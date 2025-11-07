@@ -10,7 +10,7 @@ import { MediaLibrary } from "./MediaLibrary";
   export const MediaLibraryPanel = () => {
     const { handlePanelRef } = useMediaLibraryContext();
     return (
-      <ResizablePanel id="media-library-panel" ref={handlePanelRef} defaultSize={20} minSize={20} maxSize={80} collapsible>
+      <ResizablePanel id="media-library-panel" ref={handlePanelRef} defaultSize={0} minSize={20} maxSize={80} collapsible>
         <ResizablePanelGroup id="media-library-group" direction="horizontal">
           <ResizablePanel
             id="media-library-sidebar"

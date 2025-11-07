@@ -24,30 +24,37 @@ export const AddPresentationDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {
-  const [presentationName, setPresentationName] = useState("");
+  const [presentationName, setPresentationName] = useState<string>("");
   const selectedLibrary = usePresenterStore(selectSelectedLibrary);
   const addLibrarySlideGroup = usePresenterStore((state) => state.addLibrarySlideGroup);
   const libraries = usePresenterStore(selectLibraries) ?? [];
   const [selectedLibraryId, setSelectedLibraryId] = useState<string | undefined>();
-  
+  const isDisabled = presentationName.trim().length === 0 || !selectedLibraryId;
   useEffect(() => {
     setSelectedLibraryId(selectedLibrary?.id ?? undefined);
   }, [selectedLibrary]);
 
+  const handleOpenChange = (open: boolean) => {
+    setPresentationName("");
+    onOpenChange(open);
+  };
+
   const handleCreate = () => {
-    if (!selectedLibraryId) return;
+    if (!selectedLibraryId || !presentationName) return;
     addLibrarySlideGroup(selectedLibraryId, {
-      id: crypto.randomUUID(),
+      meta: {
+        libraryId: selectedLibraryId,
+      },
       title: presentationName,
       slides: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
-    onOpenChange(false);
+    handleOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Presentation</DialogTitle>
@@ -59,7 +66,7 @@ export const AddPresentationDialog = ({
           type="text"
           placeholder="Enter presentation name"
         />
-        <Select value={selectedLibraryId} onValueChange={(value) => setSelectedLibraryId(value)}>
+        <Select onValueChange={(value) => setSelectedLibraryId(value)}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select a library" />
           </SelectTrigger>
@@ -72,7 +79,7 @@ export const AddPresentationDialog = ({
         <DialogFooter>
           <Button onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button
-            disabled={presentationName.trim().length === 0}
+            disabled={isDisabled}
             onClick={handleCreate}
           >
             Create

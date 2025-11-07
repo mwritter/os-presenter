@@ -9,6 +9,7 @@ use uuid::Uuid;
 // Data structures matching TypeScript types
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlideData {
+    pub id: String,
     pub text: Option<SlideText>,
     pub background: Option<SlideBackground>,
 }
@@ -34,8 +35,21 @@ pub enum SlideBackground {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SlideGroupMeta {
+    #[serde(rename = "playlistId", skip_serializing_if = "Option::is_none")]
+    pub playlist_id: Option<String>,
+    #[serde(rename = "originLibraryId", skip_serializing_if = "Option::is_none")]
+    pub origin_library_id: Option<String>,
+    #[serde(rename = "originSlideGroupId", skip_serializing_if = "Option::is_none")]
+    pub origin_slide_group_id: Option<String>,
+    #[serde(rename = "libraryId", skip_serializing_if = "Option::is_none")]
+    pub library_id: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlideGroup {
-    pub id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub meta: Option<SlideGroupMeta>,
     pub title: String,
     pub slides: Vec<SlideData>,
     #[serde(rename = "createdAt")]
@@ -59,10 +73,8 @@ pub struct Library {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PlaylistItem {
     pub id: String,
-    #[serde(rename = "libraryId")]
-    pub library_id: String,
-    #[serde(rename = "slideGroupId")]
-    pub slide_group_id: String,
+    #[serde(rename = "slideGroup")]
+    pub slide_group: SlideGroup, // Deep copy with meta containing origin info
     pub order: i32,
 }
 

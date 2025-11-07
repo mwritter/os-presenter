@@ -6,7 +6,7 @@ export const defaultSlideTheme: CSSProperties = {
     textAlign: "center",
     padding: "16px",
     borderRadius: "8px",
-    border: "1px solid white",
+    border: "1px solid var(--color-shade-1)",
     width: "100%",
     height: "100%",
     display: "flex",

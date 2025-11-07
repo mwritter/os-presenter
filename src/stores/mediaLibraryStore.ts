@@ -179,6 +179,7 @@ export const selectVideoMedia = (state: MediaLibraryState) =>
 // Helper function to convert MediaItem to SlideData for use with Slide component
 export const mediaItemToSlideData = (mediaItem: MediaItem): SlideData => {
   return {
+    id: `media-${mediaItem.id}`,
     background: {
       type: mediaItem.type,
       value: mediaItem.source,

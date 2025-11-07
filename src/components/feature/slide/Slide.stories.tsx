@@ -10,8 +10,9 @@ type Story = StoryObj<typeof Slide>;
 
 export const TextOnly: Story = {
   args: {
-    id: '1',
+    id: '1-story',
     data: {
+      id: '1-story',
       text: {
         color: '#ffffff',
         content: 'Text only - no background (checkerboard pattern)',
@@ -22,8 +23,9 @@ export const TextOnly: Story = {
 
 export const TextWithColorBackground: Story = {
   args: {
-    id: '2',
+    id: '2-story',
     data: {
+      id: '2-story',
       text: {
         content: 'Text with solid color background',
       },
@@ -37,8 +39,9 @@ export const TextWithColorBackground: Story = {
 
 export const TextWithGradientBackground: Story = {
   args: {
-    id: '3',
+    id: '3-story',
     data: {
+      id: '3-story',
       text: {
         content: 'Text with gradient background',
       },
@@ -52,8 +55,9 @@ export const TextWithGradientBackground: Story = {
 
 export const TextWithImageBackground: Story = {
   args: {
-    id: '4',
+    id: '4-story',
     data: {
+      id: '4-story',
       text: {
         content: 'Text over image background',
         color: '#ffffff',
@@ -69,8 +73,9 @@ export const TextWithImageBackground: Story = {
 
 export const ImageOnly: Story = {
   args: {
-    id: '5',
+    id: '5-story',
     data: {
+      id: '5-story',
       background: {
         type: 'image',
         value: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop',
@@ -81,8 +86,9 @@ export const ImageOnly: Story = {
 
 export const ColorBackgroundOnly: Story = {
   args: {
-    id: '6',
+    id: '6-story',
     data: {
+      id: '6-story',
       background: {
         type: 'color',
         value: '#10b981',
@@ -93,15 +99,18 @@ export const ColorBackgroundOnly: Story = {
 
 export const EmptySlide: Story = {
   args: {
-    id: '7',
-    data: {},
+    id: '7-story',
+    data: {
+      id: '7-story',
+    },
   },
 };
 
 export const CustomTextStyling: Story = {
   args: {
-    id: '8',
+    id: '8-story',
     data: {
+      id: '8-story',
       text: {
         content: 'Custom styled text',
         fontSize: 32,
@@ -118,8 +127,9 @@ export const CustomTextStyling: Story = {
 
 export const VideoOnly: Story = {
   args: {
-    id: '9',
+    id: '9-story',
     data: {
+      id: '9-story',
       background: {
         type: 'video',
         value: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
@@ -130,8 +140,9 @@ export const VideoOnly: Story = {
 
 export const VideoWithText: Story = {
   args: {
-    id: '10',
+    id: '10-story',
     data: {
+      id: '10-story',
       text: {
         content: 'Text overlay on video background',
         fontSize: 28,

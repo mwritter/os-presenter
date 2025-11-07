@@ -44,7 +44,7 @@ const MediaLibraryItem = ({ mediaItem }: { mediaItem: MediaItem }) => {
         isSelected ? "bg-white/20 ring-2 ring-white/40" : "hover:bg-white/10"
       }`}
     >
-      <Slide id={mediaItem.id} data={mediaItemToSlideData(mediaItem)} />
+      <Slide id={mediaItem.id} data={mediaItemToSlideData(mediaItem)} as={'div'} />
       <div className="flex flex-col items-start gap-0.5 w-full ml-2">
         <div className="text-white text-[8px] font-medium truncate w-full text-left">
           {mediaItem.name}

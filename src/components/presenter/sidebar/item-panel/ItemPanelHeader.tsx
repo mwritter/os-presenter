@@ -8,6 +8,7 @@ import {
 import { Plus } from "lucide-react";
 import { selectSelectedPlaylist, usePresenterStore } from "@/stores/presenterStore";
 import { selectSelectedLibrary } from "@/stores/presenterStore";
+import { usePresenterContext } from "@/context/presenter";
 
 export const ItemPanelHeader = () => {
   const selectedLibrary = usePresenterStore(selectSelectedLibrary);
@@ -19,11 +20,12 @@ export const ItemPanelHeader = () => {
   if (selectedPlaylist) {
     return <ItemPanelPlaylistHeader />;
   }
-  return <ItemPanelLibraryHeader />;;
+  return <ItemPanelLibraryHeader />;
 };
 
 const ItemPanelLibraryHeader = () => {
   const selectedLibrary = usePresenterStore(selectSelectedLibrary);
+  const { openAddPresentationDialog } = usePresenterContext();
   return (
     <div className="flex justify-between items-center text-[10px] uppercase p-2 bg-shade-3">
       <span className="text-gray-400">{selectedLibrary?.slideGroups.length} items</span>
@@ -38,7 +40,7 @@ const ItemPanelLibraryHeader = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="dark">
-          <DropdownMenuItem>New Presentation</DropdownMenuItem>
+          <DropdownMenuItem onClick={openAddPresentationDialog}>New Presentation</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

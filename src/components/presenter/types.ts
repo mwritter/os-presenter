@@ -1,7 +1,14 @@
 import { SlideData } from '@/components/feature/slide/types';
 
+export type SlideGroupMeta = {
+  playlistId?: string; // Only present in playlist items
+  originLibraryId?: string; // Only present in playlist items
+  originSlideGroupId?: string; // Only present in playlist items
+  libraryId?: string; // Present in library slide groups
+};
+
 export type SlideGroup = {
-  id: string;
+  meta?: SlideGroupMeta; // Metadata about origin/parent
   title: string;
   slides: SlideData[];
   createdAt: string;
@@ -18,8 +25,7 @@ export type Library = {
 
 export type PlaylistItem = {
   id: string;
-  libraryId: string;
-  slideGroupId: string;
+  slideGroup: SlideGroup; // Deep copy with meta containing origin info
   order: number;
 };
 

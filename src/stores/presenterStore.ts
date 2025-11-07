@@ -10,12 +10,16 @@ interface PresenterState {
   selectedLibraryId: string | null;
   selectedPlaylistId: string | null;
   selectedSlideGroup: {
-    id: string;
+    index: number; // Array index in library.slideGroups
     libraryId: string;
   } | null;
   selectedPlaylistItem: {
     id: string;
     playlistId: string;
+  } | null;
+  activeSlide: {
+    id: string; // Globally unique slide ID
+    data: SlideData; // Full slide data for audience view
   } | null;
   isLoading: boolean;
 
@@ -25,7 +29,7 @@ interface PresenterState {
   updateLibrary: (id: string, updates: Partial<Library>) => void;
   removeLibrary: (id: string) => void;
   addLibrarySlideGroup: (libraryId: string, slideGroup: SlideGroup) => void;
-  addSlideToSlideGroup: (libraryId: string, slideGroupId: string, slideData?: SlideData) => void;
+  addSlideToSlideGroup: (libraryId: string, slideGroupIndex: number, slideData?: SlideData) => void;
   addSlideToSelectedSlideGroup: (slideData?: SlideData) => void;
   
   // Playlist actions
@@ -33,14 +37,22 @@ interface PresenterState {
   addPlaylist: (playlist: Playlist) => void;
   updatePlaylist: (id: string, updates: Partial<Playlist>) => void;
   removePlaylist: (id: string) => void;
+  addSlideGroupToPlaylist: (playlistId: string, libraryId: string, slideGroupIndex: number) => void;
+  updatePlaylistItemSlideGroup: (playlistId: string, itemId: string, updates: Partial<SlideGroup>) => void;
+  addSlideToPlaylistItem: (playlistId: string, itemId: string, slideData?: SlideData) => void;
+  updateSlideInPlaylistItem: (playlistId: string, itemId: string, slideId: string, updates: Partial<SlideData>) => void;
 
   // Selection actions
   selectLibrary: (id: string | null) => void;
   selectPlaylist: (id: string | null) => void;
-  selectSlideGroup: (slideGroupId: string, libraryId: string) => void;
+  selectSlideGroup: (slideGroupIndex: number, libraryId: string) => void;
   selectPlaylistItem: (itemId: string, playlistId: string) => void;
   clearSlideGroupSelection: () => void;
   clearPlaylistItemSelection: () => void;
+  
+  // Active slide actions (for presenter/audience sync)
+  setActiveSlide: (slideId: string, slideData: SlideData) => void;
+  clearActiveSlide: () => void;
 
   // Loading state
   setLoading: (isLoading: boolean) => void;
@@ -61,6 +73,7 @@ const initialState = {
   selectedPlaylistId: null,
   selectedSlideGroup: null,
   selectedPlaylistItem: null,
+  activeSlide: null,
   isLoading: false,
 };
 
@@ -120,21 +133,30 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     }
   },
 
-  addSlideToSlideGroup: (libraryId, slideGroupId, slideData) => {
+  addSlideToSlideGroup: (libraryId, slideGroupIndex, slideData) => {
     const library = get().libraries.find((lib) => lib.id === libraryId);
     if (!library) return;
 
-    const slideGroup = library.slideGroups.find((sg) => sg.id === slideGroupId);
+    const slideGroup = library.slideGroups[slideGroupIndex];
     if (!slideGroup) return;
+
+    // Generate unique slide ID: libraryId-shortUuid
+    const shortId = crypto.randomUUID().split('-')[0];
+    const uniqueSlideId = `${libraryId}-${shortId}`;
 
     // Create empty slide if no slideData provided
     const newSlide: SlideData = slideData ?? {
-      id: crypto.randomUUID(),
+      id: uniqueSlideId,
     };
 
+    // Ensure slide has the unique ID
+    if (slideData) {
+      newSlide.id = uniqueSlideId;
+    }
+
     // Update the slideGroup with the new slide
-    const updatedSlideGroups = library.slideGroups.map((sg) =>
-      sg.id === slideGroupId
+    const updatedSlideGroups = library.slideGroups.map((sg, idx) =>
+      idx === slideGroupIndex
         ? { ...sg, slides: [...sg.slides, newSlide] }
         : sg
     );
@@ -145,14 +167,26 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
   },
 
   addSlideToSelectedSlideGroup: (slideData) => {
-    const selectedSlideGroup = get().selectedSlideGroup;
-    if (!selectedSlideGroup) return;
+    const state = get();
+    const selectedSlideGroup = state.selectedSlideGroup;
+    const selectedPlaylistItem = state.selectedPlaylistItem;
 
-    get().addSlideToSlideGroup(
-      selectedSlideGroup.libraryId,
-      selectedSlideGroup.id,
-      slideData
-    );
+    // If viewing a playlist item, add to playlist item's slide group
+    if (selectedPlaylistItem) {
+      state.addSlideToPlaylistItem(
+        selectedPlaylistItem.playlistId,
+        selectedPlaylistItem.id,
+        slideData
+      );
+    }
+    // Otherwise add to library slide group
+    else if (selectedSlideGroup) {
+      state.addSlideToSlideGroup(
+        selectedSlideGroup.libraryId,
+        selectedSlideGroup.index,
+        slideData
+      );
+    }
   },
 
   // Playlist actions
@@ -199,12 +233,148 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     storage.deletePlaylist(id).catch(console.error);
   },
 
+  addSlideGroupToPlaylist: (playlistId, libraryId, slideGroupIndex) => {
+    const library = get().libraries.find((lib) => lib.id === libraryId);
+    const slideGroup = library?.slideGroups[slideGroupIndex];
+    
+    if (!library || !slideGroup) {
+      console.error('Library or slide group not found');
+      return;
+    }
+
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) {
+      console.error('Playlist not found');
+      return;
+    }
+
+    // Create a deep copy of the slide group with new meta and regenerated slide IDs
+    const slideGroupCopy: SlideGroup = {
+      meta: {
+        playlistId,
+        originLibraryId: libraryId,
+        originSlideGroupId: slideGroup.meta?.libraryId ? `${libraryId}-${slideGroupIndex}` : undefined,
+      },
+      title: slideGroup.title,
+      // Deep copy slides with new unique IDs: playlistId-shortUuid
+      slides: slideGroup.slides.map(slide => {
+        const shortId = crypto.randomUUID().split('-')[0];
+        return {
+          ...slide,
+          id: `${playlistId}-${shortId}`,
+        };
+      }),
+      createdAt: slideGroup.createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Create new playlist item with embedded slide group
+    const newItem = {
+      id: crypto.randomUUID(),
+      slideGroup: slideGroupCopy,
+      order: playlist.items.length,
+    };
+
+    get().updatePlaylist(playlistId, {
+      items: [...playlist.items, newItem],
+    });
+  },
+
+  updatePlaylistItemSlideGroup: (playlistId, itemId, updates) => {
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) return;
+
+    const updatedItems = playlist.items.map((item) => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          slideGroup: {
+            ...item.slideGroup,
+            ...updates,
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      }
+      return item;
+    });
+
+    get().updatePlaylist(playlistId, { items: updatedItems });
+  },
+
+  addSlideToPlaylistItem: (playlistId, itemId, slideData) => {
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) return;
+
+    const item = playlist.items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    // Generate unique slide ID: playlistId-shortUuid
+    const shortId = crypto.randomUUID().split('-')[0];
+    const uniqueSlideId = `${playlistId}-${shortId}`;
+
+    // Create empty slide if no slideData provided
+    const newSlide: SlideData = slideData ?? {
+      id: uniqueSlideId,
+    };
+
+    // Ensure slide has the unique ID
+    if (slideData) {
+      newSlide.id = uniqueSlideId;
+    }
+
+    const updatedItems = playlist.items.map((i) => {
+      if (i.id === itemId) {
+        return {
+          ...i,
+          slideGroup: {
+            ...i.slideGroup,
+            slides: [...i.slideGroup.slides, newSlide],
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      }
+      return i;
+    });
+
+    get().updatePlaylist(playlistId, { items: updatedItems });
+  },
+
+  updateSlideInPlaylistItem: (playlistId, itemId, slideId, updates) => {
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) return;
+
+    const item = playlist.items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    const updatedItems = playlist.items.map((i) => {
+      if (i.id === itemId) {
+        const updatedSlides = i.slideGroup.slides.map((slide) => {
+          if (slide.id === slideId) {
+            return { ...slide, ...updates };
+          }
+          return slide;
+        });
+
+        return {
+          ...i,
+          slideGroup: {
+            ...i.slideGroup,
+            slides: updatedSlides,
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      }
+      return i;
+    });
+
+    get().updatePlaylist(playlistId, { items: updatedItems });
+  },
+
   // Selection actions
   selectLibrary: (id) =>
     set({
       selectedLibraryId: id,
       // Clear playlist selection when switching libraries
-      // Keep slideGroup/playlistItem selection so Show view persists
       selectedPlaylistId: null,
     }),
   
@@ -212,18 +382,19 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     set({
       selectedPlaylistId: id,
       // Clear library selection when switching playlists
-      // Keep slideGroup/playlistItem selection so Show view persists
       selectedLibraryId: null,
     }),
   
-  selectSlideGroup: (slideGroupId, libraryId) =>
+  selectSlideGroup: (slideGroupIndex, libraryId) =>
     set({
-      selectedSlideGroup: { id: slideGroupId, libraryId },
+      selectedSlideGroup: { index: slideGroupIndex, libraryId },
+      selectedPlaylistItem: null,
     }),
   
   selectPlaylistItem: (itemId, playlistId) =>
     set({
       selectedPlaylistItem: { id: itemId, playlistId },
+      selectedSlideGroup: null,
     }),
   
   clearSlideGroupSelection: () =>
@@ -235,6 +406,16 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     set({
       selectedPlaylistItem: null,
     }),
+
+  // Active slide actions (for presenter/audience sync)
+  setActiveSlide: (slideId, slideData) => {
+    set({ activeSlide: { id: slideId, data: slideData } });
+    
+    // TODO: In the future, emit this to audience screens via Tauri events
+    console.log('Active slide changed:', slideId, slideData);
+  },
+
+  clearActiveSlide: () => set({ activeSlide: null }),
 
   // Loading state
   setLoading: (isLoading) => set({ isLoading }),
@@ -285,7 +466,7 @@ export const selectLibraries = (state: PresenterState) => state.libraries;
 export const selectPlaylists = (state: PresenterState) => state.playlists;
 export const selectSelectedLibraryId = (state: PresenterState) => state.selectedLibraryId;
 export const selectSelectedPlaylistId = (state: PresenterState) => state.selectedPlaylistId;
-export const selectSelectedSlideGroupId = (state: PresenterState) => state.selectedSlideGroup?.id ?? null;
+export const selectSelectedSlideGroupId = (state: PresenterState) => state.selectedSlideGroup?.index ?? null;
 export const selectSelectedSlideGroup = (state: PresenterState) => state.selectedSlideGroup ?? null;
 export const selectIsLoading = (state: PresenterState) => state.isLoading;
 export const selectSelectedLibrary = (state: PresenterState) =>
@@ -294,10 +475,9 @@ export const selectSelectedPlaylist = (state: PresenterState) =>
   state.playlists.find((pl) => pl.id === state.selectedPlaylistId);
 export const selectSelectedSlideGroupData = (state: PresenterState) => {
   if (!state.selectedSlideGroup) return null;
-  // Use the libraryId hint for O(n) + O(m) lookup instead of O(n × m)
-  const { id, libraryId } = state.selectedSlideGroup;
+  const { index, libraryId } = state.selectedSlideGroup;
   const library = state.libraries.find(lib => lib.id === libraryId);
-  return library?.slideGroups.find(sg => sg.id === id) ?? null;
+  return library?.slideGroups[index] ?? null;
 };
 export const selectSelectedPlaylistItemId = (state: PresenterState) => state.selectedPlaylistItem?.id ?? null;
 export const selectSelectedPlaylistItem = (state: PresenterState) => state.selectedPlaylistItem ?? null;
@@ -307,4 +487,11 @@ export const selectSelectedPlaylistItemData = (state: PresenterState) => {
   const playlist = state.playlists.find(pl => pl.id === playlistId);
   return playlist?.items.find(item => item.id === id) ?? null;
 };
+export const selectPlaylistItemSlideGroup = (playlistId: string, itemId: string) => (state: PresenterState) => {
+  const playlist = state.playlists.find(pl => pl.id === playlistId);
+  const item = playlist?.items.find(i => i.id === itemId);
+  return item?.slideGroup ?? null;
+};
+export const selectActiveSlide = (state: PresenterState) => state.activeSlide;
+export const selectActiveSlideId = (state: PresenterState) => state.activeSlide?.id ?? null;
 
