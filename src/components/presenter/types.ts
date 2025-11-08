@@ -7,10 +7,16 @@ export type SlideGroupMeta = {
   libraryId?: string; // Present in library slide groups
 };
 
+export type CanvasSize = {
+  width: number;
+  height: number;
+};
+
 export type SlideGroup = {
   meta?: SlideGroupMeta; // Metadata about origin/parent
   title: string;
   slides: SlideData[];
+  canvasSize: CanvasSize; // Fixed canvas dimensions (e.g., 1920x1080)
   createdAt: string;
   updatedAt: string;
 };

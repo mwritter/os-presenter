@@ -7,13 +7,8 @@ use tauri::AppHandle;
 use uuid::Uuid;
 
 // Data structures matching TypeScript types
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SlideData {
-    pub id: String,
-    pub text: Option<SlideText>,
-    pub background: Option<SlideBackground>,
-}
 
+// Legacy types for backwards compatibility
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlideText {
     pub content: String,
@@ -34,6 +29,128 @@ pub enum SlideBackground {
     Video(String),
 }
 
+// Position object
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Position {
+    pub x: f64, // percentage (0-100)
+    pub y: f64, // percentage (0-100)
+}
+
+// Size object
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Size {
+    pub width: f64,  // percentage (0-100)
+    pub height: f64, // percentage (0-100)
+}
+
+// Text object with extended formatting
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct TextObject {
+    pub id: String,
+    #[serde(rename = "type")]
+    pub object_type: String, // "text"
+    pub position: Position,
+    pub size: Size,
+    pub rotation: Option<f64>,
+    #[serde(rename = "zIndex")]
+    pub z_index: i32,
+    pub content: String,
+    #[serde(rename = "fontSize")]
+    pub font_size: f64,
+    pub color: String,
+    pub alignment: String, // "left" | "center" | "right"
+    #[serde(rename = "fontFamily", skip_serializing_if = "Option::is_none")]
+    pub font_family: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bold: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub italic: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub underline: Option<bool>,
+}
+
+// Shape object (rectangle, circle, triangle)
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ShapeObject {
+    pub id: String,
+    #[serde(rename = "type")]
+    pub object_type: String, // "shape"
+    pub position: Position,
+    pub size: Size,
+    pub rotation: Option<f64>,
+    #[serde(rename = "zIndex")]
+    pub z_index: i32,
+    #[serde(rename = "shapeType")]
+    pub shape_type: String, // "rectangle" | "circle" | "triangle"
+    #[serde(rename = "fillColor")]
+    pub fill_color: String,
+    #[serde(rename = "strokeColor", skip_serializing_if = "Option::is_none")]
+    pub stroke_color: Option<String>,
+    #[serde(rename = "strokeWidth", skip_serializing_if = "Option::is_none")]
+    pub stroke_width: Option<f64>,
+}
+
+// Image object
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ImageObject {
+    pub id: String,
+    #[serde(rename = "type")]
+    pub object_type: String, // "image"
+    pub position: Position,
+    pub size: Size,
+    pub rotation: Option<f64>,
+    #[serde(rename = "zIndex")]
+    pub z_index: i32,
+    pub src: String,
+    #[serde(rename = "objectFit", skip_serializing_if = "Option::is_none")]
+    pub object_fit: Option<String>, // "cover" | "contain" | "fill"
+}
+
+// Video object
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct VideoObject {
+    pub id: String,
+    #[serde(rename = "type")]
+    pub object_type: String, // "video"
+    pub position: Position,
+    pub size: Size,
+    pub rotation: Option<f64>,
+    #[serde(rename = "zIndex")]
+    pub z_index: i32,
+    pub src: String,
+    #[serde(rename = "autoPlay", skip_serializing_if = "Option::is_none")]
+    pub auto_play: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub loop_video: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub muted: Option<bool>,
+}
+
+// Union type for slide objects (using untagged enum)
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(untagged)]
+pub enum SlideObject {
+    Text(TextObject),
+    Shape(ShapeObject),
+    Image(ImageObject),
+    Video(VideoObject),
+}
+
+// New SlideData structure
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SlideData {
+    pub id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub objects: Option<Vec<SlideObject>>,
+    #[serde(rename = "backgroundColor", skip_serializing_if = "Option::is_none")]
+    pub background_color: Option<String>,
+    // Legacy support (optional, for migration)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<SlideText>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub background: Option<SlideBackground>,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlideGroupMeta {
     #[serde(rename = "playlistId", skip_serializing_if = "Option::is_none")]
@@ -47,11 +164,19 @@ pub struct SlideGroupMeta {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CanvasSize {
+    pub width: i32,
+    pub height: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlideGroup {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub meta: Option<SlideGroupMeta>,
     pub title: String,
     pub slides: Vec<SlideData>,
+    #[serde(rename = "canvasSize")]
+    pub canvas_size: CanvasSize,
     #[serde(rename = "createdAt")]
     pub created_at: String,
     #[serde(rename = "updatedAt")]

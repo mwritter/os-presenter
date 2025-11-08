@@ -7,6 +7,9 @@ import { SlideGroup } from "../types";
 import { Slide } from "@/components/feature/slide/Slide";
 import { useEditContext } from "@/presenter/edit/context";
 import { cn } from "@/lib/utils";
+import { Shapes, Image as ImageIcon, Video as VideoIcon, Trash2, GripVertical } from "lucide-react";
+import { useState } from "react";
+import { EditSlideObjectPanel } from "./edit-object-panel/EditViewObjectPanel";
 
 export const EditViewSidebar = ({
   slideGroup,
@@ -47,6 +50,8 @@ const EditSlideGroupPanel = ({
   slideGroup: SlideGroup | null;
 }) => {
   const { selectedSlide, setSelectedSlide } = useEditContext();
+  const canvasSize = slideGroup?.canvasSize || { width: 1920, height: 1080 };
+  
   return (
     <div className="flex flex-col bg-shade-3 h-full">
       <div className="p-2">
@@ -61,20 +66,11 @@ const EditSlideGroupPanel = ({
             "bg-blue-400": selectedSlide?.id === slide.id,
             "hover:bg-shade-1": selectedSlide?.id !== slide.id
           } )} onClick={() => setSelectedSlide(slide)}>
-            <Slide id={slide.id} data={slide} as="div" />
+            <Slide id={slide.id} data={slide} as="div" canvasSize={canvasSize} />
             <p className="text-white text-xs font-bold text-left">{index + 1}</p>
           </button>
         ))}
       </div>
-    </div>
-  );
-};
-
-
-const EditSlideObjectPanel = () => {
-  return (
-    <div>
-      <p className="text-white text-xs font-bold p-2 border border-shade-1">Objects</p>
     </div>
   );
 };

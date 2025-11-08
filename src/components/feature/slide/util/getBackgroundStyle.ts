@@ -1,5 +1,6 @@
 import { CSSProperties } from "react";
 import { SlideData } from "../types";
+import { CanvasSize } from "../../../presenter/types";
 
 const checkerboardPattern = `
   linear-gradient(45deg, var(--shade-3) 25%, transparent 25%),
@@ -8,11 +9,17 @@ const checkerboardPattern = `
   linear-gradient(-45deg, transparent 75%, var(--shade-3) 75%)
 `;
 
-const checkerboardSize = "16px 16px";
-const checkerboardPosition = "0 0, 0 8px, 8px -8px, -8px 0px";
-
-export const getBackgroundStyle = (data: SlideData): CSSProperties => {
+export const getBackgroundStyle = (
+  data: SlideData, 
+  canvasSize: CanvasSize = { width: 1920, height: 1080 }
+): CSSProperties => {
     let backgroundStyle = checkerboardPattern;
+    
+    // Calculate checkerboard size as 5% of canvas width for proportional sizing
+    const squareSize = Math.round(canvasSize.width * 0.05);
+    const halfSquareSize = squareSize / 2;
+    const checkerboardSize = `${squareSize}px ${squareSize}px`;
+    const checkerboardPosition = `0 0, 0 ${halfSquareSize}px, ${halfSquareSize}px -${halfSquareSize}px, -${halfSquareSize}px 0px`;
 
 
     switch (data.background?.type) {

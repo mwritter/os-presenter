@@ -18,11 +18,17 @@ export const ShowViewSlideGrid = ({
   }
 
   return (
-    <div className="grid gap-4 flex-wrap text-white/70">
+    <div className="flex flex-col gap-4 text-white/70">
       <ShowViewSlideGridHeader title={title} />
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 p-5">
+      <div className="flex flex-wrap gap-4 p-5">
         {slides.map((slide, index) => (
-          <Slide key={slide.id + index} id={slide.id} data={slide} />
+          <div 
+            key={slide.id + index} 
+            className="border border-shade-1 shrink-0" 
+            style={{ flexBasis: 'clamp(200px, calc((100% - 5rem) / 4), 300px)' }}
+          >
+            <Slide id={slide.id} data={slide} />
+          </div>
         ))}
       </div>
     </div>

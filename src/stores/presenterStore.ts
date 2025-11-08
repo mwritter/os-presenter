@@ -31,6 +31,7 @@ interface PresenterState {
   addLibrarySlideGroup: (libraryId: string, slideGroup: SlideGroup) => void;
   addSlideToSlideGroup: (libraryId: string, slideGroupIndex: number, slideData?: SlideData) => void;
   addSlideToSelectedSlideGroup: (slideData?: SlideData) => void;
+  updateSlideInLibrary: (libraryId: string, slideGroupIndex: number, slideId: string, updates: Partial<SlideData>) => void;
   
   // Playlist actions
   setPlaylists: (playlists: Playlist[]) => void;
@@ -187,6 +188,30 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
         slideData
       );
     }
+  },
+
+  updateSlideInLibrary: (libraryId, slideGroupIndex, slideId, updates) => {
+    const library = get().libraries.find((lib) => lib.id === libraryId);
+    if (!library) return;
+
+    const slideGroup = library.slideGroups[slideGroupIndex];
+    if (!slideGroup) return;
+
+    // Update the specific slide in the slideGroup
+    const updatedSlideGroups = library.slideGroups.map((sg, idx) =>
+      idx === slideGroupIndex
+        ? {
+            ...sg,
+            slides: sg.slides.map((slide) =>
+              slide.id === slideId ? { ...slide, ...updates } : slide
+            ),
+          }
+        : sg
+    );
+
+    get().updateLibrary(libraryId, {
+      slideGroups: updatedSlideGroups,
+    });
   },
 
   // Playlist actions
