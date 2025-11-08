@@ -34,15 +34,15 @@ export const Slide = ({ id, data, as = 'button' }: SlideProps) => {
   return (
     <div
       key={id}
-      className="flex flex-col gap-4 aspect-video max-h-[200px] min-h-[150px]"
+      className="flex flex-col gap-4 aspect-video w-full"
     >
       <Comp
         type="button"
         onClick={as === 'button' ? handleClick : undefined}
         className={cn(
-          "hover:cursor-pointer rounded-sm transition-all duration-200 w-full h-full",
+          "rounded-xs transition-all duration-200 w-full h-full",
           {
-            "ring-4 ring-amber-400 shadow-lg shadow-amber-400/50": isActive,
+            "ring-1 ring-amber-400": isActive,
             "hover:ring-2 hover:ring-white/30": !isActive && as === 'button',
           }
         )}

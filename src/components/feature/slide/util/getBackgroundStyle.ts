@@ -30,7 +30,7 @@ export const getBackgroundStyle = (data: SlideData): CSSProperties => {
 
     return {
         background: backgroundStyle,
-        backgroundColor: data.background ? undefined : "black",
+        backgroundColor: data.background?.type === 'color' ? data.background.value : "black",
         backgroundSize:
           data.background?.type === "image"
             ? "cover"

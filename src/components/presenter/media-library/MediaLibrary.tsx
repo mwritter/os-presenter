@@ -18,7 +18,7 @@ export const MediaLibrary = () => {
     <div className="grid grid-rows-[auto_1fr_auto] h-full w-full">
       <MediaLibraryHeader />
 
-      <div className="flex gap-2 overflow-auto h-full w-full flex-wrap p-5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 overflow-auto h-full w-full flex-wrap p-5">
         {mediaItems.length > 0 ? (
           mediaItems.map((mediaItem) => (
             <MediaLibraryItem key={mediaItem.id} mediaItem={mediaItem} />
