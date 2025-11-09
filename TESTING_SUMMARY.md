@@ -189,6 +189,6 @@ Now that libraries can be added and loaded, you can:
 - **Storage Service**: `src/services/storage.ts`
 - **Presenter Store**: `src/stores/presenterStore.ts`
 - **Library Panel**: `src/components/presenter/sidebar/library-panel/LibraryPanel.tsx`
-- **Storage Init Hook**: `src/hooks/useStorageInit.ts`
+- **Storage Init Hook**: `src/hooks/use-storage-init.ts`
 - **Rust Backend**: `src-tauri/src/lib.rs` and `src-tauri/src/storage.rs`
 

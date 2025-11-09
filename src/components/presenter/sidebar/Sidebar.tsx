@@ -13,7 +13,7 @@ export const Sidebar = () => {
     <ResizablePanel
       id={"sidebar-panel"}
       defaultSize={20}
-      minSize={20}
+      minSize={10}
       maxSize={50}
       hidden={isEditRoute}
     >

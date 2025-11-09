@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { Library, Playlist, SlideGroup } from '@/components/presenter/types';
-import { SlideData } from '@/components/feature/slide/types';
-import * as storage from '@/services/storage';
+import { create } from "zustand";
+import { Library, Playlist, SlideGroup } from "@/components/presenter/types";
+import { SlideData } from "@/components/feature/slide/types";
+import * as storage from "@/services/storage";
 
 interface PresenterState {
   // State
@@ -29,19 +29,45 @@ interface PresenterState {
   updateLibrary: (id: string, updates: Partial<Library>) => void;
   removeLibrary: (id: string) => void;
   addLibrarySlideGroup: (libraryId: string, slideGroup: SlideGroup) => void;
-  addSlideToSlideGroup: (libraryId: string, slideGroupIndex: number, slideData?: SlideData) => void;
+  addSlideToSlideGroup: (
+    libraryId: string,
+    slideGroupIndex: number,
+    slideData?: SlideData
+  ) => void;
   addSlideToSelectedSlideGroup: (slideData?: SlideData) => void;
-  updateSlideInLibrary: (libraryId: string, slideGroupIndex: number, slideId: string, updates: Partial<SlideData>) => void;
-  
+  updateSlideInLibrary: (
+    libraryId: string,
+    slideGroupIndex: number,
+    slideId: string,
+    updates: Partial<SlideData>
+  ) => void;
+
   // Playlist actions
   setPlaylists: (playlists: Playlist[]) => void;
   addPlaylist: (playlist: Playlist) => void;
   updatePlaylist: (id: string, updates: Partial<Playlist>) => void;
   removePlaylist: (id: string) => void;
-  addSlideGroupToPlaylist: (playlistId: string, libraryId: string, slideGroupIndex: number) => void;
-  updatePlaylistItemSlideGroup: (playlistId: string, itemId: string, updates: Partial<SlideGroup>) => void;
-  addSlideToPlaylistItem: (playlistId: string, itemId: string, slideData?: SlideData) => void;
-  updateSlideInPlaylistItem: (playlistId: string, itemId: string, slideId: string, updates: Partial<SlideData>) => void;
+  addSlideGroupToPlaylist: (
+    playlistId: string,
+    libraryId: string,
+    slideGroupIndex: number
+  ) => void;
+  updatePlaylistItemSlideGroup: (
+    playlistId: string,
+    itemId: string,
+    updates: Partial<SlideGroup>
+  ) => void;
+  addSlideToPlaylistItem: (
+    playlistId: string,
+    itemId: string,
+    slideData?: SlideData
+  ) => void;
+  updateSlideInPlaylistItem: (
+    playlistId: string,
+    itemId: string,
+    slideId: string,
+    updates: Partial<SlideData>
+  ) => void;
 
   // Selection actions
   selectLibrary: (id: string | null) => void;
@@ -50,7 +76,7 @@ interface PresenterState {
   selectPlaylistItem: (itemId: string, playlistId: string) => void;
   clearSlideGroupSelection: () => void;
   clearPlaylistItemSelection: () => void;
-  
+
   // Active slide actions (for presenter/audience sync)
   setActiveSlide: (slideId: string, slideData: SlideData) => void;
   clearActiveSlide: () => void;
@@ -83,26 +109,31 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
 
   // Library actions
   setLibraries: (libraries) => set({ libraries }),
-  
+
   addLibrary: (library) => {
-    console.log('Adding library:', library.name, library.id);
+    console.log("Adding library:", library.name, library.id);
     set((state) => ({
       libraries: [...state.libraries, library],
     }));
     // Persist to disk asynchronously
-    get().saveLibraryToDisk(library)
-      .then(() => console.log('Library saved to disk:', library.name))
+    get()
+      .saveLibraryToDisk(library)
+      .then(() => console.log("Library saved to disk:", library.name))
       .catch((error) => {
-        console.error('Failed to save library:', error);
+        console.error("Failed to save library:", error);
       });
   },
-  
+
   updateLibrary: (id, updates) => {
     let updatedLibrary: Library | undefined;
     set((state) => {
       const libraries = state.libraries.map((lib) => {
         if (lib.id === id) {
-          updatedLibrary = { ...lib, ...updates, updatedAt: new Date().toISOString() };
+          updatedLibrary = {
+            ...lib,
+            ...updates,
+            updatedAt: new Date().toISOString(),
+          };
           return updatedLibrary;
         }
         return lib;
@@ -114,12 +145,13 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
       get().saveLibraryToDisk(updatedLibrary).catch(console.error);
     }
   },
-  
+
   removeLibrary: (id) => {
     set((state) => ({
       libraries: state.libraries.filter((lib) => lib.id !== id),
       // Clear selection if the removed library was selected
-      selectedLibraryId: state.selectedLibraryId === id ? null : state.selectedLibraryId,
+      selectedLibraryId:
+        state.selectedLibraryId === id ? null : state.selectedLibraryId,
     }));
     // Delete from disk asynchronously
     storage.deleteLibrary(id).catch(console.error);
@@ -142,7 +174,7 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     if (!slideGroup) return;
 
     // Generate unique slide ID: libraryId-shortUuid
-    const shortId = crypto.randomUUID().split('-')[0];
+    const shortId = crypto.randomUUID().split("-")[0];
     const uniqueSlideId = `${libraryId}-${shortId}`;
 
     // Create empty slide if no slideData provided
@@ -157,9 +189,7 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
 
     // Update the slideGroup with the new slide
     const updatedSlideGroups = library.slideGroups.map((sg, idx) =>
-      idx === slideGroupIndex
-        ? { ...sg, slides: [...sg.slides, newSlide] }
-        : sg
+      idx === slideGroupIndex ? { ...sg, slides: [...sg.slides, newSlide] } : sg
     );
 
     get().updateLibrary(libraryId, {
@@ -216,26 +246,31 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
 
   // Playlist actions
   setPlaylists: (playlists) => set({ playlists }),
-  
+
   addPlaylist: (playlist) => {
-    console.log('Adding playlist:', playlist.name, playlist.id);
+    console.log("Adding playlist:", playlist.name, playlist.id);
     set((state) => ({
       playlists: [...state.playlists, playlist],
     }));
     // Persist to disk asynchronously
-    get().savePlaylistToDisk(playlist)
-      .then(() => console.log('Playlist saved to disk:', playlist.name))
+    get()
+      .savePlaylistToDisk(playlist)
+      .then(() => console.log("Playlist saved to disk:", playlist.name))
       .catch((error) => {
-        console.error('Failed to save playlist:', error);
+        console.error("Failed to save playlist:", error);
       });
   },
-  
+
   updatePlaylist: (id, updates) => {
     let updatedPlaylist: Playlist | undefined;
     set((state) => {
       const playlists = state.playlists.map((pl) => {
         if (pl.id === id) {
-          updatedPlaylist = { ...pl, ...updates, updatedAt: new Date().toISOString() };
+          updatedPlaylist = {
+            ...pl,
+            ...updates,
+            updatedAt: new Date().toISOString(),
+          };
           return updatedPlaylist;
         }
         return pl;
@@ -247,12 +282,13 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
       get().savePlaylistToDisk(updatedPlaylist).catch(console.error);
     }
   },
-  
+
   removePlaylist: (id) => {
     set((state) => ({
       playlists: state.playlists.filter((pl) => pl.id !== id),
       // Clear selection if the removed playlist was selected
-      selectedPlaylistId: state.selectedPlaylistId === id ? null : state.selectedPlaylistId,
+      selectedPlaylistId:
+        state.selectedPlaylistId === id ? null : state.selectedPlaylistId,
     }));
     // Delete from disk asynchronously
     storage.deletePlaylist(id).catch(console.error);
@@ -261,29 +297,32 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
   addSlideGroupToPlaylist: (playlistId, libraryId, slideGroupIndex) => {
     const library = get().libraries.find((lib) => lib.id === libraryId);
     const slideGroup = library?.slideGroups[slideGroupIndex];
-    
+
     if (!library || !slideGroup) {
-      console.error('Library or slide group not found');
+      console.error("Library or slide group not found");
       return;
     }
 
     const playlist = get().playlists.find((pl) => pl.id === playlistId);
     if (!playlist) {
-      console.error('Playlist not found');
+      console.error("Playlist not found");
       return;
     }
 
     // Create a deep copy of the slide group with new meta and regenerated slide IDs
     const slideGroupCopy: SlideGroup = {
+      canvasSize: slideGroup.canvasSize,
       meta: {
         playlistId,
         originLibraryId: libraryId,
-        originSlideGroupId: slideGroup.meta?.libraryId ? `${libraryId}-${slideGroupIndex}` : undefined,
+        originSlideGroupId: slideGroup.meta?.libraryId
+          ? `${libraryId}-${slideGroupIndex}`
+          : undefined,
       },
       title: slideGroup.title,
       // Deep copy slides with new unique IDs: playlistId-shortUuid
-      slides: slideGroup.slides.map(slide => {
-        const shortId = crypto.randomUUID().split('-')[0];
+      slides: slideGroup.slides.map((slide) => {
+        const shortId = crypto.randomUUID().split("-")[0];
         return {
           ...slide,
           id: `${playlistId}-${shortId}`,
@@ -334,7 +373,7 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     if (!item) return;
 
     // Generate unique slide ID: playlistId-shortUuid
-    const shortId = crypto.randomUUID().split('-')[0];
+    const shortId = crypto.randomUUID().split("-")[0];
     const uniqueSlideId = `${playlistId}-${shortId}`;
 
     // Create empty slide if no slideData provided
@@ -402,31 +441,31 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
       // Clear playlist selection when switching libraries
       selectedPlaylistId: null,
     }),
-  
+
   selectPlaylist: (id) =>
     set({
       selectedPlaylistId: id,
       // Clear library selection when switching playlists
       selectedLibraryId: null,
     }),
-  
+
   selectSlideGroup: (slideGroupIndex, libraryId) =>
     set({
       selectedSlideGroup: { index: slideGroupIndex, libraryId },
       selectedPlaylistItem: null,
     }),
-  
+
   selectPlaylistItem: (itemId, playlistId) =>
     set({
       selectedPlaylistItem: { id: itemId, playlistId },
       selectedSlideGroup: null,
     }),
-  
+
   clearSlideGroupSelection: () =>
     set({
       selectedSlideGroup: null,
     }),
-  
+
   clearPlaylistItemSelection: () =>
     set({
       selectedPlaylistItem: null,
@@ -435,9 +474,9 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
   // Active slide actions (for presenter/audience sync)
   setActiveSlide: (slideId, slideData) => {
     set({ activeSlide: { id: slideId, data: slideData } });
-    
+
     // TODO: In the future, emit this to audience screens via Tauri events
-    console.log('Active slide changed:', slideId, slideData);
+    console.log("Active slide changed:", slideId, slideData);
   },
 
   clearActiveSlide: () => set({ activeSlide: null }),
@@ -447,17 +486,19 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
 
   // Persistence actions
   loadData: async () => {
-    console.log('Loading libraries and playlists from disk...');
+    console.log("Loading libraries and playlists from disk...");
     set({ isLoading: true });
     try {
       const [libraries, playlists] = await Promise.all([
         storage.loadLibraries(),
         storage.loadPlaylists(),
       ]);
-      console.log(`Loaded ${libraries.length} libraries and ${playlists.length} playlists`);
+      console.log(
+        `Loaded ${libraries.length} libraries and ${playlists.length} playlists`
+      );
       set({ libraries, playlists, isLoading: false });
     } catch (error) {
-      console.error('Failed to load data:', error);
+      console.error("Failed to load data:", error);
       set({ isLoading: false });
       throw error;
     }
@@ -467,7 +508,7 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     try {
       await storage.saveLibrary(library);
     } catch (error) {
-      console.error('Failed to save library to disk:', error);
+      console.error("Failed to save library to disk:", error);
       throw error;
     }
   },
@@ -476,7 +517,7 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     try {
       await storage.savePlaylist(playlist);
     } catch (error) {
-      console.error('Failed to save playlist to disk:', error);
+      console.error("Failed to save playlist to disk:", error);
       throw error;
     }
   },
@@ -489,10 +530,14 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
 // Usage: const libraries = usePresenterStore(selectLibraries);
 export const selectLibraries = (state: PresenterState) => state.libraries;
 export const selectPlaylists = (state: PresenterState) => state.playlists;
-export const selectSelectedLibraryId = (state: PresenterState) => state.selectedLibraryId;
-export const selectSelectedPlaylistId = (state: PresenterState) => state.selectedPlaylistId;
-export const selectSelectedSlideGroupId = (state: PresenterState) => state.selectedSlideGroup?.index ?? null;
-export const selectSelectedSlideGroup = (state: PresenterState) => state.selectedSlideGroup ?? null;
+export const selectSelectedLibraryId = (state: PresenterState) =>
+  state.selectedLibraryId;
+export const selectSelectedPlaylistId = (state: PresenterState) =>
+  state.selectedPlaylistId;
+export const selectSelectedSlideGroupId = (state: PresenterState) =>
+  state.selectedSlideGroup?.index ?? null;
+export const selectSelectedSlideGroup = (state: PresenterState) =>
+  state.selectedSlideGroup ?? null;
 export const selectIsLoading = (state: PresenterState) => state.isLoading;
 export const selectSelectedLibrary = (state: PresenterState) =>
   state.libraries.find((lib) => lib.id === state.selectedLibraryId);
@@ -501,22 +546,25 @@ export const selectSelectedPlaylist = (state: PresenterState) =>
 export const selectSelectedSlideGroupData = (state: PresenterState) => {
   if (!state.selectedSlideGroup) return null;
   const { index, libraryId } = state.selectedSlideGroup;
-  const library = state.libraries.find(lib => lib.id === libraryId);
+  const library = state.libraries.find((lib) => lib.id === libraryId);
   return library?.slideGroups[index] ?? null;
 };
-export const selectSelectedPlaylistItemId = (state: PresenterState) => state.selectedPlaylistItem?.id ?? null;
-export const selectSelectedPlaylistItem = (state: PresenterState) => state.selectedPlaylistItem ?? null;
+export const selectSelectedPlaylistItemId = (state: PresenterState) =>
+  state.selectedPlaylistItem?.id ?? null;
+export const selectSelectedPlaylistItem = (state: PresenterState) =>
+  state.selectedPlaylistItem ?? null;
 export const selectSelectedPlaylistItemData = (state: PresenterState) => {
   if (!state.selectedPlaylistItem) return null;
   const { id, playlistId } = state.selectedPlaylistItem;
-  const playlist = state.playlists.find(pl => pl.id === playlistId);
-  return playlist?.items.find(item => item.id === id) ?? null;
+  const playlist = state.playlists.find((pl) => pl.id === playlistId);
+  return playlist?.items.find((item) => item.id === id) ?? null;
 };
-export const selectPlaylistItemSlideGroup = (playlistId: string, itemId: string) => (state: PresenterState) => {
-  const playlist = state.playlists.find(pl => pl.id === playlistId);
-  const item = playlist?.items.find(i => i.id === itemId);
-  return item?.slideGroup ?? null;
-};
+export const selectPlaylistItemSlideGroup =
+  (playlistId: string, itemId: string) => (state: PresenterState) => {
+    const playlist = state.playlists.find((pl) => pl.id === playlistId);
+    const item = playlist?.items.find((i) => i.id === itemId);
+    return item?.slideGroup ?? null;
+  };
 export const selectActiveSlide = (state: PresenterState) => state.activeSlide;
-export const selectActiveSlideId = (state: PresenterState) => state.activeSlide?.id ?? null;
-
+export const selectActiveSlideId = (state: PresenterState) =>
+  state.activeSlide?.id ?? null;

@@ -12,6 +12,12 @@ export type CanvasSize = {
   height: number;
 };
 
+export type CanvasPreset = {
+  id: string;
+  label: string;
+  value: CanvasSize;
+};
+
 export type SlideGroup = {
   meta?: SlideGroupMeta; // Metadata about origin/parent
   title: string;

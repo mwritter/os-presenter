@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { selectActiveSlideId, usePresenterStore } from "@/stores/presenterStore";
 import { SlideObjectRenderer } from "./SlideObjectRenderer";
 import { CanvasSize } from "@/components/presenter/types";
+import { useSlideScale } from "./hooks/use-slide-scale";
 
 export type SlideProps = {
   id: string;
@@ -13,7 +14,7 @@ export type SlideProps = {
   isEditable?: boolean;
   selectedObjectId?: string | null;
   onResizeStart?: (objectId: string, handle: string, e: React.MouseEvent) => void;
-  canvasSize?: CanvasSize; // Fixed canvas dimensions for scaling
+  canvasSize?: CanvasSize;
 };
 
 export const Slide = ({ 
@@ -23,62 +24,13 @@ export const Slide = ({
   isEditable = false,
   selectedObjectId = null,
   onResizeStart,
-  canvasSize = { width: 1920, height: 1080 }, // Default Full HD
+  canvasSize = { width: 1920, height: 1080 },
 }: SlideProps) => {
   const activeSlideId = usePresenterStore(selectActiveSlideId);
   const setActiveSlide = usePresenterStore((state) => state.setActiveSlide);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.1);
-  const [isReady, setIsReady] = useState(false);
-  
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const { scale, isReady } = useSlideScale({ canvasSize, containerRef });
   const isActive = activeSlideId === id;
-
-  // Calculate scale to fit container
-  useEffect(() => {
-    let rafId: number | null = null;
-    
-    const updateScale = () => {
-      if (!containerRef.current) return;
-      
-      // Cancel any pending animation frame
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-      }
-      
-      // Use requestAnimationFrame to batch updates and prevent flickering
-      rafId = requestAnimationFrame(() => {
-        if (!containerRef.current) return;
-        
-        const container = containerRef.current;
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
-        
-        const scaleX = containerWidth / canvasSize.width;
-        const scaleY = containerHeight / canvasSize.height;
-        const newScale = Math.min(scaleX, scaleY);
-        
-        setScale(newScale);
-        setIsReady(true);
-      });
-    };
-
-    updateScale();
-    window.addEventListener('resize', updateScale);
-    
-    // Use ResizeObserver for better container size tracking
-    const resizeObserver = new ResizeObserver(updateScale);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-    
-    return () => {
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-      }
-      window.removeEventListener('resize', updateScale);
-      resizeObserver.disconnect();
-    };
-  }, [canvasSize.width, canvasSize.height]);
 
   const handleClick = () => {
     setActiveSlide(id, data);

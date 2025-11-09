@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { SlideData } from '@/components/feature/slide/types';
+import { ImageObject, SlideData, VideoObject } from '@/components/feature/slide/types';
 import * as storage from '@/services/storage';
+import { DEFAULT_CANVAS_PRESET } from '@/consts/canvas';
 
 export type MediaType = 'image' | 'video';
 
@@ -177,13 +178,36 @@ export const selectVideoMedia = (state: MediaLibraryState) =>
   state.mediaItems.filter((item) => item.type === 'video');
 
 // Helper function to convert MediaItem to SlideData for use with Slide component
+// Currently always show the image or video as Full HD (1920x1080)
 export const mediaItemToSlideData = (mediaItem: MediaItem): SlideData => {
+
+  const imageProps = {
+    id: mediaItem.id,
+    type: 'image',
+    src: mediaItem.source,
+    position: { x: 0, y: 0 },
+    size: DEFAULT_CANVAS_PRESET.value,
+    zIndex: 0,
+    rotation: 0,
+    objectFit: 'contain',
+  } satisfies ImageObject;
+
+  const videoProps = {
+    id: mediaItem.id,
+    type: 'video',
+    src: mediaItem.source,
+    position: { x: 0, y: 0 },
+    size: DEFAULT_CANVAS_PRESET.value,
+    zIndex: 0,
+    rotation: 0,
+    autoPlay: false,
+    loop: true,
+    muted: true,
+  } satisfies VideoObject;
+
   return {
     id: `media-${mediaItem.id}`,
-    background: {
-      type: mediaItem.type,
-      value: mediaItem.source,
-    },
+    objects: mediaItem.type === 'image' ? [imageProps] : [videoProps],
   };
 };
 

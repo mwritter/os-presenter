@@ -15,9 +15,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { usePresenterContext } from "@/context/presenter";
 
-// Displays the libraries and playlists in the sidebar
-// only one can be selected at a time
-
 export const LibraryPanel = () => {
   const { openAddPresentationDialog } = usePresenterContext();
   const libraries = usePresenterStore(selectLibraries);
@@ -56,9 +53,9 @@ export const LibraryPanel = () => {
   return (
     <div className="flex flex-col gap-1 overflow-y-auto h-full">
       <div>
-        <LibraryPanelHeader 
-          title="Library" 
-          withMenu 
+        <LibraryPanelHeader
+          title="Library"
+          withMenu
           onNewLibrary={handleNewLibrary}
           onNewPlaylist={handleNewPlaylist}
           onNewPresentation={handleNewPresentation}
@@ -100,14 +97,24 @@ const LibraryPanelHeader = ({
       {withMenu && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="rounded-sm text-gray-400 hover:bg-white/10 hover:text-gray-400" variant="ghost" size="icon-xs">
+            <Button
+              className="rounded-sm text-gray-400 hover:bg-white/10 hover:text-gray-400"
+              variant="ghost"
+              size="icon-xs"
+            >
               <Plus className="size-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="dark">
-            <DropdownMenuItem onClick={onNewLibrary}>New Library</DropdownMenuItem>
-            <DropdownMenuItem onClick={onNewPlaylist}>New Playlist</DropdownMenuItem>
-            <DropdownMenuItem onClick={onNewPresentation}>New Presentation</DropdownMenuItem>
+            <DropdownMenuItem onClick={onNewLibrary}>
+              New Library
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onNewPlaylist}>
+              New Playlist
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onNewPresentation}>
+              New Presentation
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )}

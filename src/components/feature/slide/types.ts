@@ -66,7 +66,4 @@ export type SlideData = {
   id: string;
   objects?: SlideObject[];
   backgroundColor?: string; // Canvas background color
-  // Legacy support (optional, for migration)
-  text?: SlideText;
-  background?: SlideBackground;
 };

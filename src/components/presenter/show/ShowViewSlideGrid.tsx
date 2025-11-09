@@ -8,7 +8,6 @@ type ShowViewSlideGridProps = {
   title: string;
 };
 
-// Just displays the slides in a grid, these could be from a library or a playlist item
 export const ShowViewSlideGrid = ({
   slides,
   title,
@@ -22,10 +21,12 @@ export const ShowViewSlideGrid = ({
       <ShowViewSlideGridHeader title={title} />
       <div className="flex flex-wrap gap-4 p-5">
         {slides.map((slide, index) => (
-          <div 
-            key={slide.id + index} 
-            className="border border-shade-1 shrink-0" 
-            style={{ flexBasis: 'clamp(200px, calc((100% - 5rem) / 4), 300px)' }}
+          <div
+            key={slide.id + index}
+            className="border border-shade-1 shrink-0"
+            style={{
+              flexBasis: "clamp(200px, calc((100% - 5rem) / 4), 300px)",
+            }}
           >
             <Slide id={slide.id} data={slide} />
           </div>

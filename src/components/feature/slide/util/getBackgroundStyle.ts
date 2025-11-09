@@ -2,6 +2,8 @@ import { CSSProperties } from "react";
 import { SlideData } from "../types";
 import { CanvasSize } from "../../../presenter/types";
 
+// TODO: this is legacy code, we should use the new slide object data for images and videos
+
 const checkerboardPattern = `
   linear-gradient(45deg, var(--shade-3) 25%, transparent 25%),
   linear-gradient(-45deg, var(--shade-3) 25%, transparent 25%),

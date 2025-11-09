@@ -1,4 +1,4 @@
-import { AddPresentationDialog } from "@/components/presenter/dialogs/library/AddPresentationDialog";
+import { AddPresentationDialog } from "@/components/presenter/dialogs/library/add-presentation/AddPresentationDialog";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 interface PresenterContextType {
