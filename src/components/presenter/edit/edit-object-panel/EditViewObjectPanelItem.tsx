@@ -1,58 +1,35 @@
 import { SlideObject } from "@/components/feature/slide/types";
 import { cn } from "@/lib/utils";
 import { useEditContext } from "@/presenter/edit/context";
-import {
-  GripVertical,
-  ImageIcon,
-  Shapes,
-  Trash2,
-  VideoIcon,
-} from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { getObjectIcon } from "../utils/getObjectIcon";
+import { getObjectLabel } from "../utils/getObjectLabel";
 
-export const EditViewObjectPanelItem = ({ object }: { object: SlideObject }) => {
-  const { selectObject, deleteObject } = useEditContext();
-
-  const getObjectIcon = (type: string) => {
-    switch (type) {
-      case "text":
-        return <span className="text-xs font-bold">T</span>;
-      case "shape":
-        return <Shapes className="h-3 w-3" />;
-      case "image":
-        return <ImageIcon className="h-3 w-3" />;
-      case "video":
-        return <VideoIcon className="h-3 w-3" />;
-      default:
-        return null;
-    }
-  };
-
-  const getObjectLabel = (obj: any) => {
-    if (obj.type === "text") return obj.content.substring(0, 20) || "Text";
-    if (obj.type === "shape") return `${obj.shapeType} Shape`;
-    if (obj.type === "image") return "Image";
-    if (obj.type === "video") return "Video";
-    return "Object";
-  };
+export const EditViewObjectPanelItem = ({
+  object,
+}: {
+  object: SlideObject;
+}) => {
+  const { selectObject, deleteObject, selectedObjectId } = useEditContext();
+  const isSelected = selectedObjectId === object.id;
 
   return (
     <div
       key={object.id}
       className={cn(
-        "p-2 border-b border-shade-1 hover:bg-shade-2 transition-all select-none"
+        "p-2 border transition-all bg-shade-3 select-none active:z-10",
+        {
+          "border-blue-400": isSelected,
+        }
       )}
       onClick={() => selectObject(object.id)}
     >
       <div className="flex items-center gap-2 justify-between">
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div
-            className="text-gray-400 shrink-0 cursor-grab active:cursor-grabbing hover:text-white"
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <GripVertical className="h-4 w-4" />
+          <div className="text-white shrink-0">
+            {getObjectIcon(object.type)}
           </div>
-          <div className="text-white shrink-0">{getObjectIcon(object.type)}</div>
-          <span className="text-white text-xs truncate">
+          <span className="text-white text-xs truncate select-none">
             {getObjectLabel(object)}
           </span>
         </div>

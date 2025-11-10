@@ -30,14 +30,15 @@ const ReorderableObjectsList = () => {
   const { selectedSlide, reorderObjects } = useEditContext();
   const objects = selectedSlide?.objects || [];
   const isReorderingRef = useRef(false);
-  
+
   // Create a stable sorted array
   const sortedObjects = useMemo(
     () => [...objects].sort((a, b) => b.zIndex - a.zIndex),
     [objects]
   );
-  
-  const [orderedObjects, setOrderedObjects] = useState<SlideObject[]>(sortedObjects);
+
+  const [orderedObjects, setOrderedObjects] =
+    useState<SlideObject[]>(sortedObjects);
 
   useEffect(() => {
     if (!isReorderingRef.current) {
@@ -57,7 +58,11 @@ const ReorderableObjectsList = () => {
   return (
     <Reorder.Group values={orderedObjects} onReorder={handleReorder}>
       {orderedObjects.map((object) => (
-        <Reorder.Item key={object.id} value={object}>
+        <Reorder.Item
+          className="cursor-grab relative"
+          key={object.id}
+          value={object}
+        >
           <EditViewObjectPanelItem object={object} />
         </Reorder.Item>
       ))}

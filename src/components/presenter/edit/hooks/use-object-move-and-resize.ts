@@ -1,7 +1,15 @@
 import { useEditContext } from "@/presenter/edit/context";
 import { useEffect, useState } from "react";
 
-export const useObjectMoveAndResize = ({ containerRef, scaleRef }: { containerRef: React.RefObject<HTMLDivElement | null>; scaleRef: React.RefObject<number> }) => {
+export const useObjectMoveAndResize = ({ 
+  containerRef, 
+  scaleRef, 
+  editingObjectId 
+}: { 
+  containerRef: React.RefObject<HTMLDivElement | null>; 
+  scaleRef: React.RefObject<number>;
+  editingObjectId: string | null;
+}) => {
     const {
         selectedSlide,
         selectedObjectId,
@@ -112,6 +120,9 @@ export const useObjectMoveAndResize = ({ containerRef, scaleRef }: { containerRe
     // Don't interfere with resize handles
     const target = e.target as HTMLElement;
     if (target.dataset.handle) return;
+
+    // Don't start dragging if we're in edit mode
+    if (editingObjectId) return;
 
     const objectId =
       target.dataset.objectId ||

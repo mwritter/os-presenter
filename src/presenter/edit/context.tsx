@@ -8,12 +8,15 @@ interface EditContextType {
   setSelectedSlide: (slide: SlideData) => void;
   selectedObjectId: string | null;
   selectObject: (objectId: string | null) => void;
+  editingObjectId: string | null;
+  setEditingObject: (objectId: string | null) => void;
   canvasSize: CanvasSize;
   addTextObject: () => void;
   addShapeObject: (shapeType: 'rectangle' | 'circle' | 'triangle') => void;
   addImageObject: (src: string) => void;
   addVideoObject: (src: string) => void;
   updateObject: (objectId: string, updates: Partial<SlideObject>) => void;
+  updateTextContent: (objectId: string, content: string) => void;
   deleteObject: (objectId: string) => void;
   reorderObject: (objectId: string, direction: 'forward' | 'backward' | 'front' | 'back') => void;
   reorderObjects: (orderedObjects: SlideObject[]) => void;
@@ -37,6 +40,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     const initalSlide = activeSlide?.data || selectedPlaylistItemData?.slideGroup?.slides?.[0] || activeSlideGroupData?.slides?.[0] || null;
     const [selectedSlide, setSelectedSlide] = useState<SlideData | null>(initalSlide);
     const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
+    const [editingObjectId, setEditingObjectId] = useState<string | null>(null);
 
   const updateSlideObjects = (updater: (objects: SlideObject[]) => SlideObject[]) => {
     if (!selectedSlide) return;
@@ -203,6 +207,20 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     setSelectedObjectId(objectId);
   };
 
+  const setEditingObject = (objectId: string | null) => {
+    setEditingObjectId(objectId);
+  };
+
+  const updateTextContent = (objectId: string, content: string) => {
+    updateSlideObjects((objects) =>
+      objects.map((obj) =>
+        obj.id === objectId && obj.type === 'text'
+          ? { ...obj, content } as SlideObject
+          : obj
+      )
+    );
+  };
+
   return (
     <EditContext.Provider
       value={{
@@ -210,12 +228,15 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
         setSelectedSlide,
         selectedObjectId,
         selectObject,
+        editingObjectId,
+        setEditingObject,
         canvasSize,
         addTextObject,
         addShapeObject,
         addImageObject,
         addVideoObject,
         updateObject,
+        updateTextContent,
         deleteObject,
         reorderObject,
         reorderObjects,
@@ -231,5 +252,10 @@ export const useEditContext = () => {
   if (!context) {
     throw new Error('useEditContext must be used within an EditProvider');
   }
+  return context;
+};
+
+export const useEditContextSafe = () => {
+  const context = useContext(EditContext);
   return context;
 };

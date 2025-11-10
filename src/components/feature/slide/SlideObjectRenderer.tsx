@@ -1,15 +1,19 @@
-import { SlideObject } from './types';
-import { TextObject } from './objects/TextObject';
-import { ShapeObject } from './objects/ShapeObject';
-import { ImageObject } from './objects/ImageObject';
-import { VideoObject } from './objects/VideoObject';
-import { SelectionBox } from './objects/SelectionBox';
+import { SlideObject } from "./types";
+import { TextObject } from "./objects/TextObject";
+import { ShapeObject } from "./objects/ShapeObject";
+import { ImageObject } from "./objects/ImageObject";
+import { VideoObject } from "./objects/VideoObject";
+import { SelectionBox } from "./objects/SelectionBox";
 
 export type SlideObjectRendererProps = {
   objects: SlideObject[];
   isEditable?: boolean;
   selectedObjectId?: string | null;
-  onResizeStart?: (objectId: string, handle: string, e: React.MouseEvent) => void;
+  onResizeStart?: (
+    objectId: string,
+    handle: string,
+    e: React.MouseEvent
+  ) => void;
 };
 
 export const SlideObjectRenderer = ({
@@ -25,20 +29,45 @@ export const SlideObjectRenderer = ({
     <>
       {sortedObjects.map((object) => {
         const isSelected = selectedObjectId === object.id;
+        // const isEditing = editingObjectId === object.id;
 
         let ObjectComponent;
         switch (object.type) {
-          case 'text':
-            ObjectComponent = <TextObject object={object} isEditable={isEditable} isSelected={isSelected} />;
+          case "text":
+            ObjectComponent = (
+              <TextObject
+                object={object}
+                isEditable={isEditable}
+                isSelected={isSelected}
+              />
+            );
             break;
-          case 'shape':
-            ObjectComponent = <ShapeObject object={object} isEditable={isEditable} isSelected={isSelected} />;
+          case "shape":
+            ObjectComponent = (
+              <ShapeObject
+                object={object}
+                isEditable={isEditable}
+                isSelected={isSelected}
+              />
+            );
             break;
-          case 'image':
-            ObjectComponent = <ImageObject object={object} isEditable={isEditable} isSelected={isSelected} />;
+          case "image":
+            ObjectComponent = (
+              <ImageObject
+                object={object}
+                isEditable={isEditable}
+                isSelected={isSelected}
+              />
+            );
             break;
-          case 'video':
-            ObjectComponent = <VideoObject object={object} isEditable={isEditable} isSelected={isSelected} />;
+          case "video":
+            ObjectComponent = (
+              <VideoObject
+                object={object}
+                isEditable={isEditable}
+                isSelected={isSelected}
+              />
+            );
             break;
           default:
             return null;
@@ -50,7 +79,9 @@ export const SlideObjectRenderer = ({
             {isEditable && isSelected && (
               <SelectionBox
                 object={object}
-                onResizeStart={(handle, e) => onResizeStart?.(object.id, handle, e)}
+                onResizeStart={(handle, e) =>
+                  onResizeStart?.(object.id, handle, e)
+                }
               />
             )}
           </div>
@@ -59,4 +90,3 @@ export const SlideObjectRenderer = ({
     </>
   );
 };
-

@@ -1,8 +1,11 @@
-import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import { CSSProperties, useMemo, useRef } from "react";
 import { SlideData } from "./types";
 import { getBackgroundStyle } from "./util/getBackgroundStyle";
 import { cn } from "@/lib/utils";
-import { selectActiveSlideId, usePresenterStore } from "@/stores/presenterStore";
+import {
+  selectActiveSlideId,
+  usePresenterStore,
+} from "@/stores/presenterStore";
 import { SlideObjectRenderer } from "./SlideObjectRenderer";
 import { CanvasSize } from "@/components/presenter/types";
 import { useSlideScale } from "./hooks/use-slide-scale";
@@ -10,17 +13,21 @@ import { useSlideScale } from "./hooks/use-slide-scale";
 export type SlideProps = {
   id: string;
   data: SlideData;
-  as?: 'button' | 'div';
+  as?: "button" | "div";
   isEditable?: boolean;
   selectedObjectId?: string | null;
-  onResizeStart?: (objectId: string, handle: string, e: React.MouseEvent) => void;
+  onResizeStart?: (
+    objectId: string,
+    handle: string,
+    e: React.MouseEvent
+  ) => void;
   canvasSize?: CanvasSize;
 };
 
-export const Slide = ({ 
-  id, 
-  data, 
-  as = 'button',
+export const Slide = ({
+  id,
+  data,
+  as = "button",
   isEditable = false,
   selectedObjectId = null,
   onResizeStart,
@@ -39,28 +46,28 @@ export const Slide = ({
   // Use backgroundColor if available, otherwise fall back to legacy background
   // Memoize to prevent recalculation on every render
   const backgroundStyle = useMemo(() => {
-    return data.backgroundColor 
+    return data.backgroundColor
       ? { backgroundColor: data.backgroundColor }
       : getBackgroundStyle(data, canvasSize);
-  }, [data.backgroundColor, data.background, canvasSize.width, canvasSize.height]);
-    
+  }, [data.backgroundColor, canvasSize.width, canvasSize.height]);
+
   // Canvas style - fixed size that gets scaled
   const canvasStyle: CSSProperties = {
     ...backgroundStyle,
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
     width: `${canvasSize.width}px`,
     height: `${canvasSize.height}px`,
     transform: `translate(-50%, -50%) scale(${scale})`,
-    transformOrigin: 'center center',
-    overflow: 'hidden',
-    willChange: 'transform',
-    backfaceVisibility: 'hidden',
+    transformOrigin: "center center",
+    overflow: "hidden",
+    willChange: "transform",
+    backfaceVisibility: "hidden",
     opacity: isReady ? 1 : 0,
   };
 
-  const Comp = as === 'button' ? 'button' : 'div';
+  const Comp = as === "button" ? "button" : "div";
 
   return (
     <div
@@ -70,12 +77,12 @@ export const Slide = ({
     >
       <Comp
         type="button"
-        onClick={as === 'button' ? handleClick : undefined}
+        onClick={as === "button" ? handleClick : undefined}
         className={cn(
           "rounded-xs transition-all duration-200 w-full h-full relative",
           {
             "ring-1 ring-amber-400": isActive,
-            "hover:ring-2 hover:ring-white/30": !isActive && as === 'button',
+            "hover:ring-2 hover:ring-white/30": !isActive && as === "button",
           }
         )}
       >

@@ -6,7 +6,14 @@ import { useScaleOnResize } from "./hooks/use-scale-on-resize";
 import { useObjectMoveAndResize } from "./hooks/use-object-move-and-resize";
 
 export const EditViewContent = () => {
-  const { selectedSlide, selectedObjectId, canvasSize } = useEditContext();
+  const { 
+    selectedSlide, 
+    selectedObjectId, 
+    editingObjectId,
+    setEditingObject,
+    updateTextContent,
+    canvasSize 
+  } = useEditContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scaleRef = useRef<number>(1);
 
@@ -14,7 +21,17 @@ export const EditViewContent = () => {
   const { handleSlideMouseDown, handleResizeStart } = useObjectMoveAndResize({
     containerRef,
     scaleRef,
+    editingObjectId,
   });
+
+  const handleTextDoubleClick = (objectId: string) => {
+    setEditingObject(objectId);
+  };
+
+  const handleTextContentChange = (objectId: string, content: string) => {
+    updateTextContent(objectId, content);
+    setEditingObject(null);
+  };
 
   return (
     <div className="flex h-full w-full bg-shade-lighter justify-center items-center relative overflow-y-auto py-20">
@@ -37,7 +54,10 @@ export const EditViewContent = () => {
                 as="div"
                 isEditable={true}
                 selectedObjectId={selectedObjectId}
+                editingObjectId={editingObjectId}
                 onResizeStart={handleResizeStart}
+                onTextDoubleClick={handleTextDoubleClick}
+                onTextContentChange={handleTextContentChange}
                 canvasSize={canvasSize}
               />
             </div>
