@@ -17,7 +17,7 @@ export const ShowViewSlideGrid = ({
   }
 
   return (
-    <div className="flex flex-col gap-4 text-white/70">
+    <div className="flex flex-col gap-4 text-white/70 relative">
       <ShowViewSlideGridHeader title={title} />
       <div className="flex flex-wrap gap-4 p-5">
         {slides.map((slide, index) => (
@@ -25,7 +25,7 @@ export const ShowViewSlideGrid = ({
             key={slide.id + index}
             className="border border-shade-1 shrink-0"
             style={{
-              flexBasis: "clamp(200px, calc((100% - 5rem) / 4), 300px)",
+              flexBasis: "clamp(300px, calc((100% - 5rem) / 4), 300px)",
             }}
           >
             <Slide id={slide.id} data={slide} />
@@ -39,7 +39,7 @@ export const ShowViewSlideGrid = ({
 // This is the header for the slide grid, it could be a library or a playlist item
 const ShowViewSlideGridHeader = ({ title }: { title: string }) => {
   return (
-    <div className="flex justify-between items-center text-xs p-2 text-white bg-shade-4">
+    <div className="flex justify-between items-center text-xs p-2 text-white bg-shade-4 sticky top-0 z-10">
       <div className="flex items-center gap-2">
         <File className="size-3.5" />
         {title}

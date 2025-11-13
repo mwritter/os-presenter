@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { Library, Playlist, SlideGroup } from "@/components/presenter/types";
 import { SlideData } from "@/components/feature/slide/types";
 import * as storage from "@/services/storage";
+import { createDefaultTextObject } from "./utils/createDefaultTextObject";
 
 interface PresenterState {
   // State
@@ -47,6 +48,7 @@ interface PresenterState {
   addPlaylist: (playlist: Playlist) => void;
   updatePlaylist: (id: string, updates: Partial<Playlist>) => void;
   removePlaylist: (id: string) => void;
+  removePlaylistItem: (playlistId: string, itemId: string) => void;
   addSlideGroupToPlaylist: (
     playlistId: string,
     libraryId: string,
@@ -177,9 +179,10 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     const shortId = crypto.randomUUID().split("-")[0];
     const uniqueSlideId = `${libraryId}-${shortId}`;
 
-    // Create empty slide if no slideData provided
+    // Create slide with default text object if no slideData provided
     const newSlide: SlideData = slideData ?? {
       id: uniqueSlideId,
+      objects: [createDefaultTextObject(slideGroup.canvasSize, uniqueSlideId)],
     };
 
     // Ensure slide has the unique ID
@@ -294,6 +297,26 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     storage.deletePlaylist(id).catch(console.error);
   },
 
+  removePlaylistItem: (playlistId, itemId) => {
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) {
+      console.error("Playlist not found");
+      return;
+    }
+
+    // Filter out the item to remove
+    const updatedItems = playlist.items.filter((item) => item.id !== itemId);
+
+    // Update the playlist with the filtered items
+    get().updatePlaylist(playlistId, { items: updatedItems });
+
+    // Clear selection if the removed item was selected
+    const state = get();
+    if (state.selectedPlaylistItem?.id === itemId) {
+      get().clearPlaylistItemSelection();
+    }
+  },
+
   addSlideGroupToPlaylist: (playlistId, libraryId, slideGroupIndex) => {
     const library = get().libraries.find((lib) => lib.id === libraryId);
     const slideGroup = library?.slideGroups[slideGroupIndex];
@@ -376,9 +399,12 @@ export const usePresenterStore = create<PresenterState>((set, get) => ({
     const shortId = crypto.randomUUID().split("-")[0];
     const uniqueSlideId = `${playlistId}-${shortId}`;
 
-    // Create empty slide if no slideData provided
+    // Create slide with default text object if no slideData provided
     const newSlide: SlideData = slideData ?? {
       id: uniqueSlideId,
+      objects: [
+        createDefaultTextObject(item.slideGroup.canvasSize, uniqueSlideId),
+      ],
     };
 
     // Ensure slide has the unique ID

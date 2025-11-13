@@ -20,7 +20,7 @@ export const EditViewObjectActionbar = () => {
   };
 
   return (
-    <div className="absolute top-5 z-10 flex justify-center w-full pointer-events-none">
+    <div className="fixed top-19 z-10 flex justify-center w-full pointer-events-none">
       <div className="flex items-center gap-2 bg-shade-3/45 backdrop-blur-sm rounded-md p-1 pointer-events-auto">
         <EditViewObjectActionbarButton
           icon={<p className="font-bold">T</p>}

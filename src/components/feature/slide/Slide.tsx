@@ -1,5 +1,5 @@
 import { CSSProperties, useMemo, useRef } from "react";
-import { SlideData } from "./types";
+import { SlideData, SlideObject } from "./types";
 import { getBackgroundStyle } from "./util/getBackgroundStyle";
 import { cn } from "@/lib/utils";
 import {
@@ -9,6 +9,7 @@ import {
 import { SlideObjectRenderer } from "./SlideObjectRenderer";
 import { CanvasSize } from "@/components/presenter/types";
 import { useSlideScale } from "./hooks/use-slide-scale";
+import { useIsEditRoute } from "@/components/presenter/edit/hooks/use-is-edit-route";
 
 export type SlideProps = {
   id: string;
@@ -16,11 +17,7 @@ export type SlideProps = {
   as?: "button" | "div";
   isEditable?: boolean;
   selectedObjectId?: string | null;
-  onResizeStart?: (
-    objectId: string,
-    handle: string,
-    e: React.MouseEvent
-  ) => void;
+  onUpdateObject?: (objectId: string, updates: Partial<SlideObject>) => void;
   canvasSize?: CanvasSize;
 };
 
@@ -30,14 +27,16 @@ export const Slide = ({
   as = "button",
   isEditable = false,
   selectedObjectId = null,
-  onResizeStart,
+  onUpdateObject,
   canvasSize = { width: 1920, height: 1080 },
 }: SlideProps) => {
   const activeSlideId = usePresenterStore(selectActiveSlideId);
   const setActiveSlide = usePresenterStore((state) => state.setActiveSlide);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLDivElement | null>(null);
   const { scale, isReady } = useSlideScale({ canvasSize, containerRef });
-  const isActive = activeSlideId === id;
+  const isEditRoute = useIsEditRoute();
+  const isActive = isEditRoute ? false : activeSlideId === id;
 
   const handleClick = () => {
     setActiveSlide(id, data);
@@ -76,7 +75,7 @@ export const Slide = ({
       className="flex flex-col gap-4 aspect-video w-full relative"
     >
       <Comp
-        type="button"
+        type={as === "button" ? "button" : undefined}
         onClick={as === "button" ? handleClick : undefined}
         className={cn(
           "rounded-xs transition-all duration-200 w-full h-full relative",
@@ -86,13 +85,15 @@ export const Slide = ({
           }
         )}
       >
-        <div style={canvasStyle}>
+        <div ref={canvasRef} style={canvasStyle}>
           {data.objects && data.objects.length > 0 && (
             <SlideObjectRenderer
+              scale={scale}
               objects={data.objects}
               isEditable={isEditable}
               selectedObjectId={selectedObjectId}
-              onResizeStart={onResizeStart}
+              canvasRef={canvasRef as React.RefObject<HTMLElement>}
+              onUpdateObject={onUpdateObject}
             />
           )}
         </div>

@@ -1,20 +1,20 @@
 // Legacy types for backwards compatibility
-export type SlideBackground = 
-  | { type: 'color'; value: string }
-  | { type: 'image'; value: string }
-  | { type: 'video'; value: string };
+export type SlideBackground =
+  | { type: "color"; value: string }
+  | { type: "image"; value: string }
+  | { type: "video"; value: string };
 
 export type SlideText = {
   content: string;
   fontSize?: number;
   color?: string;
-  alignment?: 'left' | 'center' | 'right';
+  alignment?: "left" | "center" | "right";
 };
 
 // Base object with common properties
 export type BaseSlideObject = {
   id: string;
-  type: 'text' | 'shape' | 'image' | 'video';
+  type: "text" | "shape" | "image" | "video";
   position: { x: number; y: number }; // pixels relative to canvas
   size: { width: number; height: number }; // pixels
   rotation?: number; // degrees
@@ -23,11 +23,11 @@ export type BaseSlideObject = {
 
 // Text object with extended formatting
 export type TextObject = BaseSlideObject & {
-  type: 'text';
+  type: "text";
   content: string;
   fontSize: number;
   color: string;
-  alignment: 'left' | 'center' | 'right';
+  alignment: "left" | "center" | "right";
   fontFamily?: string;
   bold?: boolean;
   italic?: boolean;
@@ -36,27 +36,54 @@ export type TextObject = BaseSlideObject & {
 
 // Shape object (rectangle, circle, triangle)
 export type ShapeObject = BaseSlideObject & {
-  type: 'shape';
-  shapeType: 'rectangle' | 'circle' | 'triangle';
+  type: "shape";
+  shapeType: "rectangle" | "circle" | "triangle";
   fillColor: string;
   strokeColor?: string;
   strokeWidth?: number;
+  // Optional text overlay
+  content?: string;
+  fontSize?: number;
+  color?: string;
+  alignment?: "left" | "center" | "right";
+  fontFamily?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
 };
 
 // Image object
 export type ImageObject = BaseSlideObject & {
-  type: 'image';
+  type: "image";
   src: string;
-  objectFit?: 'cover' | 'contain' | 'fill';
+  objectFit?: "cover" | "contain" | "fill";
+  // Optional text overlay
+  content?: string;
+  fontSize?: number;
+  color?: string;
+  alignment?: "left" | "center" | "right";
+  fontFamily?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
 };
 
 // Video object
 export type VideoObject = BaseSlideObject & {
-  type: 'video';
+  type: "video";
   src: string;
   autoPlay?: boolean;
   loop?: boolean;
   muted?: boolean;
+  // Optional text overlay
+  content?: string;
+  fontSize?: number;
+  color?: string;
+  alignment?: "left" | "center" | "right";
+  fontFamily?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
 };
 
 export type SlideObject = TextObject | ShapeObject | ImageObject | VideoObject;

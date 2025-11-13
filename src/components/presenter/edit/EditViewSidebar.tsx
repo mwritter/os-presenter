@@ -7,7 +7,13 @@ import { SlideGroup } from "../types";
 import { Slide } from "@/components/feature/slide/Slide";
 import { useEditContext } from "@/presenter/edit/context";
 import { cn } from "@/lib/utils";
-import { Shapes, Image as ImageIcon, Video as VideoIcon, Trash2, GripVertical } from "lucide-react";
+import {
+  Shapes,
+  Image as ImageIcon,
+  Video as VideoIcon,
+  Trash2,
+  GripVertical,
+} from "lucide-react";
 import { useState } from "react";
 import { EditSlideObjectPanel } from "./edit-object-panel/EditViewObjectPanel";
 
@@ -20,7 +26,7 @@ export const EditViewSidebar = ({
     <ResizablePanel
       id={"edit-sidebar-panel"}
       defaultSize={20}
-      minSize={20}
+      minSize={10}
       maxSize={30}
     >
       <ResizablePanelGroup id="edit-sidebar-group" direction="vertical">
@@ -51,7 +57,7 @@ const EditSlideGroupPanel = ({
 }) => {
   const { selectedSlide, setSelectedSlide } = useEditContext();
   const canvasSize = slideGroup?.canvasSize || { width: 1920, height: 1080 };
-  
+
   return (
     <div className="flex flex-col bg-shade-3 h-full">
       <div className="p-2">
@@ -62,12 +68,23 @@ const EditSlideGroupPanel = ({
       </div>
       <div className="flex-1 overflow-y-auto">
         {slideGroup?.slides.map((slide, index) => (
-          <button key={slide.id + index} className={cn("p-2 w-full flex flex-col gap-2", {
-            "bg-blue-400": selectedSlide?.id === slide.id,
-            "hover:bg-shade-1": selectedSlide?.id !== slide.id
-          } )} onClick={() => setSelectedSlide(slide)}>
-            <Slide id={slide.id} data={slide} as="div" canvasSize={canvasSize} />
-            <p className="text-white text-xs font-bold text-left">{index + 1}</p>
+          <button
+            key={slide.id + index}
+            className={cn("p-2 w-full flex flex-col gap-2", {
+              "bg-blue-400": selectedSlide?.id === slide.id,
+              "hover:bg-shade-1": selectedSlide?.id !== slide.id,
+            })}
+            onClick={() => setSelectedSlide(slide)}
+          >
+            <Slide
+              id={slide.id}
+              data={slide}
+              as="div"
+              canvasSize={canvasSize}
+            />
+            <p className="text-white text-xs font-bold text-left">
+              {index + 1}
+            </p>
           </button>
         ))}
       </div>

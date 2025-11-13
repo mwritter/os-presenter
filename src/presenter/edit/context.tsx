@@ -1,7 +1,19 @@
-import { SlideData, SlideObject, TextObject, ShapeObject, ImageObject, VideoObject } from "@/components/feature/slide/types";
+import {
+  SlideData,
+  SlideObject,
+  ShapeObject,
+  ImageObject,
+  VideoObject,
+} from "@/components/feature/slide/types";
 import { createContext, useContext, useState } from "react";
-import { usePresenterStore, selectSelectedSlideGroupData, selectSelectedPlaylistItemData, selectActiveSlide } from "@/stores/presenterStore";
+import {
+  usePresenterStore,
+  selectSelectedSlideGroupData,
+  selectSelectedPlaylistItemData,
+  selectActiveSlide,
+} from "@/stores/presenterStore";
 import { CanvasSize } from "@/components/presenter/types";
+import { createDefaultTextObject } from "@/stores/utils/createDefaultTextObject";
 
 interface EditContextType {
   selectedSlide: SlideData | null;
@@ -12,37 +24,58 @@ interface EditContextType {
   setEditingObject: (objectId: string | null) => void;
   canvasSize: CanvasSize;
   addTextObject: () => void;
-  addShapeObject: (shapeType: 'rectangle' | 'circle' | 'triangle') => void;
+  addShapeObject: (shapeType: "rectangle" | "circle" | "triangle") => void;
   addImageObject: (src: string) => void;
   addVideoObject: (src: string) => void;
   updateObject: (objectId: string, updates: Partial<SlideObject>) => void;
   updateTextContent: (objectId: string, content: string) => void;
   deleteObject: (objectId: string) => void;
-  reorderObject: (objectId: string, direction: 'forward' | 'backward' | 'front' | 'back') => void;
+  reorderObject: (
+    objectId: string,
+    direction: "forward" | "backward" | "front" | "back"
+  ) => void;
   reorderObjects: (orderedObjects: SlideObject[]) => void;
 }
 
 const EditContext = createContext<EditContextType | undefined>(undefined);
 
 export const EditProvider = ({ children }: { children: React.ReactNode }) => {
-    
-    const updateSlideInLibrary = usePresenterStore((state) => state.updateSlideInLibrary);
-    const updateSlideInPlaylistItem = usePresenterStore((state) => state.updateSlideInPlaylistItem);
-    const selectedSlideGroup = usePresenterStore((state) => state.selectedSlideGroup);
-    const selectedPlaylistItem = usePresenterStore((state) => state.selectedPlaylistItem);
-    
-    // Get canvas size from the current slide group
-    const selectedPlaylistItemData = usePresenterStore(selectSelectedPlaylistItemData);
-    const activeSlideGroupData = usePresenterStore(selectSelectedSlideGroupData);
-    const activeSlide = usePresenterStore(selectActiveSlide);
-    const slideGroup = selectedPlaylistItemData?.slideGroup || activeSlideGroupData;
-    const canvasSize = slideGroup?.canvasSize || { width: 1920, height: 1080 };
-    const initalSlide = activeSlide?.data || selectedPlaylistItemData?.slideGroup?.slides?.[0] || activeSlideGroupData?.slides?.[0] || null;
-    const [selectedSlide, setSelectedSlide] = useState<SlideData | null>(initalSlide);
-    const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
-    const [editingObjectId, setEditingObjectId] = useState<string | null>(null);
+  const updateSlideInLibrary = usePresenterStore(
+    (state) => state.updateSlideInLibrary
+  );
+  const updateSlideInPlaylistItem = usePresenterStore(
+    (state) => state.updateSlideInPlaylistItem
+  );
+  const selectedSlideGroup = usePresenterStore(
+    (state) => state.selectedSlideGroup
+  );
+  const selectedPlaylistItem = usePresenterStore(
+    (state) => state.selectedPlaylistItem
+  );
 
-  const updateSlideObjects = (updater: (objects: SlideObject[]) => SlideObject[]) => {
+  // Get canvas size from the current slide group
+  const selectedPlaylistItemData = usePresenterStore(
+    selectSelectedPlaylistItemData
+  );
+  const activeSlideGroupData = usePresenterStore(selectSelectedSlideGroupData);
+  const activeSlide = usePresenterStore(selectActiveSlide);
+  const slideGroup =
+    selectedPlaylistItemData?.slideGroup || activeSlideGroupData;
+  const canvasSize = slideGroup?.canvasSize || { width: 1920, height: 1080 };
+  const initalSlide =
+    activeSlide?.data ||
+    selectedPlaylistItemData?.slideGroup?.slides?.[0] ||
+    activeSlideGroupData?.slides?.[0] ||
+    null;
+  const [selectedSlide, setSelectedSlide] = useState<SlideData | null>(
+    initalSlide
+  );
+  const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
+  const [editingObjectId, setEditingObjectId] = useState<string | null>(null);
+
+  const updateSlideObjects = (
+    updater: (objects: SlideObject[]) => SlideObject[]
+  ) => {
     if (!selectedSlide) return;
 
     const currentObjects = selectedSlide.objects || [];
@@ -73,32 +106,22 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addTextObject = () => {
-    const newObject: TextObject = {
-      id: crypto.randomUUID(),
-      type: 'text',
-      position: { x: canvasSize.width * 0.25, y: canvasSize.height * 0.25 },
-      size: { width: canvasSize.width * 0.5, height: 100 },
-      zIndex: (selectedSlide?.objects?.length || 0) + 1,
-      content: 'New Text',
-      fontSize: 48,
-      color: '#ffffff',
-      alignment: 'left',
-    };
+    const newObject = createDefaultTextObject(canvasSize);
 
     updateSlideObjects((objects) => [...objects, newObject]);
     setSelectedObjectId(newObject.id);
   };
 
-  const addShapeObject = (shapeType: 'rectangle' | 'circle' | 'triangle') => {
+  const addShapeObject = (shapeType: "rectangle" | "circle" | "triangle") => {
     const newObject: ShapeObject = {
       id: crypto.randomUUID(),
-      type: 'shape',
+      type: "shape",
       position: { x: canvasSize.width * 0.35, y: canvasSize.height * 0.35 },
       size: { width: 300, height: 300 },
       zIndex: (selectedSlide?.objects?.length || 0) + 1,
       shapeType,
-      fillColor: '#3b82f6',
-      strokeColor: '#1e40af',
+      fillColor: "#3b82f6",
+      strokeColor: "#1e40af",
       strokeWidth: 2,
     };
 
@@ -109,12 +132,12 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   const addImageObject = (src: string) => {
     const newObject: ImageObject = {
       id: crypto.randomUUID(),
-      type: 'image',
+      type: "image",
       position: { x: canvasSize.width * 0.2, y: canvasSize.height * 0.2 },
       size: { width: canvasSize.width * 0.6, height: canvasSize.height * 0.6 },
       zIndex: (selectedSlide?.objects?.length || 0) + 1,
       src,
-      objectFit: 'cover',
+      objectFit: "cover",
     };
 
     updateSlideObjects((objects) => [...objects, newObject]);
@@ -124,7 +147,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   const addVideoObject = (src: string) => {
     const newObject: VideoObject = {
       id: crypto.randomUUID(),
-      type: 'video',
+      type: "video",
       position: { x: canvasSize.width * 0.2, y: canvasSize.height * 0.2 },
       size: { width: canvasSize.width * 0.6, height: canvasSize.height * 0.6 },
       zIndex: (selectedSlide?.objects?.length || 0) + 1,
@@ -141,19 +164,24 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   const updateObject = (objectId: string, updates: Partial<SlideObject>) => {
     updateSlideObjects((objects) =>
       objects.map((obj) =>
-        obj.id === objectId ? { ...obj, ...updates } as SlideObject : obj
+        obj.id === objectId ? ({ ...obj, ...updates } as SlideObject) : obj
       )
     );
   };
 
   const deleteObject = (objectId: string) => {
-    updateSlideObjects((objects) => objects.filter((obj) => obj.id !== objectId));
+    updateSlideObjects((objects) =>
+      objects.filter((obj) => obj.id !== objectId)
+    );
     if (selectedObjectId === objectId) {
       setSelectedObjectId(null);
     }
   };
 
-  const reorderObject = (objectId: string, direction: 'forward' | 'backward' | 'front' | 'back') => {
+  const reorderObject = (
+    objectId: string,
+    direction: "forward" | "backward" | "front" | "back"
+  ) => {
     updateSlideObjects((objects) => {
       const index = objects.findIndex((obj) => obj.id === objectId);
       if (index === -1) return objects;
@@ -161,22 +189,22 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       const newObjects = [...objects];
       const [object] = newObjects.splice(index, 1);
 
-      if (direction === 'front') {
+      if (direction === "front") {
         // Move to front (highest zIndex)
-        object.zIndex = Math.max(...objects.map(o => o.zIndex)) + 1;
+        object.zIndex = Math.max(...objects.map((o) => o.zIndex)) + 1;
         newObjects.push(object);
-      } else if (direction === 'back') {
+      } else if (direction === "back") {
         // Move to back (lowest zIndex)
-        object.zIndex = Math.min(...objects.map(o => o.zIndex)) - 1;
+        object.zIndex = Math.min(...objects.map((o) => o.zIndex)) - 1;
         newObjects.unshift(object);
-      } else if (direction === 'forward' && index < objects.length - 1) {
+      } else if (direction === "forward" && index < objects.length - 1) {
         // Swap zIndex with next object
         const nextObj = objects[index + 1];
         const tempZ = object.zIndex;
         object.zIndex = nextObj.zIndex;
         nextObj.zIndex = tempZ;
         newObjects.splice(index + 1, 0, object);
-      } else if (direction === 'backward' && index > 0) {
+      } else if (direction === "backward" && index > 0) {
         // Swap zIndex with previous object
         const prevObj = objects[index - 1];
         const tempZ = object.zIndex;
@@ -214,9 +242,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   const updateTextContent = (objectId: string, content: string) => {
     updateSlideObjects((objects) =>
       objects.map((obj) =>
-        obj.id === objectId && obj.type === 'text'
-          ? { ...obj, content } as SlideObject
-          : obj
+        obj.id === objectId ? ({ ...obj, content } as SlideObject) : obj
       )
     );
   };
@@ -250,7 +276,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
 export const useEditContext = () => {
   const context = useContext(EditContext);
   if (!context) {
-    throw new Error('useEditContext must be used within an EditProvider');
+    throw new Error("useEditContext must be used within an EditProvider");
   }
   return context;
 };
