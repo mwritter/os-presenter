@@ -1,0 +1,49 @@
+import { ColorResult } from "@uiw/react-color";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Wheel } from "@uiw/react-color";
+import { PopoverArrow } from "@radix-ui/react-popover";
+import { ColorWheelTriggerButton } from "./ColorWheelTriggerButton";
+import { ColorWheelBrightnessSlider } from "./ColorWheelBrightnessSlider";
+import { ColorWheelOpacitySlider } from "./ColorWheelOpacitySlider";
+import { useColorPicker } from "../../context";
+
+export const ColorWheelContent = () => {
+  const { baseColor, brightness, opacity, setBaseColor, setHsva } =
+    useColorPicker();
+
+  const handleWheelChange = (colorResult: ColorResult) => {
+    const newHsva = colorResult.hsva;
+    // Only update the base color (hue and saturation) from the wheel
+    // DO NOT update brightness - keep it independent
+    setBaseColor({ h: newHsva.h, s: newHsva.s });
+
+    // Use our current brightness and opacity, not the wheel's values
+    setHsva({ h: newHsva.h, s: newHsva.s, v: brightness, a: opacity });
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <ColorWheelTriggerButton />
+      </PopoverTrigger>
+      <PopoverContent
+        className="p-5 w-min bg-shade-1 border-none box-shadow-md mr-2"
+        sideOffset={5}
+      >
+        <div className="flex flex-col gap-3">
+          <Wheel
+            color={{ ...baseColor, v: brightness, a: 1 }}
+            onChange={handleWheelChange}
+          />
+          <ColorWheelBrightnessSlider />
+          <ColorWheelOpacitySlider />
+        </div>
+        <PopoverArrow className="fill-shade-1" />
+      </PopoverContent>
+    </Popover>
+  );
+};

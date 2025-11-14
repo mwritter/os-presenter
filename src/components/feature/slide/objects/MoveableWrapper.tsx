@@ -85,32 +85,34 @@ export const MoveableWrapper = ({
   };
 
   const handleResizeEnd = (e: OnResizeEnd) => {
-    // Update size and position in state
-    const newWidth = e.lastEvent.width;
-    const newHeight = e.lastEvent.height;
-    const newX = object.position.x + e.lastEvent.drag.translate[0];
-    const newY = object.position.y + e.lastEvent.drag.translate[1];
+    requestAnimationFrame(() => {
+      // Update size and position in state
+      const newWidth = e.lastEvent.width;
+      const newHeight = e.lastEvent.height;
+      const newX = object.position.x + e.lastEvent.drag.translate[0];
+      const newY = object.position.y + e.lastEvent.drag.translate[1];
 
-    // Clear the translate from transform, keep only rotation
-    // Also ensure width/height inline styles match the final size
-    if (targetElementRef.current) {
-      const rotation = object.rotation || 0;
-      targetElementRef.current.style.width = `${newWidth}px`;
-      targetElementRef.current.style.height = `${newHeight}px`;
-      targetElementRef.current.style.transform = rotation
-        ? `rotate(${rotation}deg)`
-        : "";
-    }
+      // Clear the translate from transform, keep only rotation
+      // Also ensure width/height inline styles match the final size
+      if (targetElementRef.current) {
+        const rotation = object.rotation || 0;
+        targetElementRef.current.style.width = `${newWidth}px`;
+        targetElementRef.current.style.height = `${newHeight}px`;
+        targetElementRef.current.style.transform = rotation
+          ? `rotate(${rotation}deg)`
+          : "";
+      }
 
-    onUpdate({
-      size: {
-        width: newWidth,
-        height: newHeight,
-      },
-      position: {
-        x: newX,
-        y: newY,
-      },
+      onUpdate({
+        size: {
+          width: newWidth,
+          height: newHeight,
+        },
+        position: {
+          x: newX,
+          y: newY,
+        },
+      });
     });
   };
 
