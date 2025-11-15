@@ -18,6 +18,8 @@ export type BaseSlideObject = {
   position: { x: number; y: number }; // pixels relative to canvas
   size: { width: number; height: number }; // pixels
   rotation?: number; // degrees
+  scaleX?: number; // scale factor for horizontal axis (negative for flip)
+  scaleY?: number; // scale factor for vertical axis (negative for flip)
   zIndex: number;
 };
 
@@ -30,8 +32,16 @@ export type TextObject = BaseSlideObject & {
   alignment: "left" | "center" | "right";
   fontFamily?: string;
   bold?: boolean;
-  italic?: boolean;
+  fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
+  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  // Text content stroke (outline around letters)
+  textStrokeColor?: string;
+  textStrokeWidth?: number;
+  // Text object bounds (background and border of the text box)
+  backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: number;
 };
 
 // Shape object (rectangle, circle, triangle)
@@ -48,8 +58,11 @@ export type ShapeObject = BaseSlideObject & {
   alignment?: "left" | "center" | "right";
   fontFamily?: string;
   bold?: boolean;
-  italic?: boolean;
+  fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
+  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  textStrokeColor?: string;
+  textStrokeWidth?: number;
 };
 
 // Image object
@@ -57,6 +70,9 @@ export type ImageObject = BaseSlideObject & {
   type: "image";
   src: string;
   objectFit?: "cover" | "contain" | "fill";
+  // Border around the image bounds
+  borderColor?: string;
+  borderWidth?: number;
   // Optional text overlay
   content?: string;
   fontSize?: number;
@@ -64,8 +80,11 @@ export type ImageObject = BaseSlideObject & {
   alignment?: "left" | "center" | "right";
   fontFamily?: string;
   bold?: boolean;
-  italic?: boolean;
+  fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
+  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  textStrokeColor?: string;
+  textStrokeWidth?: number;
 };
 
 // Video object
@@ -75,6 +94,9 @@ export type VideoObject = BaseSlideObject & {
   autoPlay?: boolean;
   loop?: boolean;
   muted?: boolean;
+  // Border around the video bounds
+  borderColor?: string;
+  borderWidth?: number;
   // Optional text overlay
   content?: string;
   fontSize?: number;
@@ -82,8 +104,11 @@ export type VideoObject = BaseSlideObject & {
   alignment?: "left" | "center" | "right";
   fontFamily?: string;
   bold?: boolean;
-  italic?: boolean;
+  fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
+  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  textStrokeColor?: string;
+  textStrokeWidth?: number;
 };
 
 export type SlideObject = TextObject | ShapeObject | ImageObject | VideoObject;

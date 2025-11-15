@@ -13,11 +13,14 @@ export const createDefaultTextObject = (canvasSize: CanvasSize): TextObject => {
     type: "text",
     position: { x, y },
     size: { width, height },
+    scaleX: 1,
+    scaleY: 1,
     zIndex: 1,
     content: "",
     fontSize: 48,
     color: "#FFFFFF",
     alignment: "center",
     fontFamily: "Arial",
+    fontStyle: "normal",
   };
 };

@@ -52,6 +52,10 @@ pub struct TextObject {
     pub position: Position,
     pub size: Size,
     pub rotation: Option<f64>,
+    #[serde(rename = "scaleX", skip_serializing_if = "Option::is_none")]
+    pub scale_x: Option<f64>,
+    #[serde(rename = "scaleY", skip_serializing_if = "Option::is_none")]
+    pub scale_y: Option<f64>,
     #[serde(rename = "zIndex")]
     pub z_index: i32,
     pub content: String,
@@ -63,10 +67,24 @@ pub struct TextObject {
     pub font_family: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bold: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub italic: Option<bool>,
+    #[serde(rename = "fontStyle", skip_serializing_if = "Option::is_none")]
+    pub font_style: Option<String>, // "normal" | "italic" | "oblique"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub underline: Option<bool>,
+    #[serde(rename = "textTransform", skip_serializing_if = "Option::is_none")]
+    pub text_transform: Option<String>, // "uppercase" | "lowercase" | "capitalize"
+    // Text content stroke (outline around letters)
+    #[serde(rename = "textStrokeColor", skip_serializing_if = "Option::is_none")]
+    pub text_stroke_color: Option<String>,
+    #[serde(rename = "textStrokeWidth", skip_serializing_if = "Option::is_none")]
+    pub text_stroke_width: Option<f64>,
+    // Text object bounds (background and border of the text box)
+    #[serde(rename = "backgroundColor", skip_serializing_if = "Option::is_none")]
+    pub background_color: Option<String>,
+    #[serde(rename = "borderColor", skip_serializing_if = "Option::is_none")]
+    pub border_color: Option<String>,
+    #[serde(rename = "borderWidth", skip_serializing_if = "Option::is_none")]
+    pub border_width: Option<f64>,
 }
 
 // Shape object (rectangle, circle, triangle)
@@ -78,6 +96,10 @@ pub struct ShapeObject {
     pub position: Position,
     pub size: Size,
     pub rotation: Option<f64>,
+    #[serde(rename = "scaleX", skip_serializing_if = "Option::is_none")]
+    pub scale_x: Option<f64>,
+    #[serde(rename = "scaleY", skip_serializing_if = "Option::is_none")]
+    pub scale_y: Option<f64>,
     #[serde(rename = "zIndex")]
     pub z_index: i32,
     #[serde(rename = "shapeType")]
@@ -88,6 +110,29 @@ pub struct ShapeObject {
     pub stroke_color: Option<String>,
     #[serde(rename = "strokeWidth", skip_serializing_if = "Option::is_none")]
     pub stroke_width: Option<f64>,
+    // Optional text overlay
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(rename = "fontSize", skip_serializing_if = "Option::is_none")]
+    pub font_size: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub alignment: Option<String>,
+    #[serde(rename = "fontFamily", skip_serializing_if = "Option::is_none")]
+    pub font_family: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bold: Option<bool>,
+    #[serde(rename = "fontStyle", skip_serializing_if = "Option::is_none")]
+    pub font_style: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub underline: Option<bool>,
+    #[serde(rename = "textTransform", skip_serializing_if = "Option::is_none")]
+    pub text_transform: Option<String>,
+    #[serde(rename = "textStrokeColor", skip_serializing_if = "Option::is_none")]
+    pub text_stroke_color: Option<String>,
+    #[serde(rename = "textStrokeWidth", skip_serializing_if = "Option::is_none")]
+    pub text_stroke_width: Option<f64>,
 }
 
 // Image object
@@ -99,11 +144,43 @@ pub struct ImageObject {
     pub position: Position,
     pub size: Size,
     pub rotation: Option<f64>,
+    #[serde(rename = "scaleX", skip_serializing_if = "Option::is_none")]
+    pub scale_x: Option<f64>,
+    #[serde(rename = "scaleY", skip_serializing_if = "Option::is_none")]
+    pub scale_y: Option<f64>,
     #[serde(rename = "zIndex")]
     pub z_index: i32,
     pub src: String,
     #[serde(rename = "objectFit", skip_serializing_if = "Option::is_none")]
     pub object_fit: Option<String>, // "cover" | "contain" | "fill"
+    // Border around the image bounds
+    #[serde(rename = "borderColor", skip_serializing_if = "Option::is_none")]
+    pub border_color: Option<String>,
+    #[serde(rename = "borderWidth", skip_serializing_if = "Option::is_none")]
+    pub border_width: Option<f64>,
+    // Optional text overlay
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(rename = "fontSize", skip_serializing_if = "Option::is_none")]
+    pub font_size: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub alignment: Option<String>,
+    #[serde(rename = "fontFamily", skip_serializing_if = "Option::is_none")]
+    pub font_family: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bold: Option<bool>,
+    #[serde(rename = "fontStyle", skip_serializing_if = "Option::is_none")]
+    pub font_style: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub underline: Option<bool>,
+    #[serde(rename = "textTransform", skip_serializing_if = "Option::is_none")]
+    pub text_transform: Option<String>,
+    #[serde(rename = "textStrokeColor", skip_serializing_if = "Option::is_none")]
+    pub text_stroke_color: Option<String>,
+    #[serde(rename = "textStrokeWidth", skip_serializing_if = "Option::is_none")]
+    pub text_stroke_width: Option<f64>,
 }
 
 // Video object
@@ -115,6 +192,10 @@ pub struct VideoObject {
     pub position: Position,
     pub size: Size,
     pub rotation: Option<f64>,
+    #[serde(rename = "scaleX", skip_serializing_if = "Option::is_none")]
+    pub scale_x: Option<f64>,
+    #[serde(rename = "scaleY", skip_serializing_if = "Option::is_none")]
+    pub scale_y: Option<f64>,
     #[serde(rename = "zIndex")]
     pub z_index: i32,
     pub src: String,
@@ -124,6 +205,34 @@ pub struct VideoObject {
     pub loop_video: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub muted: Option<bool>,
+    // Border around the video bounds
+    #[serde(rename = "borderColor", skip_serializing_if = "Option::is_none")]
+    pub border_color: Option<String>,
+    #[serde(rename = "borderWidth", skip_serializing_if = "Option::is_none")]
+    pub border_width: Option<f64>,
+    // Optional text overlay
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(rename = "fontSize", skip_serializing_if = "Option::is_none")]
+    pub font_size: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub alignment: Option<String>,
+    #[serde(rename = "fontFamily", skip_serializing_if = "Option::is_none")]
+    pub font_family: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bold: Option<bool>,
+    #[serde(rename = "fontStyle", skip_serializing_if = "Option::is_none")]
+    pub font_style: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub underline: Option<bool>,
+    #[serde(rename = "textTransform", skip_serializing_if = "Option::is_none")]
+    pub text_transform: Option<String>,
+    #[serde(rename = "textStrokeColor", skip_serializing_if = "Option::is_none")]
+    pub text_stroke_color: Option<String>,
+    #[serde(rename = "textStrokeWidth", skip_serializing_if = "Option::is_none")]
+    pub text_stroke_width: Option<f64>,
 }
 
 // Union type for slide objects (using untagged enum)
@@ -294,36 +403,36 @@ fn load_media_items(app: AppHandle) -> Result<Vec<MediaItem>, String> {
 #[tauri::command]
 fn import_media_file(app: AppHandle, source_path: String) -> Result<MediaItem, String> {
     let source = PathBuf::from(&source_path);
-    
+
     if !source.exists() {
         return Err("Source file does not exist".to_string());
     }
 
     // Generate unique ID for the media
     let media_id = Uuid::new_v4().to_string();
-    
+
     // Get file extension
     let extension = storage::get_file_extension(&source)
         .ok_or_else(|| "Could not determine file extension".to_string())?;
-    
+
     // Get original file name
     let file_name = storage::get_file_stem(&source)
         .ok_or_else(|| "Could not determine file name".to_string())?;
-    
+
     // Determine media type based on extension
     let media_type = match extension.to_lowercase().as_str() {
         "jpg" | "jpeg" | "png" | "gif" | "webp" | "bmp" => "image",
         "mp4" | "webm" | "mov" | "avi" | "mkv" => "video",
         _ => return Err("Unsupported file format".to_string()),
     };
-    
+
     // Copy file to media directory
     let media_files_dir = storage::get_media_files_dir(&app).map_err(|e| e.message)?;
     let dest_file_name = format!("{}.{}", media_id, extension);
     let dest_path = media_files_dir.join(&dest_file_name);
-    
+
     storage::copy_file(&source, &dest_path).map_err(|e| e.message)?;
-    
+
     // Create media item
     let now = chrono::Utc::now().to_rfc3339();
     let media_item = MediaItem {
@@ -337,12 +446,12 @@ fn import_media_file(app: AppHandle, source_path: String) -> Result<MediaItem, S
         updated_at: now,
         metadata: None,
     };
-    
+
     // Save metadata
     let metadata_dir = storage::get_media_metadata_dir(&app).map_err(|e| e.message)?;
     let metadata_path = metadata_dir.join(format!("{}.json", media_id));
     storage::write_json_file(&metadata_path, &media_item).map_err(|e| e.message)?;
-    
+
     Ok(media_item)
 }
 
@@ -351,20 +460,20 @@ fn delete_media_item(app: AppHandle, id: String) -> Result<(), String> {
     // Load media item to get file name
     let metadata_dir = storage::get_media_metadata_dir(&app).map_err(|e| e.message)?;
     let metadata_path = metadata_dir.join(format!("{}.json", id));
-    
+
     if let Ok(media_item) = storage::read_json_file::<MediaItem>(&metadata_path) {
         // Delete the actual media file
         let media_files_dir = storage::get_media_files_dir(&app).map_err(|e| e.message)?;
         let file_path = media_files_dir.join(&media_item.source);
         let _ = storage::delete_file(&file_path); // Ignore error if file doesn't exist
-        
+
         // Delete thumbnail if exists
         if let Some(thumb) = media_item.thumbnail {
             let thumb_path = media_files_dir.join(&thumb);
             let _ = storage::delete_file(&thumb_path);
         }
     }
-    
+
     // Delete metadata
     storage::delete_file(&metadata_path).map_err(|e| e.message)
 }
@@ -373,7 +482,7 @@ fn delete_media_item(app: AppHandle, id: String) -> Result<(), String> {
 fn get_media_file_path(app: AppHandle, file_name: String) -> Result<String, String> {
     let media_files_dir = storage::get_media_files_dir(&app).map_err(|e| e.message)?;
     let file_path = media_files_dir.join(file_name);
-    
+
     file_path
         .to_str()
         .ok_or_else(|| "Invalid path".to_string())

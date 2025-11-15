@@ -1,17 +1,21 @@
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 
-export const TextFontSizeInput = () => {
-  const [fontSize, setFontSize] = useState(16);
+export const TextFontSizeInput = ({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+}) => {
   return (
     <div className="flex flex-col gap-2">
       <Input
         className="text-xs! h-min"
         type="number"
         min={1}
-        value={fontSize}
-        onChange={(e) => setFontSize(Number(e.target.value))}
-        onBlur={() => setFontSize(Math.max(1, fontSize))}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        onBlur={() => onChange(Math.max(1, value))}
       />
     </div>
   );

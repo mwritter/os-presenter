@@ -1,11 +1,17 @@
 import { ColorPicker } from "@/components/feature/ColorPicker/ColorPicker";
 import { Label } from "@/components/ui/label";
 
-export const TextColorPicker = () => {
+export const TextColorPicker = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (color: string) => void;
+}) => {
   return (
     <div className="flex items-center justify-between">
       <Label className="text-xs!">Text Color</Label>
-      <ColorPicker />
+      <ColorPicker value={value} onChange={onChange} />
     </div>
   );
 };

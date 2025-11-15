@@ -25,17 +25,27 @@ export const VideoObject = ({
     textContentStyle,
   } = useTextEditing({ object, isEditable });
 
+  const scaleX = object.scaleX ?? 1;
+  const scaleY = object.scaleY ?? 1;
+  const rotation = object.rotation ?? 0;
+
   const containerStyle: CSSProperties = {
     position: "absolute",
     left: `${object.position.x}px`,
     top: `${object.position.y}px`,
     width: `${object.size.width}px`,
     height: `${object.size.height}px`,
-    transform: object.rotation ? `rotate(${object.rotation}deg)` : undefined,
+    transform: `scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`,
     zIndex: object.zIndex,
     cursor: isEditable ? "move" : "default",
     userSelect: "none",
     overflow: "hidden",
+    // Border around the video bounds
+    border:
+      object.borderColor && object.borderWidth
+        ? `${object.borderWidth}px solid ${object.borderColor}`
+        : "none",
+    boxSizing: "border-box",
   };
 
   const videoStyle: CSSProperties = {

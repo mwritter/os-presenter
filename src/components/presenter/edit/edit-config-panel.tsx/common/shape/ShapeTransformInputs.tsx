@@ -3,33 +3,66 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { FlipHorizontal, FlipVertical } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // sets the flip (horizontal or vertical) and rotation of the slide object
 export const ShapeTransformInputs = ({
   flip,
   rotation,
+  scaleX,
+  scaleY,
+  onChange,
 }: {
   flip: Array<"horizontal" | "vertical">;
   rotation: number;
+  scaleX: number;
+  scaleY: number;
+  onChange: (update: {
+    scaleX?: number;
+    scaleY?: number;
+    rotation?: number;
+  }) => void;
 }) => {
   const [localFlip, setLocalFlip] =
     useState<Array<"horizontal" | "vertical">>(flip);
   const [localRotation, setLocalRotation] = useState(rotation);
 
+  // Sync local state when external props change (e.g., from MoveableWrapper)
+  useEffect(() => {
+    setLocalFlip(flip);
+  }, [flip]);
+
+  useEffect(() => {
+    setLocalRotation(rotation);
+  }, [rotation]);
+
   const handleFlipChange = (update: { flip?: "horizontal" | "vertical" }) => {
+    const { flip } = update;
+    if (!flip) return;
+
     setLocalFlip((prev) => {
-      const { flip } = update;
-      if (!flip) return prev;
-      if (prev.includes(flip)) {
-        return prev.filter((f) => f !== flip);
-      }
-      return [...prev, flip];
+      const newFlip = prev.includes(flip)
+        ? prev.filter((f) => f !== flip)
+        : [...prev, flip];
+
+      // Convert flip to scaleX/scaleY
+      const newScaleX = newFlip.includes("horizontal")
+        ? -Math.abs(scaleX)
+        : Math.abs(scaleX);
+      const newScaleY = newFlip.includes("vertical")
+        ? -Math.abs(scaleY)
+        : Math.abs(scaleY);
+
+      onChange({ scaleX: newScaleX, scaleY: newScaleY });
+
+      return newFlip;
     });
   };
 
   const handleRotationChange = (update: { rotation?: number }) => {
-    setLocalRotation(update.rotation ?? 0);
+    const newRotation = update.rotation ?? 0;
+    setLocalRotation(newRotation);
+    onChange({ rotation: newRotation });
   };
 
   return (
@@ -104,9 +137,10 @@ const ShapeTransformRotationInput = ({
         className="text-xs! h-min"
         id="shape-transform-rotation"
         type="number"
+        step="0.01"
         min={0}
         max={360}
-        value={value}
+        value={Number(value.toFixed(2))}
         onChange={(e) => {
           const value = Number(e.target.value);
           if (value < 0) return;

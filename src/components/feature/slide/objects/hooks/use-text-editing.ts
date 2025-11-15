@@ -9,8 +9,11 @@ type TextableObject = {
   alignment?: "left" | "center" | "right";
   fontFamily?: string;
   bold?: boolean;
-  italic?: boolean;
+  fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
+  textStrokeColor?: string;
+  textStrokeWidth?: number;
+  textTransform?: "uppercase" | "lowercase" | "capitalize";
 };
 
 type UseTextEditingOptions = {
@@ -134,13 +137,18 @@ export const useTextEditing = ({
     background: "transparent",
     border: "none",
     outline: "none",
-    fontSize: `${object.fontSize || 48}px`,
+    fontSize: `${object.fontSize}px`,
     color: object.color || "#FFFFFF",
     textAlign: object.alignment || "center",
     fontFamily: object.fontFamily || "Arial",
     fontWeight: object.bold ? "bold" : "normal",
-    fontStyle: object.italic ? "italic" : "normal",
+    fontStyle: object.fontStyle || "normal",
     textDecoration: object.underline ? "underline" : "none",
+    textTransform: object.textTransform || "none",
+    WebkitTextStroke:
+      object.textStrokeColor && object.textStrokeWidth
+        ? `${object.textStrokeWidth}px ${object.textStrokeColor}`
+        : "none",
     padding: "8px",
     boxSizing: "border-box",
     cursor: isEditable && !isEditing ? "move" : "text",

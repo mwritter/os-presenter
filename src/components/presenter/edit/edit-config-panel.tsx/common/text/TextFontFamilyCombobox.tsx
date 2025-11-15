@@ -42,9 +42,15 @@ const fontFamilies = [
   },
 ];
 
-export function TextFontFamilyCombobox() {
+export function TextFontFamilyCombobox({
+  value: externalValue,
+  onChange,
+}: {
+  value?: string;
+  onChange: (value: string) => void;
+}) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = React.useState(externalValue || "");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -75,7 +81,9 @@ export function TextFontFamilyCombobox() {
                   key={fontFamily.value}
                   value={fontFamily.value}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                    const newValue = currentValue === value ? "" : currentValue;
+                    setValue(newValue);
+                    onChange(newValue);
                     setOpen(false);
                   }}
                 >

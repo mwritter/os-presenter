@@ -5,7 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { HsvaColor, hsvaToHex } from "@uiw/react-color";
+import { HsvaColor, hsvaToHex, hexToHsva } from "@uiw/react-color";
 
 interface ColorPickerContextValue {
   // Main color state
@@ -36,24 +36,39 @@ export const useColorPicker = () => {
 
 interface ColorPickerProviderProps {
   children: ReactNode;
-  defaultColor?: HsvaColor;
+  value?: string; // hex color value from parent
+  onChange?: (color: string) => void;
 }
 
 export const ColorPickerProvider = ({
   children,
-  defaultColor = { h: 0, s: 0, v: 0, a: 1 },
+  value: externalValue,
+  onChange,
 }: ColorPickerProviderProps) => {
-  const [hsva, setHsva] = useState<HsvaColor>(defaultColor);
+  // Initialize from external value or default
+  const initialHsva = externalValue
+    ? hexToHsva(externalValue)
+    : { h: 0, s: 0, v: 0, a: 1 };
+  
+  const [hsva, setHsva] = useState<HsvaColor>(initialHsva);
 
   // Internal state for color wheel
   const [baseColor, setBaseColor] = useState({
-    h: defaultColor.h,
-    s: defaultColor.s,
+    h: initialHsva.h,
+    s: initialHsva.s,
   });
-  const [brightness, setBrightness] = useState(defaultColor.v);
-  const [opacity, setOpacity] = useState(defaultColor.a);
+  const [brightness, setBrightness] = useState(initialHsva.v);
+  const [opacity, setOpacity] = useState(initialHsva.a);
 
-  // Sync internal state when hsva changes externally
+  // Sync with external value changes
+  useEffect(() => {
+    if (externalValue) {
+      const newHsva = hexToHsva(externalValue);
+      setHsva(newHsva);
+    }
+  }, [externalValue]);
+
+  // Sync internal state when hsva changes
   useEffect(() => {
     // Only update base color if brightness is > 0 (to preserve color when dark)
     if (hsva.v > 0) {
@@ -63,10 +78,19 @@ export const ColorPickerProvider = ({
     setOpacity(hsva.a);
   }, [hsva]);
 
+  // Notify parent of changes (separate effect to avoid dependency issues)
+  useEffect(() => {
+    if (onChange) {
+      const newHexColor = hsvaToHex(hsva);
+      onChange(newHexColor);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hsva]);
+
   // Convert to hex for display
   const hexColor = hsvaToHex(hsva);
 
-  const value: ColorPickerContextValue = {
+  const contextValue: ColorPickerContextValue = {
     hsva,
     hexColor,
     setHsva,
@@ -79,7 +103,7 @@ export const ColorPickerProvider = ({
   };
 
   return (
-    <ColorPickerContext.Provider value={value}>
+    <ColorPickerContext.Provider value={contextValue}>
       {children}
     </ColorPickerContext.Provider>
   );

@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ShapePositionInputsProps {
   x: number;
@@ -16,13 +16,16 @@ export const ShapePositionInputs = ({
 }: ShapePositionInputsProps) => {
   const [value, setValue] = useState<{ x: number; y: number }>({ x, y });
 
-  const handleChange = (update: { x?: number; y?: number }) => {
-    setValue((prev) => ({ ...prev, ...update }));
-  };
-
+  // Sync local state when external props change (e.g., from MoveableWrapper)
   useEffect(() => {
-    onChange({ x: value.x, y: value.y });
-  }, [value.x, value.y]);
+    setValue({ x, y });
+  }, [x, y]);
+
+  const handleChange = (update: { x?: number; y?: number }) => {
+    const newValue = { ...value, ...update };
+    setValue(newValue);
+    onChange(newValue);
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -45,7 +48,8 @@ export const ShapePositionXInput = ({
         className="text-xs! h-min"
         id="shape-position-x"
         type="number"
-        value={value}
+        step="0.01"
+        value={Number(value.toFixed(2))}
         onChange={(e) => onChange({ x: Number(e.target.value) })}
       />
       <Label className="text-xs!" htmlFor="shape-position-x">
@@ -68,7 +72,8 @@ export const ShapePositionYInput = ({
         className="text-xs! h-min"
         id="shape-position-y"
         type="number"
-        value={value}
+        step="0.01"
+        value={Number(value.toFixed(2))}
         onChange={(e) => onChange({ y: Number(e.target.value) })}
       />
       <Label className="text-xs!" htmlFor="shape-position-y">

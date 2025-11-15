@@ -5,7 +5,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
 
 // TODO: figure out how to get font style with tauri
 const fontStyles = [
@@ -23,10 +22,19 @@ const fontStyles = [
   },
 ];
 
-export const TextFontStyle = () => {
-  const [fontStyle, setFontStyle] = useState("normal");
+export const TextFontStyle = ({
+  value,
+  onChange,
+}: {
+  value?: string;
+  onChange: (value: "normal" | "italic" | "oblique") => void;
+}) => {
+  const fontStyle = value || "normal";
   return (
-    <Select value={fontStyle} onValueChange={setFontStyle}>
+    <Select
+      value={fontStyle}
+      onValueChange={onChange as (value: string) => void}
+    >
       <SelectTrigger className="w-full text-xs! h-min! py-1">
         <div style={{ fontStyle }}>
           <SelectValue placeholder="Select a font style" />

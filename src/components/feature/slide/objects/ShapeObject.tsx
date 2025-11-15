@@ -25,16 +25,21 @@ export const ShapeObject = ({
     textContentStyle,
   } = useTextEditing({ object, isEditable });
 
+  const scaleX = object.scaleX ?? 1;
+  const scaleY = object.scaleY ?? 1;
+  const rotation = object.rotation ?? 0;
+
   const containerStyle: CSSProperties = {
     position: "absolute",
     left: `${object.position.x}px`,
     top: `${object.position.y}px`,
     width: `${object.size.width}px`,
     height: `${object.size.height}px`,
-    transform: object.rotation ? `rotate(${object.rotation}deg)` : undefined,
+    transform: `scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`,
     zIndex: object.zIndex,
     cursor: isEditable ? "move" : "default",
     userSelect: "none",
+    boxSizing: "border-box",
   };
 
   const shapeStyle: CSSProperties = {
@@ -49,22 +54,7 @@ export const ShapeObject = ({
         ? `${object.strokeWidth}px solid ${object.strokeColor}`
         : "none",
     ...(object.shapeType === "circle" && { borderRadius: "50%" }),
-    ...(object.shapeType === "triangle" && {
-      backgroundColor: "transparent",
-      border: "none",
-      width: 0,
-      height: 0,
-    }),
   };
-
-  // For triangle, we use CSS borders trick
-  if (object.shapeType === "triangle") {
-    const triangleWidth = object.size.width;
-    const triangleHeight = object.size.height;
-    shapeStyle.borderLeft = `${triangleWidth / 2}px solid transparent`;
-    shapeStyle.borderRight = `${triangleWidth / 2}px solid transparent`;
-    shapeStyle.borderBottom = `${triangleHeight}px solid ${object.fillColor}`;
-  }
 
   return (
     <div
@@ -74,7 +64,32 @@ export const ShapeObject = ({
       onDoubleClick={handleDoubleClick}
       onMouseDown={handleMouseDown}
     >
-      <div style={shapeStyle}></div>
+      {object.shapeType === "triangle" ? (
+        // Always use SVG for triangles (supports both fill and stroke)
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 100 100"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            overflow: "visible",
+          }}
+          preserveAspectRatio="none"
+        >
+          <polygon
+            points="50,0 100,100 0,100"
+            fill={object.fillColor}
+            stroke={object.strokeColor || "none"}
+            strokeWidth={object.strokeWidth || 0}
+            strokeLinejoin="miter"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      ) : (
+        <div style={shapeStyle}></div>
+      )}
       {(textContent || isEditing) && (
         <div style={textOverlayStyle} className={cn({ editing: isEditing })}>
           <div

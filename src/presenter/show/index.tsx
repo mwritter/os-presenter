@@ -49,7 +49,7 @@ const ShowViewLibraryContent = () => {
     );
   };
   return (
-    <div className="flex flex-col h-full w-full relative">
+    <div className="flex flex-col h-full w-full relative overflow-y-auto">
       <ShowViewSlideGrid
         slides={selectedSlideGroupData?.slides ?? []}
         title={selectedSlideGroupData?.title ?? ""}

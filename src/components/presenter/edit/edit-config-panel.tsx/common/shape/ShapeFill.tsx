@@ -3,17 +3,23 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
-import { useState } from "react";
 
 // sets the fill color for the slide object
-export const ShapeFill = () => {
-  const [hasFill, setHasFill] = useState(false);
+export const ShapeFill = ({
+  value,
+  onChange,
+}: {
+  value?: string;
+  onChange: (color: string | undefined) => void;
+}) => {
+  const hasFill = !!value;
+
   const handleAddFill = () => {
-    setHasFill(true);
+    onChange("#3b82f6"); // Default blue color
   };
 
   const handleRemoveFill = () => {
-    setHasFill(false);
+    onChange(undefined);
   };
 
   return (
@@ -36,19 +42,24 @@ export const ShapeFill = () => {
           </Button>
         )}
       </div>
-      {hasFill && <ShapeFillItem />}
+      {hasFill && <ShapeFillItem value={value!} onChange={onChange} />}
     </div>
   );
 };
 
-const ShapeFillItem = () => {
+const ShapeFillItem = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (color: string | undefined) => void;
+}) => {
   return (
     <div className="flex items-center justify-between gap-2 pl-2">
-      {/* TODO: new color picker component that shows the color as a swatch and gives an editable hex color input */}
       <Label className="text-xs!" htmlFor="shape-fill-color">
         Color
       </Label>
-      <ColorPicker />
+      <ColorPicker value={value} onChange={onChange} />
     </div>
   );
 };

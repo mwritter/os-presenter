@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ShapeSizeInputsProps {
   width: number;
@@ -19,13 +19,16 @@ export const ShapeSizeInputs = ({
     height,
   });
 
-  const handleChange = (update: { width?: number; height?: number }) => {
-    setValue((prev) => ({ ...prev, ...update }));
-  };
-
+  // Sync local state when external props change (e.g., from MoveableWrapper)
   useEffect(() => {
-    onChange({ width: value.width, height: value.height });
-  }, [value.width, value.height]);
+    setValue({ width, height });
+  }, [width, height]);
+
+  const handleChange = (update: { width?: number; height?: number }) => {
+    const newValue = { ...value, ...update };
+    setValue(newValue);
+    onChange(newValue);
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -51,8 +54,9 @@ export const ShapeSizeWidthInput = ({
         className="text-xs! h-min"
         id="shape-size-width"
         type="number"
+        step="0.01"
         min={1}
-        value={value}
+        value={Number(value.toFixed(2))}
         onChange={(e) => onChange({ width: Number(e.target.value) })}
       />
       <Label className="text-xs!" htmlFor="shape-size-width">
@@ -75,8 +79,9 @@ export const ShapeSizeHeightInput = ({
         className="text-xs! h-min"
         id="shape-size-height"
         type="number"
+        step="0.01"
         min={1}
-        value={value}
+        value={Number(value.toFixed(2))}
         onChange={(e) => onChange({ height: Number(e.target.value) })}
       />
       <Label className="text-xs!" htmlFor="shape-size-height">

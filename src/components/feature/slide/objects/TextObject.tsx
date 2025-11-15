@@ -27,6 +27,10 @@ export const TextObject = ({ object, isEditable = false }: TextObjectProps) => {
     showPlaceholder: true,
   });
 
+  const scaleX = object.scaleX ?? 1;
+  const scaleY = object.scaleY ?? 1;
+  const rotation = object.rotation ?? 0;
+  
   const containerStyle: CSSProperties = {
     ...textContainerStyle,
     position: "absolute",
@@ -34,8 +38,15 @@ export const TextObject = ({ object, isEditable = false }: TextObjectProps) => {
     top: `${object.position.y}px`,
     width: `${object.size.width}px`,
     height: `${object.size.height}px`,
-    transform: object.rotation ? `rotate(${object.rotation}deg)` : undefined,
+    transform: `scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`,
     zIndex: object.zIndex,
+    // Text box bounds (background and border)
+    backgroundColor: object.backgroundColor,
+    border:
+      object.borderColor && object.borderWidth
+        ? `${object.borderWidth}px solid ${object.borderColor}`
+        : "none",
+    boxSizing: "border-box",
   };
 
   return (

@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import Moveable, { OnDragEnd, OnResizeEnd } from "react-moveable";
+import Moveable, { OnDragEnd, OnResizeEnd, OnRotateEnd } from "react-moveable";
 import { SlideObject } from "../types";
 
 export type MoveableWrapperProps = {
@@ -59,6 +59,8 @@ export const MoveableWrapper = ({
     object.size.width,
     object.size.height,
     object.rotation,
+    object.scaleX,
+    object.scaleY,
   ]);
 
   const handleDragEnd = (e: OnDragEnd) => {
@@ -67,12 +69,19 @@ export const MoveableWrapper = ({
       const newX = object.position.x + e.lastEvent.translate[0];
       const newY = object.position.y + e.lastEvent.translate[1];
 
-      // Clear the translate from transform, keep only rotation
+      // Clear the translate from transform, keep scale and rotation
       if (targetElementRef.current) {
         const rotation = object.rotation || 0;
-        targetElementRef.current.style.transform = rotation
-          ? `rotate(${rotation}deg)`
-          : "";
+        const scaleX = object.scaleX ?? 1;
+        const scaleY = object.scaleY ?? 1;
+        const hasScale = scaleX !== 1 || scaleY !== 1;
+        const hasRotation = rotation !== 0;
+
+        if (hasScale || hasRotation) {
+          targetElementRef.current.style.transform = `scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
+        } else {
+          targetElementRef.current.style.transform = "";
+        }
       }
 
       onUpdate({
@@ -86,21 +95,31 @@ export const MoveableWrapper = ({
 
   const handleResizeEnd = (e: OnResizeEnd) => {
     requestAnimationFrame(() => {
-      // Update size and position in state
-      const newWidth = e.lastEvent.width;
-      const newHeight = e.lastEvent.height;
+      const MIN_SIZE = 1;
+
+      // Enforce minimum size
+      const newWidth = Math.max(e.lastEvent.width, MIN_SIZE);
+      const newHeight = Math.max(e.lastEvent.height, MIN_SIZE);
       const newX = object.position.x + e.lastEvent.drag.translate[0];
       const newY = object.position.y + e.lastEvent.drag.translate[1];
 
-      // Clear the translate from transform, keep only rotation
+      // Clear the translate from transform, keep scale and rotation
       // Also ensure width/height inline styles match the final size
       if (targetElementRef.current) {
         const rotation = object.rotation || 0;
+        const scaleX = object.scaleX ?? 1;
+        const scaleY = object.scaleY ?? 1;
+        const hasScale = scaleX !== 1 || scaleY !== 1;
+        const hasRotation = rotation !== 0;
+
         targetElementRef.current.style.width = `${newWidth}px`;
         targetElementRef.current.style.height = `${newHeight}px`;
-        targetElementRef.current.style.transform = rotation
-          ? `rotate(${rotation}deg)`
-          : "";
+
+        if (hasScale || hasRotation) {
+          targetElementRef.current.style.transform = `scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
+        } else {
+          targetElementRef.current.style.transform = "";
+        }
       }
 
       onUpdate({
@@ -112,6 +131,14 @@ export const MoveableWrapper = ({
           x: newX,
           y: newY,
         },
+      });
+    });
+  };
+
+  const handleRotateEnd = (e: OnRotateEnd) => {
+    requestAnimationFrame(() => {
+      onUpdate({
+        rotation: e.lastEvent.rotate,
       });
     });
   };
@@ -161,26 +188,33 @@ export const MoveableWrapper = ({
       onDrag={(e) => {
         // Update position during drag
         const rotation = object.rotation || 0;
-        e.target.style.transform = `translate(${e.translate[0]}px, ${e.translate[1]}px) rotate(${rotation}deg)`;
+        const scaleX = object.scaleX ?? 1;
+        const scaleY = object.scaleY ?? 1;
+        e.target.style.transform = `translate(${e.translate[0]}px, ${e.translate[1]}px) scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
       }}
       onDragEnd={handleDragEnd}
       onResize={(e) => {
-        // Update size and position during resize
+        const MIN_SIZE = 1;
+
+        // Enforce minimum size
+        const width = Math.max(e.width, MIN_SIZE);
+        const height = Math.max(e.height, MIN_SIZE);
         const rotation = object.rotation || 0;
-        e.target.style.width = `${e.width}px`;
-        e.target.style.height = `${e.height}px`;
-        e.target.style.transform = `translate(${e.drag.translate[0]}px, ${e.drag.translate[1]}px) rotate(${rotation}deg)`;
+        const scaleX = object.scaleX ?? 1;
+        const scaleY = object.scaleY ?? 1;
+
+        e.target.style.width = `${width}px`;
+        e.target.style.height = `${height}px`;
+        e.target.style.transform = `translate(${e.drag.translate[0]}px, ${e.drag.translate[1]}px) scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
       }}
       onResizeEnd={handleResizeEnd}
       onRotate={(e) => {
         // Update rotation during rotate
-        e.target.style.transform = `translate(0px, 0px) rotate(${e.rotate}deg)`;
+        const scaleX = object.scaleX ?? 1;
+        const scaleY = object.scaleY ?? 1;
+        e.target.style.transform = `translate(0px, 0px) scale(${scaleX}, ${scaleY}) rotate(${e.rotation}deg)`;
       }}
-      onRotateEnd={(e) => {
-        onUpdate({
-          rotation: e.lastEvent.rotate,
-        });
-      }}
+      onRotateEnd={handleRotateEnd}
     />
   );
 };

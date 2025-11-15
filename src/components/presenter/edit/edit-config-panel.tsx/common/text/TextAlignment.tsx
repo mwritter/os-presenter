@@ -12,24 +12,21 @@ import {
   AlignStartHorizontal,
   AlignStartVertical,
 } from "lucide-react";
-import { useState } from "react";
 
-export const TextAlignment = () => {
-  const [horizontalAlignment, setHorizontalAlignment] = useState<
-    "left" | "center" | "right" | "justify"
-  >("left");
-  const [verticalAlignment, setVerticalAlignment] = useState<
-    "top" | "center" | "bottom"
-  >("top");
+export const TextAlignment = ({
+  value,
+  onChange,
+}: {
+  value: "left" | "center" | "right";
+  onChange: (alignment: "left" | "center" | "right") => void;
+}) => {
+  // Note: Currently only supporting horizontal alignment (left, center, right)
+  // Vertical alignment could be added in the future
   return (
     <div className="flex flex-col gap-2">
       <TextAlignmentHorizontalControls
-        alignment={horizontalAlignment}
-        setAlignment={setHorizontalAlignment}
-      />
-      <TextAlignmentVerticalControls
-        alignment={verticalAlignment}
-        setAlignment={setVerticalAlignment}
+        alignment={value}
+        setAlignment={onChange}
       />
     </div>
   );
@@ -39,8 +36,8 @@ const TextAlignmentHorizontalControls = ({
   alignment,
   setAlignment,
 }: {
-  alignment: "left" | "center" | "right" | "justify";
-  setAlignment: (alignment: "left" | "center" | "right" | "justify") => void;
+  alignment: "left" | "center" | "right";
+  setAlignment: (alignment: "left" | "center" | "right") => void;
 }) => {
   return (
     <div className="flex items-center bg-shade-1 rounded-sm">
@@ -68,27 +65,17 @@ const TextAlignmentHorizontalControls = ({
         <AlignCenter className="size-3" />
       </Button>
       <Button
-        className={cn("flex-1 size-6 rounded-none border-r border-x-shade-2", {
-          "bg-shade-lighter hover:bg-shade-lighter!": alignment === "right",
-        })}
         variant="ghost"
         size="icon-sm"
         onClick={() => setAlignment("right")}
-      >
-        <AlignRight className="size-3" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        onClick={() => setAlignment("justify")}
         className={cn(
           "flex-1 size-6 rounded-sm rounded-bl-none rounded-tl-none",
           {
-            "bg-shade-lighter hover:bg-shade-lighter!": alignment === "justify",
+            "bg-shade-lighter hover:bg-shade-lighter!": alignment === "right",
           }
         )}
       >
-        <AlignJustify className="size-3" />
+        <AlignRight className="size-3" />
       </Button>
     </div>
   );

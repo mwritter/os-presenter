@@ -5,19 +5,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
 
-export const TextCapitalizationSelect = () => {
-  const [capitalization, setCapitalization] = useState<string>();
+export const TextCapitalizationSelect = ({
+  value,
+  onChange,
+}: {
+  value?: "uppercase" | "lowercase" | "capitalize";
+  onChange: (
+    value: "uppercase" | "lowercase" | "capitalize" | undefined
+  ) => void;
+}) => {
   return (
-    <Select value={capitalization} onValueChange={setCapitalization}>
+    <Select value={value} onValueChange={onChange as (value: string) => void}>
       <SelectTrigger className="w-full text-xs! h-min! py-1">
         <SelectValue placeholder="Select a capitalization" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all-caps">All Caps</SelectItem>
-        <SelectItem value="title-case">Title Case</SelectItem>
-        <SelectItem value="start-case">Start Case</SelectItem>
+        <SelectItem value="uppercase">Uppercase</SelectItem>
+        <SelectItem value="lowercase">Lowercase</SelectItem>
+        <SelectItem value="capitalize">Capitalize</SelectItem>
       </SelectContent>
     </Select>
   );

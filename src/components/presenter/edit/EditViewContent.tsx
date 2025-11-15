@@ -2,7 +2,6 @@ import { useEditContext } from "@/presenter/edit/context";
 import { Slide } from "@/components/feature/slide/Slide";
 import { EditViewObjectActionbar } from "./edit-object-action-bar/EditViewObjectActionbar";
 import { useRef } from "react";
-import { EditPresentationConfigPanel } from "./edit-config-panel.tsx/EditPresentationConfigPanel";
 import { EditConfigPanel } from "./edit-config-panel.tsx/EditConfigPanel";
 
 export const EditViewContent = () => {
@@ -37,7 +36,7 @@ export const EditViewContent = () => {
 
   return (
     <div className="grid grid-cols-[1fr_300px] h-full w-full bg-shade-lighter">
-      <div className="flex flex-col justify-center items-center h-full w-full relative overflow-y-auto">
+      <div className="flex flex-col justify-center items-center h-full w-full overflow-y-auto">
         {selectedSlide && (
           <>
             <EditViewObjectActionbar />

@@ -5,7 +5,7 @@ import {
   ImageObject,
   VideoObject,
 } from "@/components/feature/slide/types";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import {
   usePresenterStore,
   selectSelectedSlideGroupData,
@@ -35,6 +35,9 @@ interface EditContextType {
     direction: "forward" | "backward" | "front" | "back"
   ) => void;
   reorderObjects: (orderedObjects: SlideObject[]) => void;
+  updateSlideBackground: (backgroundColor: string | undefined) => void;
+  updateAllSlidesBackground: (backgroundColor: string | undefined) => void;
+  updateCanvasSize: (canvasSize: CanvasSize) => void;
 }
 
 const EditContext = createContext<EditContextType | undefined>(undefined);
@@ -46,6 +49,10 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   const updateSlideInPlaylistItem = usePresenterStore(
     (state) => state.updateSlideInPlaylistItem
   );
+  const updatePlaylistItemSlideGroup = usePresenterStore(
+    (state) => state.updatePlaylistItemSlideGroup
+  );
+  const updateLibrary = usePresenterStore((state) => state.updateLibrary);
   const selectedSlideGroup = usePresenterStore(
     (state) => state.selectedSlideGroup
   );
@@ -72,6 +79,27 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   );
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
   const [editingObjectId, setEditingObjectId] = useState<string | null>(null);
+
+  // Sync selectedSlide with store when slideGroup changes (e.g., navigating back from show view)
+  useEffect(() => {
+    if (!selectedSlide && slideGroup?.slides?.[0]) {
+      // If no slide selected, select the first one
+      setSelectedSlide(slideGroup.slides[0]);
+    } else if (selectedSlide && slideGroup?.slides) {
+      // If a slide is selected, find and update it from the store
+      const updatedSlide = slideGroup.slides.find(
+        (s) => s.id === selectedSlide.id
+      );
+      if (updatedSlide) {
+        // Only update if the data has actually changed (deep comparison by JSON)
+        // This prevents infinite loops while still syncing changes from other views
+        if (JSON.stringify(updatedSlide) !== JSON.stringify(selectedSlide)) {
+          setSelectedSlide(updatedSlide);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideGroup, selectedSlide?.id]);
 
   const updateSlideObjects = (
     updater: (objects: SlideObject[]) => SlideObject[]
@@ -118,6 +146,8 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       type: "shape",
       position: { x: canvasSize.width * 0.35, y: canvasSize.height * 0.35 },
       size: { width: 300, height: 300 },
+      scaleX: 1,
+      scaleY: 1,
       zIndex: (selectedSlide?.objects?.length || 0) + 1,
       shapeType,
       fillColor: "#3b82f6",
@@ -135,6 +165,8 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       type: "image",
       position: { x: canvasSize.width * 0.2, y: canvasSize.height * 0.2 },
       size: { width: canvasSize.width * 0.6, height: canvasSize.height * 0.6 },
+      scaleX: 1,
+      scaleY: 1,
       zIndex: (selectedSlide?.objects?.length || 0) + 1,
       src,
       objectFit: "cover",
@@ -150,6 +182,8 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       type: "video",
       position: { x: canvasSize.width * 0.2, y: canvasSize.height * 0.2 },
       size: { width: canvasSize.width * 0.6, height: canvasSize.height * 0.6 },
+      scaleX: 1,
+      scaleY: 1,
       zIndex: (selectedSlide?.objects?.length || 0) + 1,
       src,
       autoPlay: false,
@@ -247,6 +281,99 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
+  const updateSlideBackground = (backgroundColor: string | undefined) => {
+    if (!selectedSlide) return;
+
+    const updatedSlide: SlideData = {
+      ...selectedSlide,
+      backgroundColor,
+    };
+
+    // Update in store
+    if (selectedPlaylistItem) {
+      updateSlideInPlaylistItem(
+        selectedPlaylistItem.playlistId,
+        selectedPlaylistItem.id,
+        selectedSlide.id,
+        { backgroundColor }
+      );
+    } else if (selectedSlideGroup) {
+      updateSlideInLibrary(
+        selectedSlideGroup.libraryId,
+        selectedSlideGroup.index,
+        selectedSlide.id,
+        { backgroundColor }
+      );
+    }
+
+    setSelectedSlide(updatedSlide);
+  };
+
+  const updateAllSlidesBackground = (backgroundColor: string | undefined) => {
+    if (!slideGroup) return;
+
+    // Update all slides in the slide group
+    const updatedSlides = slideGroup.slides.map((slide) => ({
+      ...slide,
+      backgroundColor,
+    }));
+
+    // Update in store
+    if (selectedPlaylistItem) {
+      updatePlaylistItemSlideGroup(
+        selectedPlaylistItem.playlistId,
+        selectedPlaylistItem.id,
+        { slides: updatedSlides }
+      );
+    } else if (selectedSlideGroup) {
+      const library = usePresenterStore
+        .getState()
+        .libraries.find((lib) => lib.id === selectedSlideGroup.libraryId);
+      if (library) {
+        const updatedSlideGroups = [...library.slideGroups];
+        updatedSlideGroups[selectedSlideGroup.index] = {
+          ...updatedSlideGroups[selectedSlideGroup.index],
+          slides: updatedSlides,
+        };
+        updateLibrary(selectedSlideGroup.libraryId, {
+          slideGroups: updatedSlideGroups,
+        });
+      }
+    }
+
+    // Update local state if current slide is selected
+    if (selectedSlide) {
+      setSelectedSlide({ ...selectedSlide, backgroundColor });
+    }
+  };
+
+  const updateCanvasSize = (newCanvasSize: CanvasSize) => {
+    if (!slideGroup) return;
+
+    // Update in store
+    if (selectedPlaylistItem) {
+      updatePlaylistItemSlideGroup(
+        selectedPlaylistItem.playlistId,
+        selectedPlaylistItem.id,
+        { canvasSize: newCanvasSize }
+      );
+    } else if (selectedSlideGroup) {
+      const library = usePresenterStore
+        .getState()
+        .libraries.find((lib) => lib.id === selectedSlideGroup.libraryId);
+      if (library) {
+        const updatedSlideGroups = [...library.slideGroups];
+        updatedSlideGroups[selectedSlideGroup.index] = {
+          ...updatedSlideGroups[selectedSlideGroup.index],
+          canvasSize: newCanvasSize,
+        };
+        updateLibrary(selectedSlideGroup.libraryId, {
+          slideGroups: updatedSlideGroups,
+        });
+      }
+    }
+  };
+
   return (
     <EditContext.Provider
       value={{
@@ -266,6 +393,9 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
         deleteObject,
         reorderObject,
         reorderObjects,
+        updateSlideBackground,
+        updateAllSlidesBackground,
+        updateCanvasSize,
       }}
     >
       {children}

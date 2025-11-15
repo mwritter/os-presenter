@@ -60,10 +60,26 @@ export const Slide = ({
     height: `${canvasSize.height}px`,
     transform: `translate(-50%, -50%) scale(${scale})`,
     transformOrigin: "center center",
-    overflow: "hidden",
+    overflow: isEditable ? "visible" : "hidden", // Allow overflow in edit mode
     willChange: "transform",
     backfaceVisibility: "hidden",
     opacity: isReady ? 1 : 0,
+  };
+
+  // Mask overlay style - shows grayed area outside the slide bounds in edit mode
+  const maskOverlayStyle: CSSProperties = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: `${canvasSize.width}px`,
+    height: `${canvasSize.height}px`,
+    transform: `translate(-50%, -50%) scale(${scale})`,
+    transformOrigin: "center center",
+    pointerEvents: "none",
+    zIndex: 20,
+    boxShadow: `0 0 0 9999px rgba(0, 0, 0, 0.4)`, // Gray overlay outside bounds
+    opacity: isReady ? 1 : 0,
+    transition: "opacity 200ms ease-in",
   };
 
   const Comp = as === "button" ? "button" : "div";
@@ -98,6 +114,8 @@ export const Slide = ({
           )}
         </div>
       </Comp>
+      {/* Mask overlay to gray out areas outside the slide in edit mode */}
+      {isEditable && <div style={maskOverlayStyle} />}
     </div>
   );
 };

@@ -3,16 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Minus, Plus } from "lucide-react";
-import { useState } from "react";
 
-export const TextStroke = () => {
-  const [hasStroke, setHasStroke] = useState(false);
+export const TextStroke = ({
+  strokeColor,
+  strokeWidth,
+  onChange,
+}: {
+  strokeColor?: string;
+  strokeWidth?: number;
+  onChange: (update: { strokeColor?: string; strokeWidth?: number }) => void;
+}) => {
+  const hasStroke = !!(strokeColor && strokeWidth);
+
   const handleAddStroke = () => {
-    setHasStroke(true);
+    onChange({ strokeColor: "#000000", strokeWidth: 1 });
   };
 
   const handleRemoveStroke = () => {
-    setHasStroke(false);
+    onChange({ strokeColor: undefined, strokeWidth: undefined });
   };
 
   return (
@@ -29,21 +37,36 @@ export const TextStroke = () => {
           </Button>
         )}
       </div>
-      {hasStroke && <TextStrokeItem />}
+      {hasStroke && (
+        <TextStrokeItem
+          strokeColor={strokeColor!}
+          strokeWidth={strokeWidth!}
+          onChange={onChange}
+        />
+      )}
     </div>
   );
 };
 
-const TextStrokeItem = () => {
-  const [width, setWidth] = useState(0);
+const TextStrokeItem = ({
+  strokeColor,
+  strokeWidth,
+  onChange,
+}: {
+  strokeColor: string;
+  strokeWidth: number;
+  onChange: (update: { strokeColor?: string; strokeWidth?: number }) => void;
+}) => {
   return (
     <div className="flex flex-col gap-3 pl-2">
-      {/* TODO: new color picker component that shows the color as a swatch and gives an editable hex color input */}
       <div className="flex items-center justify-between gap-2">
         <Label className="text-xs!" htmlFor="text-stroke-color">
           Color
         </Label>
-        <ColorPicker />
+        <ColorPicker
+          value={strokeColor}
+          onChange={(color) => onChange({ strokeColor: color })}
+        />
       </div>
       <div className="flex items-center justify-between gap-2">
         <Label className="text-xs! flex-1" htmlFor="text-stroke-width">
@@ -53,8 +76,8 @@ const TextStrokeItem = () => {
           className="text-xs! h-min w-[10ch]"
           min={0}
           type="number"
-          value={width}
-          onChange={(e) => setWidth(Number(e.target.value))}
+          value={strokeWidth}
+          onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
         />
       </div>
     </div>
