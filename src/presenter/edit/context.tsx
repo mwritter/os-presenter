@@ -151,8 +151,6 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       zIndex: (selectedSlide?.objects?.length || 0) + 1,
       shapeType,
       fillColor: "#3b82f6",
-      strokeColor: "#1e40af",
-      strokeWidth: 2,
     };
 
     updateSlideObjects((objects) => [...objects, newObject]);
@@ -275,9 +273,32 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateTextContent = (objectId: string, content: string) => {
     updateSlideObjects((objects) =>
-      objects.map((obj) =>
-        obj.id === objectId ? ({ ...obj, content } as SlideObject) : obj
-      )
+      objects.map((obj) => {
+        if (obj.id !== objectId) return obj;
+
+        // If this is the first time adding text content to a shape/image/video object,
+        // add default text styling properties
+        const needsDefaultTextStyles =
+          obj.type !== "text" &&
+          !("fontSize" in obj) &&
+          !("color" in obj) &&
+          !("fontFamily" in obj);
+
+        if (needsDefaultTextStyles) {
+          // Apply default text styles from createDefaultTextObject
+          return {
+            ...obj,
+            content,
+            fontSize: 48,
+            color: "#FFFFFF",
+            alignment: "center" as const,
+            fontFamily: "Arial",
+            fontStyle: "normal" as const,
+          } as SlideObject;
+        }
+
+        return { ...obj, content } as SlideObject;
+      })
     );
   };
 

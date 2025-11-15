@@ -21,6 +21,10 @@ import {
 // tauri-plugin-system-fonts looks promising https://github.com/ayangweb/tauri-plugin-system-fonts
 const fontFamilies = [
   {
+    value: "Arial",
+    label: "Arial",
+  },
+  {
     value: "sans-serif",
     label: "Sans Serif",
   },
@@ -51,6 +55,11 @@ export function TextFontFamilyCombobox({
 }) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(externalValue || "");
+
+  // Sync local state with external value
+  React.useEffect(() => {
+    setValue(externalValue || "");
+  }, [externalValue]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

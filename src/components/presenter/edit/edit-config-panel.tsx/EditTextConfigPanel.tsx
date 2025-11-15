@@ -31,11 +31,15 @@ export const EditTextConfigPanel = () => {
   // Get text properties with defaults for shape/image/video overlays
   const textProps = {
     fontFamily:
-      "fontFamily" in selectedObject ? selectedObject.fontFamily : undefined,
+      ("fontFamily" in selectedObject
+        ? selectedObject.fontFamily
+        : undefined) || "Arial",
     fontStyle:
-      "fontStyle" in selectedObject ? selectedObject.fontStyle : undefined,
+      ("fontStyle" in selectedObject ? selectedObject.fontStyle : undefined) ||
+      "normal",
     fontSize:
-      "fontSize" in selectedObject ? selectedObject.fontSize : undefined,
+      ("fontSize" in selectedObject ? selectedObject.fontSize : undefined) ||
+      48,
     textTransform:
       "textTransform" in selectedObject
         ? selectedObject.textTransform
@@ -71,7 +75,7 @@ export const EditTextConfigPanel = () => {
               onChange={(fontStyle) => handleUpdate({ fontStyle })}
             />
             <TextFontSizeInput
-              value={textProps.fontSize || 0}
+              value={textProps.fontSize}
               onChange={(fontSize) => handleUpdate({ fontSize })}
             />
           </div>

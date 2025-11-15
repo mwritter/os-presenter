@@ -17,7 +17,7 @@ export const ShapeStroke = ({
   const hasStroke = !!(strokeColor && strokeWidth);
 
   const handleAddStroke = () => {
-    onChange({ strokeColor: "#000000", strokeWidth: 2 });
+    onChange({ strokeColor: "#000000", strokeWidth: 1 });
   };
 
   const handleRemoveStroke = () => {
@@ -79,14 +79,13 @@ const ShapeStrokeItem = ({
           className="text-xs! h-min w-[10ch]"
           min={0}
           type="number"
-          step="0.1"
+          step="1"
           value={strokeWidth}
-          onChange={(e) =>
-            onChange({
-              strokeColor: strokeColor,
-              strokeWidth: Number(e.target.value),
-            })
-          }
+          onChange={(e) => {
+            const number = Number(e.target.value);
+            if (number < 1) return;
+            onChange({ strokeColor: strokeColor, strokeWidth: number });
+          }}
         />
       </div>
     </div>

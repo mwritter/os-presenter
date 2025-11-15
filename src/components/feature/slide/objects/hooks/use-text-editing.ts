@@ -137,7 +137,7 @@ export const useTextEditing = ({
     background: "transparent",
     border: "none",
     outline: "none",
-    fontSize: `${object.fontSize}px`,
+    fontSize: `${object.fontSize || 48}px`,
     color: object.color || "#FFFFFF",
     textAlign: object.alignment || "center",
     fontFamily: object.fontFamily || "Arial",

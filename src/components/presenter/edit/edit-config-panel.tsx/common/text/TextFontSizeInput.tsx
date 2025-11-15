@@ -13,8 +13,12 @@ export const TextFontSizeInput = ({
         className="text-xs! h-min"
         type="number"
         min={1}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
+        value={Math.max(1, value)}
+        onChange={(e) => {
+          const number = Number(e.target.value);
+          if (number < 1) return;
+          onChange(number);
+        }}
         onBlur={() => onChange(Math.max(1, value))}
       />
     </div>
