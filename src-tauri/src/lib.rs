@@ -581,87 +581,11 @@ fn get_font_variants(family_name: String) -> Result<Vec<FontVariantInfo>, String
     Ok(variants)
 }
 
-#[tauri::command]
-fn get_detailed_fonts() -> Result<Vec<FontVariantInfo>, String> {
-    use font_kit::source::SystemSource;
-    use std::collections::HashSet;
-    
-    let source = SystemSource::new();
-    let mut fonts_info = Vec::new();
-    let mut seen = HashSet::new();
-
-    // Get all font families
-    let families = source
-        .all_families()
-        .map_err(|e| format!("Failed to get font families: {}", e))?;
-
-    for family_name in families {
-        // Get all fonts in this family
-        if let Ok(handles) = source.select_family_by_name(&family_name) {
-            for handle in handles.fonts() {
-                // Try to load font - skip if it fails rather than erroring out
-                match handle.load() {
-                    Ok(font) => {
-                        let postscript_name = font.postscript_name();
-                        let full_name = font.full_name();
-                        
-                        // Extract style name from full name
-                        let style = if full_name.starts_with(&family_name) {
-                            let style_part = full_name
-                                .strip_prefix(&family_name)
-                                .unwrap_or("")
-                                .trim_start_matches(&['-', ' '][..])
-                                .trim();
-                            
-                            if style_part.is_empty() {
-                                "Regular".to_string()
-                            } else {
-                                style_part.to_string()
-                            }
-                        } else {
-                            postscript_name
-                                .as_ref()
-                                .and_then(|ps| {
-                                    ps.strip_prefix(&family_name.replace(" ", ""))
-                                        .map(|s| s.trim_start_matches('-').to_string())
-                                })
-                                .unwrap_or_else(|| "Regular".to_string())
-                        };
-
-                        // Create unique key to avoid duplicates
-                        let key = format!("{}-{}", family_name, style);
-                        if seen.insert(key) {
-                            fonts_info.push(FontVariantInfo {
-                                family: family_name.clone(),
-                                style,
-                                full_name: full_name.clone(),
-                                postscript_name,
-                            });
-                        }
-                    }
-                    Err(_) => {
-                        // Skip fonts that fail to load
-                        continue;
-                    }
-                }
-            }
-        }
-    }
-
-    // Sort by family, then by style
-    fonts_info.sort_by(|a, b| {
-        a.family.cmp(&b.family).then(a.style.cmp(&b.style))
-    });
-
-    Ok(fonts_info)
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_system_fonts::init())
         .invoke_handler(tauri::generate_handler![
             greet,
             initialize_storage,
@@ -677,7 +601,6 @@ pub fn run() {
             get_media_file_path,
             get_font_families,
             get_font_variants,
-            get_detailed_fonts,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

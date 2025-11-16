@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 
 export const EditTextConfigPanel = () => {
   const { selectedSlide, selectedObjectId, updateObject } = useEditContext();
-  const { fonts } = useSystemFonts();
+  const { fontNames } = useSystemFonts();
   const [, forceUpdate] = useState({});
 
   // Find the selected object - works with text objects and objects with text overlay
@@ -36,13 +36,11 @@ export const EditTextConfigPanel = () => {
       : undefined) || "Regular";
 
   // Extract base font family from full font name
-  // If the font family is in our fonts list, it's already a base family
+  // If the font family is in our font names list, it's already a base family
   // Otherwise, find which base family the full name starts with (e.g., "American Typewriter Bold" → "American Typewriter")
-  const baseFontFamily = fonts.has(fontFamily)
+  const baseFontFamily = fontNames.includes(fontFamily)
     ? fontFamily
-    : Array.from(fonts.keys()).find((family) =>
-        fontFamily.startsWith(family)
-      ) || fontFamily;
+    : fontNames.find((family) => fontFamily.startsWith(family)) || fontFamily;
 
   // Load font variants on demand when base font family changes
   useEffect(() => {
@@ -94,7 +92,7 @@ export const EditTextConfigPanel = () => {
 
   // Get available variants for the selected font
   const availableVariants =
-    fonts.size > 0 ? getAvailableVariants(baseFontFamily) : undefined;
+    fontNames.length > 0 ? getAvailableVariants(baseFontFamily) : undefined;
 
   return (
     <div className="flex flex-col gap-3">

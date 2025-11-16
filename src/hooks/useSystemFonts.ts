@@ -11,44 +11,24 @@ interface FontVariantInfo {
 // Cache for font variants per family
 const variantsCache = new Map<string, FontVariantInfo[]>();
 
-export interface FontVariant {
-  weight: number;
-  style: "normal" | "italic" | "oblique";
-  fontName: string;
-  path: string;
-}
-
-export interface FontFamily {
-  name: string;
-  variants: FontVariant[];
-  availableStyles: Set<"normal" | "italic" | "oblique">;
-  availableWeights: Set<number>;
-}
+// Cached font family names
+let cachedFontNames: string[] | null = null;
+let loadingPromise: Promise<void> | null = null;
 
 export interface SystemFontsData {
-  fonts: Map<string, FontFamily>;
   fontNames: string[];
   isLoading: boolean;
   error: Error | null;
 }
 
-// Cached font data to avoid reloading
-let cachedFonts: Map<string, FontFamily> | null = null;
-let cachedFontNames: string[] | null = null;
-let loadingPromise: Promise<void> | null = null;
-
 export function useSystemFonts(): SystemFontsData {
-  const [fonts, setFonts] = useState<Map<string, FontFamily>>(
-    cachedFonts || new Map()
-  );
   const [fontNames, setFontNames] = useState<string[]>(cachedFontNames || []);
-  const [isLoading, setIsLoading] = useState(!cachedFonts);
+  const [isLoading, setIsLoading] = useState(!cachedFontNames);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     // If we already have cached data, use it
-    if (cachedFonts && cachedFontNames) {
-      setFonts(cachedFonts);
+    if (cachedFontNames) {
       setFontNames(cachedFontNames);
       setIsLoading(false);
       return;
@@ -58,8 +38,7 @@ export function useSystemFonts(): SystemFontsData {
     if (loadingPromise) {
       loadingPromise
         .then(() => {
-          if (cachedFonts && cachedFontNames) {
-            setFonts(cachedFonts);
+          if (cachedFontNames) {
             setFontNames(cachedFontNames);
           }
         })
@@ -82,22 +61,9 @@ export function useSystemFonts(): SystemFontsData {
           `Loaded ${families.length} font families in ${endTime - startTime}ms`
         );
 
-        // Create empty font map - variants will be loaded on demand
-        const fontMap = new Map<string, FontFamily>();
-        families.forEach((family) => {
-          fontMap.set(family, {
-            name: family,
-            variants: [],
-            availableStyles: new Set(),
-            availableWeights: new Set(),
-          });
-        });
-
         // Cache the results
-        cachedFonts = fontMap;
         cachedFontNames = families;
 
-        setFonts(fontMap);
         setFontNames(families);
 
         console.log("Font families loaded and cached");
@@ -113,21 +79,7 @@ export function useSystemFonts(): SystemFontsData {
     loadingPromise = loadSystemFonts();
   }, []);
 
-  return { fonts, fontNames, isLoading, error };
-}
-
-/**
- * Get available styles for a specific font family
- */
-export function getAvailableStyles(
-  fonts: Map<string, FontFamily>,
-  fontFamily: string
-): Array<"normal" | "italic" | "oblique"> {
-  const family = fonts.get(fontFamily);
-  if (!family) {
-    return ["normal", "italic", "oblique"]; // fallback to all
-  }
-  return Array.from(family.availableStyles).sort();
+  return { fontNames, isLoading, error };
 }
 
 /**
@@ -178,15 +130,12 @@ export function getAvailableVariants(fontFamily: string): FontVariantOption[] {
 }
 
 /**
- * Get available weights for a specific font family
+ * Get a fallback font by name (for fonts not yet loaded)
  */
-export function getAvailableWeights(
-  fonts: Map<string, FontFamily>,
-  fontFamily: string
-): number[] {
-  const family = fonts.get(fontFamily);
-  if (!family) {
-    return [400, 700]; // fallback to normal and bold
-  }
-  return Array.from(family.availableWeights).sort((a, b) => a - b);
+export function getFontByName(
+  fontNames: string[],
+  name: string
+): string | null {
+  const font = fontNames.find((f) => f.toLowerCase() === name.toLowerCase());
+  return font || null;
 }
