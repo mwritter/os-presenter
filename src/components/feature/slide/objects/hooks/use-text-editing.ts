@@ -8,7 +8,8 @@ type TextableObject = {
   color?: string;
   alignment?: "left" | "center" | "right";
   fontFamily?: string;
-  bold?: boolean;
+  fontWeight?: number;
+  bold?: boolean; // Deprecated: for backward compatibility
   fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
   textStrokeColor?: string;
@@ -140,9 +141,8 @@ export const useTextEditing = ({
     fontSize: `${object.fontSize || 48}px`,
     color: object.color || "#FFFFFF",
     textAlign: object.alignment || "center",
+    // fontFamily now contains the full font name (e.g., "American Typewriter Bold")
     fontFamily: object.fontFamily || "Arial",
-    fontWeight: object.bold ? "bold" : "normal",
-    fontStyle: object.fontStyle || "normal",
     textDecoration: object.underline ? "underline" : "none",
     textTransform: object.textTransform || "none",
     WebkitTextStroke:

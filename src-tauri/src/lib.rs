@@ -65,8 +65,10 @@ pub struct TextObject {
     pub alignment: String, // "left" | "center" | "right"
     #[serde(rename = "fontFamily", skip_serializing_if = "Option::is_none")]
     pub font_family: Option<String>,
+    #[serde(rename = "fontWeight", skip_serializing_if = "Option::is_none")]
+    pub font_weight: Option<i32>, // 100-900
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bold: Option<bool>,
+    pub bold: Option<bool>, // Deprecated: for backward compatibility
     #[serde(rename = "fontStyle", skip_serializing_if = "Option::is_none")]
     pub font_style: Option<String>, // "normal" | "italic" | "oblique"
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -121,8 +123,10 @@ pub struct ShapeObject {
     pub alignment: Option<String>,
     #[serde(rename = "fontFamily", skip_serializing_if = "Option::is_none")]
     pub font_family: Option<String>,
+    #[serde(rename = "fontWeight", skip_serializing_if = "Option::is_none")]
+    pub font_weight: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bold: Option<bool>,
+    pub bold: Option<bool>, // Deprecated
     #[serde(rename = "fontStyle", skip_serializing_if = "Option::is_none")]
     pub font_style: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -169,8 +173,10 @@ pub struct ImageObject {
     pub alignment: Option<String>,
     #[serde(rename = "fontFamily", skip_serializing_if = "Option::is_none")]
     pub font_family: Option<String>,
+    #[serde(rename = "fontWeight", skip_serializing_if = "Option::is_none")]
+    pub font_weight: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bold: Option<bool>,
+    pub bold: Option<bool>, // Deprecated
     #[serde(rename = "fontStyle", skip_serializing_if = "Option::is_none")]
     pub font_style: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -221,8 +227,10 @@ pub struct VideoObject {
     pub alignment: Option<String>,
     #[serde(rename = "fontFamily", skip_serializing_if = "Option::is_none")]
     pub font_family: Option<String>,
+    #[serde(rename = "fontWeight", skip_serializing_if = "Option::is_none")]
+    pub font_weight: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bold: Option<bool>,
+    pub bold: Option<bool>, // Deprecated
     #[serde(rename = "fontStyle", skip_serializing_if = "Option::is_none")]
     pub font_style: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -489,11 +497,171 @@ fn get_media_file_path(app: AppHandle, file_name: String) -> Result<String, Stri
         .map(|s| s.to_string())
 }
 
+// Custom font information structure
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct FontVariantInfo {
+    pub family: String, // Base family name (e.g., "American Typewriter")
+    pub style: String, // The style name like "Bold", "Condensed Bold", etc.
+    pub full_name: String, // Full font name to use in CSS (e.g., "American Typewriter Bold")
+    pub postscript_name: Option<String>,
+}
+
+// Get just the font family names (fast)
+#[tauri::command]
+fn get_font_families() -> Result<Vec<String>, String> {
+    use font_kit::source::SystemSource;
+    
+    let source = SystemSource::new();
+    let mut families = source
+        .all_families()
+        .map_err(|e| format!("Failed to get font families: {}", e))?;
+    
+    families.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+    Ok(families)
+}
+
+// Get variants for a specific font family (on-demand)
+#[tauri::command]
+fn get_font_variants(family_name: String) -> Result<Vec<FontVariantInfo>, String> {
+    use font_kit::source::SystemSource;
+    use std::collections::HashMap;
+    
+    let source = SystemSource::new();
+    let mut variants_map = HashMap::new();
+    
+    // Get all fonts in this family
+    if let Ok(handles) = source.select_family_by_name(&family_name) {
+        for handle in handles.fonts() {
+            match handle.load() {
+                Ok(font) => {
+                    let postscript_name = font.postscript_name();
+                    let full_name = font.full_name();
+                    
+                    // Extract style name from full name
+                    let style = if full_name.starts_with(&family_name) {
+                        let style_part = full_name
+                            .strip_prefix(&family_name)
+                            .unwrap_or("")
+                            .trim_start_matches(&['-', ' '][..])
+                            .trim();
+                        
+                        if style_part.is_empty() {
+                            "Regular".to_string()
+                        } else {
+                            style_part.to_string()
+                        }
+                    } else {
+                        postscript_name
+                            .as_ref()
+                            .and_then(|ps| {
+                                ps.strip_prefix(&family_name.replace(" ", ""))
+                                    .map(|s| s.trim_start_matches('-').to_string())
+                            })
+                            .unwrap_or_else(|| "Regular".to_string())
+                    };
+
+                    // Use style name as the key for deduplication
+                    if !variants_map.contains_key(&style) {
+                        variants_map.insert(style.clone(), FontVariantInfo {
+                            family: family_name.clone(),
+                            style,
+                            full_name: full_name.clone(),
+                            postscript_name,
+                        });
+                    }
+                }
+                Err(_) => continue,
+            }
+        }
+    }
+    
+    // Convert to vec and sort by style name
+    let mut variants: Vec<FontVariantInfo> = variants_map.into_values().collect();
+    variants.sort_by(|a, b| a.style.cmp(&b.style));
+    Ok(variants)
+}
+
+#[tauri::command]
+fn get_detailed_fonts() -> Result<Vec<FontVariantInfo>, String> {
+    use font_kit::source::SystemSource;
+    use std::collections::HashSet;
+    
+    let source = SystemSource::new();
+    let mut fonts_info = Vec::new();
+    let mut seen = HashSet::new();
+
+    // Get all font families
+    let families = source
+        .all_families()
+        .map_err(|e| format!("Failed to get font families: {}", e))?;
+
+    for family_name in families {
+        // Get all fonts in this family
+        if let Ok(handles) = source.select_family_by_name(&family_name) {
+            for handle in handles.fonts() {
+                // Try to load font - skip if it fails rather than erroring out
+                match handle.load() {
+                    Ok(font) => {
+                        let postscript_name = font.postscript_name();
+                        let full_name = font.full_name();
+                        
+                        // Extract style name from full name
+                        let style = if full_name.starts_with(&family_name) {
+                            let style_part = full_name
+                                .strip_prefix(&family_name)
+                                .unwrap_or("")
+                                .trim_start_matches(&['-', ' '][..])
+                                .trim();
+                            
+                            if style_part.is_empty() {
+                                "Regular".to_string()
+                            } else {
+                                style_part.to_string()
+                            }
+                        } else {
+                            postscript_name
+                                .as_ref()
+                                .and_then(|ps| {
+                                    ps.strip_prefix(&family_name.replace(" ", ""))
+                                        .map(|s| s.trim_start_matches('-').to_string())
+                                })
+                                .unwrap_or_else(|| "Regular".to_string())
+                        };
+
+                        // Create unique key to avoid duplicates
+                        let key = format!("{}-{}", family_name, style);
+                        if seen.insert(key) {
+                            fonts_info.push(FontVariantInfo {
+                                family: family_name.clone(),
+                                style,
+                                full_name: full_name.clone(),
+                                postscript_name,
+                            });
+                        }
+                    }
+                    Err(_) => {
+                        // Skip fonts that fail to load
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    // Sort by family, then by style
+    fonts_info.sort_by(|a, b| {
+        a.family.cmp(&b.family).then(a.style.cmp(&b.style))
+    });
+
+    Ok(fonts_info)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_system_fonts::init())
         .invoke_handler(tauri::generate_handler![
             greet,
             initialize_storage,
@@ -507,6 +675,9 @@ pub fn run() {
             import_media_file,
             delete_media_item,
             get_media_file_path,
+            get_font_families,
+            get_font_variants,
+            get_detailed_fonts,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

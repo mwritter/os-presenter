@@ -10,9 +10,9 @@ export const TextCapitalizationSelect = ({
   value,
   onChange,
 }: {
-  value?: "uppercase" | "lowercase" | "capitalize";
+  value?: "none" | "uppercase" | "lowercase" | "capitalize";
   onChange: (
-    value: "uppercase" | "lowercase" | "capitalize" | undefined
+    value: "none" | "uppercase" | "lowercase" | "capitalize" | undefined
   ) => void;
 }) => {
   return (
@@ -21,6 +21,7 @@ export const TextCapitalizationSelect = ({
         <SelectValue placeholder="Select a capitalization" />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value="none">None</SelectItem>
         <SelectItem value="uppercase">Uppercase</SelectItem>
         <SelectItem value="lowercase">Lowercase</SelectItem>
         <SelectItem value="capitalize">Capitalize</SelectItem>

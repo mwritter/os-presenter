@@ -101,6 +101,11 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slideGroup, selectedSlide?.id]);
 
+  useEffect(() => {
+    // when the slide changes, unselect object
+    setSelectedObjectId(null);
+  }, [selectedSlide?.id]);
+
   const updateSlideObjects = (
     updater: (objects: SlideObject[]) => SlideObject[]
   ) => {

@@ -1,6 +1,5 @@
-import * as React from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,35 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-// TODO: figure out how to get system fonts with
-// tauri-plugin-system-fonts looks promising https://github.com/ayangweb/tauri-plugin-system-fonts
-const fontFamilies = [
-  {
-    value: "Arial",
-    label: "Arial",
-  },
-  {
-    value: "sans-serif",
-    label: "Sans Serif",
-  },
-  {
-    value: "serif",
-    label: "Serif",
-  },
-  {
-    value: "monospace",
-    label: "Monospace",
-  },
-  {
-    value: "display",
-    label: "Display",
-  },
-  {
-    value: "handwriting",
-    label: "Handwriting",
-  },
-];
+import { useSystemFonts } from "@/hooks/useSystemFonts";
 
 export function TextFontFamilyCombobox({
   value: externalValue,
@@ -53,11 +24,17 @@ export function TextFontFamilyCombobox({
   value?: string;
   onChange: (value: string) => void;
 }) {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState(externalValue || "");
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(externalValue || "");
+  const { fontNames, isLoading } = useSystemFonts();
+
+  const fontFamilies = fontNames.map((name) => ({
+    value: name,
+    label: name,
+  }));
 
   // Sync local state with external value
-  React.useEffect(() => {
+  useEffect(() => {
     setValue(externalValue || "");
   }, [externalValue]);
 
@@ -70,11 +47,14 @@ export function TextFontFamilyCombobox({
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between text-xs! h-min! py-1"
+          disabled={isLoading}
         >
-          {value
-            ? fontFamilies.find((fontFamily) => fontFamily.value === value)
-                ?.label
-            : "Select font family..."}
+          {isLoading
+            ? "Loading fonts..."
+            : value
+              ? fontFamilies.find((fontFamily) => fontFamily.value === value)
+                  ?.label
+              : "Select font family..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>

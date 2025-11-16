@@ -30,11 +30,14 @@ export type TextObject = BaseSlideObject & {
   fontSize: number;
   color: string;
   alignment: "left" | "center" | "right";
-  fontFamily?: string;
+  fontFamily?: string; // Full font name to use in CSS (e.g., "American Typewriter Bold")
+  fontVariant?: string; // Style name for UI (e.g., "Bold", "Condensed Bold")
+  // Deprecated fields kept for backward compatibility
+  fontWeight?: number;
   bold?: boolean;
   fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
-  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   // Text content stroke (outline around letters)
   textStrokeColor?: string;
   textStrokeWidth?: number;
@@ -56,7 +59,10 @@ export type ShapeObject = BaseSlideObject & {
   fontSize?: number;
   color?: string;
   alignment?: "left" | "center" | "right";
-  fontFamily?: string;
+  fontFamily?: string; // Full font name for CSS
+  fontVariant?: string; // Style name for UI
+  // Deprecated fields
+  fontWeight?: number;
   bold?: boolean;
   fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
@@ -78,7 +84,10 @@ export type ImageObject = BaseSlideObject & {
   fontSize?: number;
   color?: string;
   alignment?: "left" | "center" | "right";
-  fontFamily?: string;
+  fontFamily?: string; // Full font name for CSS
+  fontVariant?: string; // Style name for UI
+  // Deprecated fields
+  fontWeight?: number;
   bold?: boolean;
   fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
@@ -102,7 +111,10 @@ export type VideoObject = BaseSlideObject & {
   fontSize?: number;
   color?: string;
   alignment?: "left" | "center" | "right";
-  fontFamily?: string;
+  fontFamily?: string; // Full font name for CSS
+  fontVariant?: string; // Style name for UI
+  // Deprecated fields
+  fontWeight?: number;
   bold?: boolean;
   fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;

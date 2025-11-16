@@ -7,14 +7,6 @@ import { SlideGroup } from "../types";
 import { Slide } from "@/components/feature/slide/Slide";
 import { useEditContext } from "@/presenter/edit/context";
 import { cn } from "@/lib/utils";
-import {
-  Shapes,
-  Image as ImageIcon,
-  Video as VideoIcon,
-  Trash2,
-  GripVertical,
-} from "lucide-react";
-import { useState } from "react";
 import { EditSlideObjectPanel } from "./edit-object-panel/EditViewObjectPanel";
 
 export const EditViewSidebar = ({

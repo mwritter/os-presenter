@@ -5,45 +5,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-// TODO: figure out how to get font style with tauri
-const fontStyles = [
-  {
-    value: "normal",
-    label: "Normal",
-  },
-  {
-    value: "italic",
-    label: "Italic",
-  },
-  {
-    value: "oblique",
-    label: "Oblique",
-  },
-];
+import { FontVariantOption } from "@/hooks/useSystemFonts";
 
 export const TextFontStyle = ({
-  value,
+  fontFamily,
+  selectedStyle,
   onChange,
+  availableVariants,
 }: {
-  value?: string;
-  onChange: (value: "normal" | "italic" | "oblique") => void;
+  fontFamily: string;
+  selectedStyle?: string; // The currently selected style name (e.g., "Bold", "Condensed Bold")
+  onChange: (fullFontName: string) => void;
+  availableVariants?: FontVariantOption[];
 }) => {
-  const fontStyle = value || "normal";
+  const currentStyle = selectedStyle || "Regular";
+
+  // Use provided variants or fallback to default options
+  const variants: FontVariantOption[] = availableVariants || [
+    { label: "Regular", value: "Regular", fullName: "Regular" },
+  ];
+
+  // Find current variant by style name
+  const currentVariant = variants.find((v) => v.value === currentStyle);
+  const displayValue = currentVariant?.value || variants[0]?.value || "Regular";
+
+  const handleChange = (styleName: string) => {
+    // Find the variant by its style name
+    const selectedVariant = variants.find((v) => v.value === styleName);
+
+    if (selectedVariant) {
+      // Return the full font name to use in CSS
+      onChange(selectedVariant.fullName);
+    }
+  };
+
   return (
-    <Select
-      value={fontStyle}
-      onValueChange={onChange as (value: string) => void}
-    >
+    <Select value={displayValue} onValueChange={handleChange}>
       <SelectTrigger className="w-full text-xs! h-min! py-1">
-        <div style={{ fontStyle }}>
-          <SelectValue placeholder="Select a font style" />
+        <div style={{ fontFamily: `${fontFamily} ${currentVariant?.value}` }}>
+          <SelectValue placeholder="Select variant" />
         </div>
       </SelectTrigger>
       <SelectContent>
-        {fontStyles.map((fontStyle) => (
-          <SelectItem key={fontStyle.value} value={fontStyle.value}>
-            {fontStyle.label}
+        {variants.map((variant) => (
+          <SelectItem
+            style={{ fontFamily: `${fontFamily} ${variant.value}` }}
+            key={variant.value}
+            value={variant.value}
+          >
+            {variant.label}
           </SelectItem>
         ))}
       </SelectContent>

@@ -2,6 +2,9 @@ import { ShapeObject as ShapeObjectType } from "../types";
 import { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { useTextEditing } from "./hooks/use-text-editing";
+import { Triangle } from "./shapes/Triangle";
+import { Circle } from "./shapes/Circle";
+import { Square } from "./shapes/Square";
 
 export type ShapeObjectProps = {
   object: ShapeObjectType;
@@ -42,20 +45,6 @@ export const ShapeObject = ({
     boxSizing: "border-box",
   };
 
-  const shapeStyle: CSSProperties = {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: object.fillColor,
-    border:
-      object.strokeColor && object.strokeWidth
-        ? `${object.strokeWidth}px solid ${object.strokeColor}`
-        : "none",
-    ...(object.shapeType === "circle" && { borderRadius: "50%" }),
-  };
-
   return (
     <div
       style={containerStyle}
@@ -64,31 +53,26 @@ export const ShapeObject = ({
       onDoubleClick={handleDoubleClick}
       onMouseDown={handleMouseDown}
     >
-      {object.shapeType === "triangle" ? (
-        // Always use SVG for triangles (supports both fill and stroke)
-        <svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 100 100"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            overflow: "visible",
-          }}
-          preserveAspectRatio="none"
-        >
-          <polygon
-            points="50,0 100,100 0,100"
-            fill={object.fillColor}
-            stroke={object.strokeColor || "none"}
-            strokeWidth={object.strokeWidth || 0}
-            strokeLinejoin="miter"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-      ) : (
-        <div style={shapeStyle}></div>
+      {object.shapeType === "triangle" && (
+        <Triangle
+          fillColor={object.fillColor}
+          strokeColor={object.strokeColor}
+          strokeWidth={object.strokeWidth}
+        />
+      )}
+      {object.shapeType === "circle" && (
+        <Circle
+          fillColor={object.fillColor}
+          strokeColor={object.strokeColor}
+          strokeWidth={object.strokeWidth}
+        />
+      )}
+      {object.shapeType === "rectangle" && (
+        <Square
+          fillColor={object.fillColor}
+          strokeColor={object.strokeColor}
+          strokeWidth={object.strokeWidth}
+        />
       )}
       {(textContent || isEditing) && (
         <div style={textOverlayStyle} className={cn({ editing: isEditing })}>
