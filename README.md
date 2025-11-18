@@ -56,7 +56,7 @@ Before building, ensure you have the following installed:
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone git@github.com:mwritter/os-presenter.git
 cd os-presenter
 ```
 
