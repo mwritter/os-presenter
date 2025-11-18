@@ -13,6 +13,8 @@ export const getObjectStyles = ({
 }: {
   object: ShapeObject;
 }): CSSProperties => {
+  // Apply shadow to the SVG shape itself (not the container bounds)
+  // This ensures shadow follows the shape contour (circle, triangle, etc.)
   return {
     filter: getDropShadowFilter(object.effect?.shadow),
   };

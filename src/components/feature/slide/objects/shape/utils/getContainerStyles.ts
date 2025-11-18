@@ -18,10 +18,12 @@ export const getContainerStyles = ({
     top: `${object.position.y}px`,
     width: `${object.size.width}px`,
     height: `${object.size.height}px`,
-    transform: `scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`,
+    transform: `scale(${scaleX}, ${scaleY}) rotate(${rotation}deg) translateZ(0)`,
     zIndex: object.zIndex,
     cursor: isEditable ? "move" : "default",
     userSelect: "none",
     boxSizing: "border-box",
+    // Optimize rendering to prevent shadow artifacts during movement
+    willChange: "transform",
   };
 };

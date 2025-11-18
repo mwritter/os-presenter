@@ -8,9 +8,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const host = process.env.TAURI_DEV_HOST;
 
+const ReactCompilerConfig = {
+  /* ... */
+};
+
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-  plugins: [reactRouter(), tailwindcss()],
+  plugins: [
+    reactRouter({
+      babel: {
+        plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
+      },
+    }),
+    tailwindcss(),
+  ],
 
   resolve: {
     alias: {
