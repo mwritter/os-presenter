@@ -7,6 +7,7 @@ import { ShapeFill } from "./common/shape/ShapeFill";
 import { ShapeStroke } from "./common/shape/ShapeStroke";
 import { useEditContext } from "@/presenter/edit/context";
 import { SlideObject, ShapeObject } from "@/components/feature/slide/types";
+import { Effect as ShapeEffect } from "./common/effects/Effect";
 
 export const EditShapeConfigPanel = () => {
   const { selectedSlide, selectedObjectId, updateObject, canvasSize } =
@@ -152,6 +153,10 @@ export const EditShapeConfigPanel = () => {
         onChange={handleStrokeChange}
       />
       <hr />
+      <ShapeEffect
+        value={"effect" in selectedObject ? selectedObject.effect : undefined}
+        onChange={(effect) => updateObject(selectedObject.id, { effect })}
+      />
     </div>
   );
 };

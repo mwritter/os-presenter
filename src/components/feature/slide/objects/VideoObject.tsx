@@ -1,7 +1,13 @@
-import { VideoObject as VideoObjectType } from "../types";
+import { VideoObject as VideoObjectType, ShadowEffect } from "../types";
 import { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { useTextEditing } from "./hooks/use-text-editing";
+
+// Helper function to convert ShadowEffect to CSS box-shadow
+const getShadowStyle = (shadow?: ShadowEffect): string => {
+  if (!shadow) return "none";
+  return `${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blurRadius}px ${shadow.spreadRadius}px ${shadow.color}`;
+};
 
 export type VideoObjectProps = {
   object: VideoObjectType;
@@ -46,6 +52,8 @@ export const VideoObject = ({
         ? `${object.borderWidth}px solid ${object.borderColor}`
         : "none",
     boxSizing: "border-box",
+    // Shadow effect
+    boxShadow: getShadowStyle(object.effect?.shadow),
   };
 
   const videoStyle: CSSProperties = {

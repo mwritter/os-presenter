@@ -50,6 +50,27 @@ pub struct TextAlignment {
     pub vertical: String,   // "top" | "center" | "bottom"
 }
 
+// Shadow effect type
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ShadowEffect {
+    pub color: String,
+    #[serde(rename = "offsetX")]
+    pub offset_x: f64,
+    #[serde(rename = "offsetY")]
+    pub offset_y: f64,
+    #[serde(rename = "blurRadius")]
+    pub blur_radius: f64,
+    #[serde(rename = "spreadRadius")]
+    pub spread_radius: f64,
+}
+
+// Effect container type
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Effect {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shadow: Option<ShadowEffect>,
+}
+
 // Text object with extended formatting
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TextObject {
@@ -94,6 +115,12 @@ pub struct TextObject {
     pub border_color: Option<String>,
     #[serde(rename = "borderWidth", skip_serializing_if = "Option::is_none")]
     pub border_width: Option<f64>,
+    // Effects (for container/bounds)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub effect: Option<Effect>,
+    // Text content shadow (text-shadow CSS)
+    #[serde(rename = "textShadow", skip_serializing_if = "Option::is_none")]
+    pub text_shadow: Option<ShadowEffect>,
 }
 
 // Shape object (rectangle, circle, triangle)
@@ -144,6 +171,12 @@ pub struct ShapeObject {
     pub text_stroke_color: Option<String>,
     #[serde(rename = "textStrokeWidth", skip_serializing_if = "Option::is_none")]
     pub text_stroke_width: Option<f64>,
+    // Effects (for shape itself)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub effect: Option<Effect>,
+    // Text overlay shadow (text-shadow CSS for overlay text)
+    #[serde(rename = "textShadow", skip_serializing_if = "Option::is_none")]
+    pub text_shadow: Option<ShadowEffect>,
 }
 
 // Image object
@@ -194,6 +227,12 @@ pub struct ImageObject {
     pub text_stroke_color: Option<String>,
     #[serde(rename = "textStrokeWidth", skip_serializing_if = "Option::is_none")]
     pub text_stroke_width: Option<f64>,
+    // Effects (for image bounds)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub effect: Option<Effect>,
+    // Text overlay shadow (text-shadow CSS for overlay text)
+    #[serde(rename = "textShadow", skip_serializing_if = "Option::is_none")]
+    pub text_shadow: Option<ShadowEffect>,
 }
 
 // Video object
@@ -248,6 +287,12 @@ pub struct VideoObject {
     pub text_stroke_color: Option<String>,
     #[serde(rename = "textStrokeWidth", skip_serializing_if = "Option::is_none")]
     pub text_stroke_width: Option<f64>,
+    // Effects (for video bounds)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub effect: Option<Effect>,
+    // Text overlay shadow (text-shadow CSS for overlay text)
+    #[serde(rename = "textShadow", skip_serializing_if = "Option::is_none")]
+    pub text_shadow: Option<ShadowEffect>,
 }
 
 // Union type for slide objects (using untagged enum)

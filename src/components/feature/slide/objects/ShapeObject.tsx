@@ -1,10 +1,17 @@
-import { ShapeObject as ShapeObjectType } from "../types";
+import { ShapeObject as ShapeObjectType, ShadowEffect } from "../types";
 import { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { useTextEditing } from "./hooks/use-text-editing";
 import { Triangle } from "./shapes/Triangle";
 import { Circle } from "./shapes/Circle";
 import { Square } from "./shapes/Square";
+
+// Helper function to convert ShadowEffect to CSS drop-shadow filter
+const getDropShadowFilter = (shadow?: ShadowEffect): string => {
+  if (!shadow) return "none";
+  // drop-shadow doesn't support spread radius, so we omit it
+  return `drop-shadow(${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blurRadius}px ${shadow.color})`;
+};
 
 export type ShapeObjectProps = {
   object: ShapeObjectType;
@@ -45,6 +52,11 @@ export const ShapeObject = ({
     boxSizing: "border-box",
   };
 
+  const shapeStyle: CSSProperties = {
+    // Apply drop-shadow filter to the shape
+    filter: getDropShadowFilter(object.effect?.shadow),
+  };
+
   return (
     <div
       style={containerStyle}
@@ -58,6 +70,7 @@ export const ShapeObject = ({
           fillColor={object.fillColor}
           strokeColor={object.strokeColor}
           strokeWidth={object.strokeWidth}
+          style={shapeStyle}
         />
       )}
       {object.shapeType === "circle" && (
@@ -65,6 +78,7 @@ export const ShapeObject = ({
           fillColor={object.fillColor}
           strokeColor={object.strokeColor}
           strokeWidth={object.strokeWidth}
+          style={shapeStyle}
         />
       )}
       {object.shapeType === "rectangle" && (
@@ -72,6 +86,7 @@ export const ShapeObject = ({
           fillColor={object.fillColor}
           strokeColor={object.strokeColor}
           strokeWidth={object.strokeWidth}
+          style={shapeStyle}
         />
       )}
       {(textContent || isEditing) && (

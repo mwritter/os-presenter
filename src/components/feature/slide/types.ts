@@ -17,6 +17,21 @@ export type TextAlignment = {
   vertical: "top" | "center" | "bottom";
 };
 
+// Shadow effect type
+export type ShadowEffect = {
+  color: string;
+  offsetX: number;
+  offsetY: number;
+  blurRadius: number;
+  spreadRadius: number;
+};
+
+// Effect container type
+export type Effect = {
+  shadow?: ShadowEffect;
+  // Future effects can be added here (e.g., blur, glow, etc.)
+};
+
 // Base object with common properties
 export type BaseSlideObject = {
   id: string;
@@ -51,6 +66,10 @@ export type TextObject = BaseSlideObject & {
   backgroundColor?: string;
   borderColor?: string;
   borderWidth?: number;
+  // Effects (for container/bounds)
+  effect?: Effect;
+  // Text content shadow (text-shadow CSS)
+  textShadow?: ShadowEffect;
 };
 
 // Shape object (rectangle, circle, triangle)
@@ -75,6 +94,10 @@ export type ShapeObject = BaseSlideObject & {
   textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   textStrokeColor?: string;
   textStrokeWidth?: number;
+  // Effects (for shape itself)
+  effect?: Effect;
+  // Text overlay shadow (text-shadow CSS for overlay text)
+  textShadow?: ShadowEffect;
 };
 
 // Image object
@@ -100,6 +123,10 @@ export type ImageObject = BaseSlideObject & {
   textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   textStrokeColor?: string;
   textStrokeWidth?: number;
+  // Effects (for image bounds)
+  effect?: Effect;
+  // Text overlay shadow (text-shadow CSS for overlay text)
+  textShadow?: ShadowEffect;
 };
 
 // Video object
@@ -127,6 +154,10 @@ export type VideoObject = BaseSlideObject & {
   textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   textStrokeColor?: string;
   textStrokeWidth?: number;
+  // Effects (for video bounds)
+  effect?: Effect;
+  // Text overlay shadow (text-shadow CSS for overlay text)
+  textShadow?: ShadowEffect;
 };
 
 export type SlideObject = TextObject | ShapeObject | ImageObject | VideoObject;

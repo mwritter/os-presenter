@@ -1,0 +1,12 @@
+export type ShadowEffectType = {
+  type: "shadow";
+  color: string;
+  offsetX: number;
+  offsetY: number;
+  blurRadius: number;
+  spreadRadius: number;
+};
+
+export type EffectType = {
+  shadow?: ShadowEffectType;
+};

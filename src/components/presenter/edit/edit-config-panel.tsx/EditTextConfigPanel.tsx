@@ -17,6 +17,7 @@ import {
   loadFontVariants,
 } from "@/hooks/useSystemFonts";
 import { useEffect, useState } from "react";
+import { Effect as TextEffect } from "./common/effects/Effect";
 
 export const EditTextConfigPanel = () => {
   const { selectedSlide, selectedObjectId, updateObject } = useEditContext();
@@ -165,6 +166,15 @@ export const EditTextConfigPanel = () => {
               }
               handleUpdate(textUpdate);
             }}
+          />
+          <hr />
+          <TextEffect
+            value={
+              "textShadow" in selectedObject && selectedObject.textShadow
+                ? { shadow: selectedObject.textShadow }
+                : undefined
+            }
+            onChange={(effect) => handleUpdate({ textShadow: effect?.shadow })}
           />
         </div>
       </div>

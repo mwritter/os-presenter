@@ -10,3 +10,4 @@ tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 font-kit = "0.14"
 
+

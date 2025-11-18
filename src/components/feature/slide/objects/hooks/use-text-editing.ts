@@ -1,6 +1,12 @@
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useEditContextSafe } from "@/presenter/edit/context";
-import { TextAlignment } from "@/components/feature/slide/types";
+import { TextAlignment, ShadowEffect } from "@/components/feature/slide/types";
+
+// Helper function to convert ShadowEffect to CSS text-shadow
+const getTextShadowStyle = (shadow?: ShadowEffect): string => {
+  if (!shadow) return "none";
+  return `${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blurRadius}px ${shadow.color}`;
+};
 
 type TextableObject = {
   id: string;
@@ -16,6 +22,7 @@ type TextableObject = {
   textStrokeColor?: string;
   textStrokeWidth?: number;
   textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+  textShadow?: ShadowEffect;
 };
 
 type UseTextEditingOptions = {
@@ -163,6 +170,7 @@ export const useTextEditing = ({
       object.textStrokeColor && object.textStrokeWidth
         ? `${object.textStrokeWidth}px ${object.textStrokeColor}`
         : "none",
+    textShadow: getTextShadowStyle(object.textShadow),
     padding: "8px",
     boxSizing: "border-box",
     cursor: isEditable && !isEditing ? "move" : "text",
