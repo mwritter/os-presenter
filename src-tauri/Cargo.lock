@@ -3831,12 +3831,12 @@ name = "tauri-app"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "font-kit",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
+ "tauri-plugin-font-variants",
  "tauri-plugin-opener",
  "uuid",
 ]
@@ -3937,6 +3937,15 @@ dependencies = [
  "tauri-plugin-fs",
  "thiserror 2.0.17",
  "url",
+]
+
+[[package]]
+name = "tauri-plugin-font-variants"
+version = "0.1.0"
+dependencies = [
+ "font-kit",
+ "serde",
+ "tauri",
 ]
 
 [[package]]

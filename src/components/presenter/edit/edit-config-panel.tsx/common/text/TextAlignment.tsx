@@ -3,30 +3,29 @@ import { cn } from "@/lib/utils";
 import {
   AlignCenter,
   AlignCenterHorizontal,
-  AlignCenterVertical,
   AlignEndHorizontal,
-  AlignEndVertical,
-  AlignJustify,
   AlignLeft,
   AlignRight,
   AlignStartHorizontal,
-  AlignStartVertical,
 } from "lucide-react";
+import { TextAlignment as TextAlignmentType } from "@/components/feature/slide/types";
 
 export const TextAlignment = ({
   value,
   onChange,
 }: {
-  value: "left" | "center" | "right";
-  onChange: (alignment: "left" | "center" | "right") => void;
+  value: TextAlignmentType;
+  onChange: (alignment: TextAlignmentType) => void;
 }) => {
-  // Note: Currently only supporting horizontal alignment (left, center, right)
-  // Vertical alignment could be added in the future
   return (
     <div className="flex flex-col gap-2">
       <TextAlignmentHorizontalControls
-        alignment={value}
-        setAlignment={onChange}
+        alignment={value.horizontal}
+        setAlignment={(horizontal) => onChange({ ...value, horizontal })}
+      />
+      <TextAlignmentVerticalControls
+        alignment={value.vertical}
+        setAlignment={(vertical) => onChange({ ...value, vertical })}
       />
     </div>
   );

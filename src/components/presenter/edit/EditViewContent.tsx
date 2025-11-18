@@ -34,9 +34,23 @@ export const EditViewContent = () => {
     }
   };
 
+  // Handle clicks outside the slide to deselect objects
+  const handleOuterClick = (e: React.MouseEvent) => {
+    // Don't deselect if we're in edit mode
+    if (editingObjectId) return;
+
+    // Check if click is outside the slide container
+    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      selectObject(null);
+    }
+  };
+
   return (
     <div className="grid grid-cols-[1fr_300px] h-full w-full bg-shade-lighter">
-      <div className="flex flex-col justify-center items-center h-full w-full overflow-y-auto">
+      <div 
+        className="flex flex-col justify-center items-center h-full w-full overflow-y-auto"
+        onMouseDown={handleOuterClick}
+      >
         {selectedSlide && (
           <>
             <EditViewObjectActionbar />

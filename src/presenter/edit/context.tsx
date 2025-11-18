@@ -296,7 +296,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
             content,
             fontSize: 48,
             color: "#FFFFFF",
-            alignment: "center" as const,
+            alignment: { horizontal: "center" as const, vertical: "center" as const },
             fontFamily: "Arial",
             fontStyle: "normal" as const,
           } as SlideObject;

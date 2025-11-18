@@ -7,7 +7,10 @@ import { TextColorPicker } from "./common/text/TextColorPicker";
 import { TextAlignment } from "./common/text/TextAlignment";
 import { TextStroke } from "./common/text/TextStroke";
 import { useEditContext } from "@/presenter/edit/context";
-import { TextObject } from "@/components/feature/slide/types";
+import {
+  TextObject,
+  TextAlignment as TextAlignmentType,
+} from "@/components/feature/slide/types";
 import {
   useSystemFonts,
   getAvailableVariants,
@@ -77,9 +80,12 @@ export const EditTextConfigPanel = () => {
     color:
       ("color" in selectedObject ? selectedObject.color : undefined) ||
       "#FFFFFF",
-    alignment: (("alignment" in selectedObject
+    alignment: ("alignment" in selectedObject && selectedObject.alignment
       ? selectedObject.alignment
-      : undefined) || "center") as "left" | "center" | "right",
+      : {
+          horizontal: "center" as const,
+          vertical: "center" as const,
+        }) as TextAlignmentType,
     textStrokeColor:
       "textStrokeColor" in selectedObject
         ? selectedObject.textStrokeColor

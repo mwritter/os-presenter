@@ -54,10 +54,12 @@ export const ShapeSizeWidthInput = ({
         className="text-xs! h-min"
         id="shape-size-width"
         type="number"
-        step="0.01"
-        min={1}
+        step="1"
         value={Number(value.toFixed(2))}
-        onChange={(e) => onChange({ width: Number(e.target.value) })}
+        onChange={(e) => {
+          if (Number(e.target.value) === 0) return;
+          onChange({ width: Number(e.target.value) });
+        }}
       />
       <Label className="text-xs!" htmlFor="shape-size-width">
         Width
@@ -79,10 +81,12 @@ export const ShapeSizeHeightInput = ({
         className="text-xs! h-min"
         id="shape-size-height"
         type="number"
-        step="0.01"
-        min={1}
+        step="1"
         value={Number(value.toFixed(2))}
-        onChange={(e) => onChange({ height: Number(e.target.value) })}
+        onChange={(e) => {
+          if (Number(e.target.value) === 0) return;
+          onChange({ height: Number(e.target.value) });
+        }}
       />
       <Label className="text-xs!" htmlFor="shape-size-height">
         Height

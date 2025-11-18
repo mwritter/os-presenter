@@ -1,0 +1,12 @@
+[package]
+name = "tauri-plugin-font-variants"
+version = "0.1.0"
+edition = "2021"
+description = "A Tauri plugin for enumerating system fonts with full variant support"
+license = "MIT"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+font-kit = "0.14"
+

@@ -1,12 +1,13 @@
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useEditContextSafe } from "@/presenter/edit/context";
+import { TextAlignment } from "@/components/feature/slide/types";
 
 type TextableObject = {
   id: string;
   content?: string;
   fontSize?: number;
   color?: string;
-  alignment?: "left" | "center" | "right";
+  alignment?: TextAlignment;
   fontFamily?: string;
   fontWeight?: number;
   bold?: boolean; // Deprecated: for backward compatibility
@@ -14,7 +15,7 @@ type TextableObject = {
   underline?: boolean;
   textStrokeColor?: string;
   textStrokeWidth?: number;
-  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
 };
 
 type UseTextEditingOptions = {
@@ -104,6 +105,19 @@ export const useTextEditing = ({
     }
   };
 
+  // Map vertical alignment to CSS alignItems
+  const getAlignItems = (vertical?: "top" | "center" | "bottom") => {
+    switch (vertical) {
+      case "top":
+        return "flex-start";
+      case "bottom":
+        return "flex-end";
+      case "center":
+      default:
+        return "center";
+    }
+  };
+
   // Styles for overlay mode (shapes, images, videos)
   const textOverlayStyle: CSSProperties =
     mode === "overlay"
@@ -114,7 +128,7 @@ export const useTextEditing = ({
           width: "100%",
           height: "100%",
           display: "flex",
-          alignItems: "center",
+          alignItems: getAlignItems(object.alignment?.vertical),
           justifyContent: "center",
           pointerEvents: isEditing ? "auto" : "none",
           overflow: isEditable && isSelected ? "visible" : "hidden",
@@ -126,7 +140,7 @@ export const useTextEditing = ({
     mode === "direct"
       ? {
           display: "flex",
-          alignItems: "center",
+          alignItems: getAlignItems(object.alignment?.vertical),
           justifyContent: "center",
           overflow: isEditable && isSelected ? "visible" : "hidden",
         }
@@ -140,7 +154,7 @@ export const useTextEditing = ({
     outline: "none",
     fontSize: `${object.fontSize || 48}px`,
     color: object.color || "#FFFFFF",
-    textAlign: object.alignment || "center",
+    textAlign: object.alignment?.horizontal || "center",
     // fontFamily now contains the full font name (e.g., "American Typewriter Bold")
     fontFamily: object.fontFamily || "Arial",
     textDecoration: object.underline ? "underline" : "none",

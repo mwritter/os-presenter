@@ -11,6 +11,12 @@ export type SlideText = {
   alignment?: "left" | "center" | "right";
 };
 
+// Alignment types
+export type TextAlignment = {
+  horizontal: "left" | "center" | "right";
+  vertical: "top" | "center" | "bottom";
+};
+
 // Base object with common properties
 export type BaseSlideObject = {
   id: string;
@@ -29,7 +35,7 @@ export type TextObject = BaseSlideObject & {
   content: string;
   fontSize: number;
   color: string;
-  alignment: "left" | "center" | "right";
+  alignment: TextAlignment;
   fontFamily?: string; // Full font name to use in CSS (e.g., "American Typewriter Bold")
   fontVariant?: string; // Style name for UI (e.g., "Bold", "Condensed Bold")
   // Deprecated fields kept for backward compatibility
@@ -58,7 +64,7 @@ export type ShapeObject = BaseSlideObject & {
   content?: string;
   fontSize?: number;
   color?: string;
-  alignment?: "left" | "center" | "right";
+  alignment?: TextAlignment;
   fontFamily?: string; // Full font name for CSS
   fontVariant?: string; // Style name for UI
   // Deprecated fields
@@ -66,7 +72,7 @@ export type ShapeObject = BaseSlideObject & {
   bold?: boolean;
   fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
-  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   textStrokeColor?: string;
   textStrokeWidth?: number;
 };
@@ -83,7 +89,7 @@ export type ImageObject = BaseSlideObject & {
   content?: string;
   fontSize?: number;
   color?: string;
-  alignment?: "left" | "center" | "right";
+  alignment?: TextAlignment;
   fontFamily?: string; // Full font name for CSS
   fontVariant?: string; // Style name for UI
   // Deprecated fields
@@ -91,7 +97,7 @@ export type ImageObject = BaseSlideObject & {
   bold?: boolean;
   fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
-  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   textStrokeColor?: string;
   textStrokeWidth?: number;
 };
@@ -110,7 +116,7 @@ export type VideoObject = BaseSlideObject & {
   content?: string;
   fontSize?: number;
   color?: string;
-  alignment?: "left" | "center" | "right";
+  alignment?: TextAlignment;
   fontFamily?: string; // Full font name for CSS
   fontVariant?: string; // Style name for UI
   // Deprecated fields
@@ -118,7 +124,7 @@ export type VideoObject = BaseSlideObject & {
   bold?: boolean;
   fontStyle?: "normal" | "italic" | "oblique";
   underline?: boolean;
-  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   textStrokeColor?: string;
   textStrokeWidth?: number;
 };
