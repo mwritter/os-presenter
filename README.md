@@ -1,4 +1,4 @@
-# Presenter
+# OS Presenter
 
 A powerful, cross-platform presentation software designed for live events, churches, conferences, and stage productions. Built with modern web technologies and native performance through Tauri.
 
