@@ -1,6 +1,21 @@
-# OS Presenter
+<p align="center">
+  <img src="public/osp_logo.svg" alt="OS Presenter Logo" width="240"/>
+</p>
 
-A powerful, cross-platform presentation software designed for live events, churches, conferences, and stage productions. Built with modern web technologies and native performance through Tauri.
+<h1 align="center">OS Presenter</h1>
+
+<p align="center">
+A powerful, cross-platform presentation software designed for live events, churches, conferences, and stage productions.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.1.0--alpha-blue" alt="Version" />
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" alt="Platform" />
+  <img src="https://img.shields.io/github/license/mwritter/os-presenter" alt="License" />
+  <img src="https://img.shields.io/badge/status-pre--alpha-orange" alt="Status" />
+</p>
+
+---
 
 > **⚠️ Early Development**: This project is currently in early-stage development working towards an Alpha release. Features are actively being built and refined. Expect breaking changes and incomplete functionality.
 
