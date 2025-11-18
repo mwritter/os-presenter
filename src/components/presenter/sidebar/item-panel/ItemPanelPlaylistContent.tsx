@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 import {
-  selectSelectedPlaylist,
-  selectSelectedPlaylistItemId,
-  usePresenterStore,
+  useSelectedPlaylist,
+  usePlaylistStore,
+  useSelectionStore,
 } from "@/stores/presenterStore";
 import { File } from "lucide-react";
 import { useItemPanelContext } from "./context";
@@ -14,16 +14,12 @@ import {
 } from "@/components/ui/context-menu";
 
 export const ItemPanelPlaylistContent = () => {
-  const selectedPlaylist = usePresenterStore(selectSelectedPlaylist);
-  const selectedPlaylistItemId = usePresenterStore(
-    selectSelectedPlaylistItemId
+  const selectedPlaylist = useSelectedPlaylist();
+  const selectedPlaylistItemId = useSelectionStore(
+    (s) => s.selectedPlaylistItem?.id ?? null
   );
-  const selectPlaylistItem = usePresenterStore(
-    (state) => state.selectPlaylistItem
-  );
-  const removePlaylistItem = usePresenterStore(
-    (state) => state.removePlaylistItem
-  );
+  const selectPlaylistItem = useSelectionStore((s) => s.selectPlaylistItem);
+  const removePlaylistItem = usePlaylistStore((s) => s.removePlaylistItem);
   const { filter } = useItemPanelContext();
 
   const filteredItems =

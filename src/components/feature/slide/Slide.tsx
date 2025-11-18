@@ -1,15 +1,13 @@
-import { CSSProperties, useMemo, useRef } from "react";
+import { useRef } from "react";
 import { SlideData, SlideObject } from "./types";
-import { getBackgroundStyle } from "./util/getBackgroundStyle";
 import { cn } from "@/lib/utils";
-import {
-  selectActiveSlideId,
-  usePresenterStore,
-} from "@/stores/presenterStore";
+import { useSelectionStore } from "@/stores/presenterStore";
 import { SlideObjectRenderer } from "./SlideObjectRenderer";
 import { CanvasSize } from "@/components/presenter/types";
 import { useSlideScale } from "./hooks/use-slide-scale";
 import { useIsEditRoute } from "@/components/presenter/edit/hooks/use-is-edit-route";
+import { getSlideCanvasStyles } from "./util/getSlideCanvasStyles";
+import { getSlideMaskOverlay } from "./util/getSlideMaskOverlay";
 
 export type SlideProps = {
   id: string;
@@ -30,8 +28,8 @@ export const Slide = ({
   onUpdateObject,
   canvasSize = { width: 1920, height: 1080 },
 }: SlideProps) => {
-  const activeSlideId = usePresenterStore(selectActiveSlideId);
-  const setActiveSlide = usePresenterStore((state) => state.setActiveSlide);
+  const activeSlideId = useSelectionStore((s) => s.activeSlide?.id ?? null);
+  const setActiveSlide = useSelectionStore((s) => s.setActiveSlide);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const { scale, isReady } = useSlideScale({ canvasSize, containerRef });
@@ -42,45 +40,17 @@ export const Slide = ({
     setActiveSlide(id, data);
   };
 
-  // Use backgroundColor if available, otherwise fall back to legacy background
-  // Memoize to prevent recalculation on every render
-  const backgroundStyle = useMemo(() => {
-    return data.backgroundColor
-      ? { backgroundColor: data.backgroundColor }
-      : getBackgroundStyle(data, canvasSize);
-  }, [data.backgroundColor, canvasSize.width, canvasSize.height]);
+  const canvasStyle = getSlideCanvasStyles({
+    backgroundColor: data.backgroundColor,
+    canvasSize,
+    scale,
+    isEditable,
+    isReady,
+  });
 
-  // Canvas style - fixed size that gets scaled
-  const canvasStyle: CSSProperties = {
-    ...backgroundStyle,
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    width: `${canvasSize.width}px`,
-    height: `${canvasSize.height}px`,
-    transform: `translate(-50%, -50%) scale(${scale})`,
-    transformOrigin: "center center",
-    overflow: isEditable ? "visible" : "hidden", // Allow overflow in edit mode
-    willChange: "transform",
-    backfaceVisibility: "hidden",
-    opacity: isReady ? 1 : 0,
-  };
-
-  // Mask overlay style - shows grayed area outside the slide bounds in edit mode
-  const maskOverlayStyle: CSSProperties = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    width: `${canvasSize.width}px`,
-    height: `${canvasSize.height}px`,
-    transform: `translate(-50%, -50%) scale(${scale})`,
-    transformOrigin: "center center",
-    pointerEvents: "none",
-    zIndex: 20,
-    boxShadow: `0 0 0 9999px rgba(0, 0, 0, 0.4)`, // Gray overlay outside bounds
-    opacity: isReady ? 1 : 0,
-    transition: "opacity 200ms ease-in",
-  };
+  const maskOverlayStyle = isEditable
+    ? getSlideMaskOverlay({ canvasSize, scale, isReady })
+    : undefined;
 
   const Comp = as === "button" ? "button" : "div";
 
@@ -115,7 +85,7 @@ export const Slide = ({
         </div>
       </Comp>
       {/* Mask overlay to gray out areas outside the slide in edit mode */}
-      {isEditable && <div style={maskOverlayStyle} />}
+      {maskOverlayStyle && <div style={maskOverlayStyle} />}
     </div>
   );
 };

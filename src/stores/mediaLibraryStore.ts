@@ -1,9 +1,7 @@
-import { create } from 'zustand';
-import { ImageObject, SlideData, VideoObject } from '@/components/feature/slide/types';
-import * as storage from '@/services/storage';
-import { DEFAULT_CANVAS_PRESET } from '@/consts/canvas';
+import { create } from "zustand";
+import * as storage from "@/services/storage";
 
-export type MediaType = 'image' | 'video';
+export type MediaType = "image" | "video";
 
 export interface MediaItem {
   id: string;
@@ -22,7 +20,7 @@ export interface MediaLibraryState {
   mediaItems: MediaItem[];
   selectedMediaId: string | null;
   isLoading: boolean;
-  
+
   // Media actions
   setMediaItems: (items: MediaItem[]) => void;
   addMediaItem: (item: MediaItem) => void;
@@ -30,22 +28,22 @@ export interface MediaLibraryState {
   updateMediaItem: (id: string, updates: Partial<MediaItem>) => void;
   removeMediaItem: (id: string) => void;
   removeMediaItems: (ids: string[]) => void;
-  
+
   // Selection actions
   selectMedia: (id: string | null) => void;
-  
+
   // Loading state
   setLoading: (isLoading: boolean) => void;
-  
+
   // Utility actions
   getMediaById: (id: string) => MediaItem | undefined;
   getMediaByType: (type: MediaType) => MediaItem[];
-  
+
   // Persistence actions
   loadData: () => Promise<void>;
   importMedia: (sourcePath: string) => Promise<MediaItem>;
   getMediaUrl: (fileName: string) => Promise<string>;
-  
+
   // Reset
   reset: () => void;
 }
@@ -58,71 +56,73 @@ const initialState = {
 
 export const useMediaLibraryStore = create<MediaLibraryState>((set, get) => ({
   ...initialState,
-  
+
   // Media actions
   setMediaItems: (items) => set({ mediaItems: items }),
-  
+
   addMediaItem: (item) =>
     set((state) => ({
       mediaItems: [...state.mediaItems, item],
     })),
-  
+
   addMediaItems: (items) =>
     set((state) => ({
       mediaItems: [...state.mediaItems, ...items],
     })),
-  
+
   updateMediaItem: (id, updates) =>
     set((state) => ({
       mediaItems: state.mediaItems.map((item) =>
-        item.id === id 
-          ? { ...item, ...updates, updatedAt: new Date() } 
-          : item
+        item.id === id ? { ...item, ...updates, updatedAt: new Date() } : item
       ),
     })),
-  
+
   removeMediaItem: (id) => {
     set((state) => ({
       mediaItems: state.mediaItems.filter((item) => item.id !== id),
       // Clear selection if the removed item was selected
-      selectedMediaId: state.selectedMediaId === id ? null : state.selectedMediaId,
+      selectedMediaId:
+        state.selectedMediaId === id ? null : state.selectedMediaId,
     }));
     // Delete from disk asynchronously
     storage.deleteMediaItem(id).catch(console.error);
   },
-  
+
   removeMediaItems: (ids) => {
     set((state) => {
       const idsSet = new Set(ids);
       return {
         mediaItems: state.mediaItems.filter((item) => !idsSet.has(item.id)),
         // Clear selection if the removed items included the selected one
-        selectedMediaId: state.selectedMediaId && idsSet.has(state.selectedMediaId) 
-          ? null 
-          : state.selectedMediaId,
+        selectedMediaId:
+          state.selectedMediaId && idsSet.has(state.selectedMediaId)
+            ? null
+            : state.selectedMediaId,
       };
     });
     // Delete from disk asynchronously
-    Promise.all(ids.map((id) => storage.deleteMediaItem(id))).catch(console.error);
+    Promise.all(ids.map((id) => storage.deleteMediaItem(id))).catch(
+      console.error
+    );
   },
-  
+
   // Selection actions
   selectMedia: (id) => set({ selectedMediaId: id }),
-  
+
   // Loading state
   setLoading: (isLoading) => set({ isLoading }),
-  
+
   // Utility actions
   getMediaById: (id) => {
     const state = get();
     return state.mediaItems.find((item) => item.id === id);
   },
-  
+
   getMediaByType: (type) => {
     const state = get();
     return state.mediaItems.filter((item) => item.type === type);
   },
-  
+
   // Persistence actions
   loadData: async () => {
     set({ isLoading: true });
@@ -130,7 +130,7 @@ export const useMediaLibraryStore = create<MediaLibraryState>((set, get) => ({
       const items = await storage.loadMediaItems();
       set({ mediaItems: items, isLoading: false });
     } catch (error) {
-      console.error('Failed to load media items:', error);
+      console.error("Failed to load media items:", error);
       set({ isLoading: false });
       throw error;
     }
@@ -146,7 +146,7 @@ export const useMediaLibraryStore = create<MediaLibraryState>((set, get) => ({
       }));
       return mediaItem;
     } catch (error) {
-      console.error('Failed to import media:', error);
+      console.error("Failed to import media:", error);
       set({ isLoading: false });
       throw error;
     }
@@ -156,11 +156,11 @@ export const useMediaLibraryStore = create<MediaLibraryState>((set, get) => ({
     try {
       return await storage.getMediaFileUrl(fileName);
     } catch (error) {
-      console.error('Failed to get media URL:', error);
+      console.error("Failed to get media URL:", error);
       throw error;
     }
   },
-  
+
   // Reset
   reset: () => set(initialState),
 }));
@@ -168,46 +168,12 @@ export const useMediaLibraryStore = create<MediaLibraryState>((set, get) => ({
 // Selectors for optimized component re-renders
 // Usage: const mediaItems = useMediaLibraryStore(selectMediaItems);
 export const selectMediaItems = (state: MediaLibraryState) => state.mediaItems;
-export const selectSelectedMediaId = (state: MediaLibraryState) => state.selectedMediaId;
+export const selectSelectedMediaId = (state: MediaLibraryState) =>
+  state.selectedMediaId;
 export const selectIsLoading = (state: MediaLibraryState) => state.isLoading;
 export const selectSelectedMedia = (state: MediaLibraryState) =>
   state.mediaItems.find((item) => item.id === state.selectedMediaId);
 export const selectImageMedia = (state: MediaLibraryState) =>
-  state.mediaItems.filter((item) => item.type === 'image');
+  state.mediaItems.filter((item) => item.type === "image");
 export const selectVideoMedia = (state: MediaLibraryState) =>
-  state.mediaItems.filter((item) => item.type === 'video');
-
-// Helper function to convert MediaItem to SlideData for use with Slide component
-// Currently always show the image or video as Full HD (1920x1080)
-export const mediaItemToSlideData = (mediaItem: MediaItem): SlideData => {
-
-  const imageProps = {
-    id: mediaItem.id,
-    type: 'image',
-    src: mediaItem.source,
-    position: { x: 0, y: 0 },
-    size: DEFAULT_CANVAS_PRESET.value,
-    zIndex: 0,
-    rotation: 0,
-    objectFit: 'contain',
-  } satisfies ImageObject;
-
-  const videoProps = {
-    id: mediaItem.id,
-    type: 'video',
-    src: mediaItem.source,
-    position: { x: 0, y: 0 },
-    size: DEFAULT_CANVAS_PRESET.value,
-    zIndex: 0,
-    rotation: 0,
-    autoPlay: false,
-    loop: true,
-    muted: true,
-  } satisfies VideoObject;
-
-  return {
-    id: `media-${mediaItem.id}`,
-    objects: mediaItem.type === 'image' ? [imageProps] : [videoProps],
-  };
-};
-
+  state.mediaItems.filter((item) => item.type === "video");

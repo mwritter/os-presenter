@@ -5,18 +5,15 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import {
-  selectSelectedPlaylistItemData,
-  selectSelectedSlideGroupData,
-  usePresenterStore,
+  useSelectedPlaylistItemData,
+  useSelectedSlideGroupData,
 } from "@/stores/presenterStore";
 import { EditProvider } from "./context";
 import { EditViewContent } from "@/components/presenter/edit/EditViewContent";
 
 const Edit = () => {
-  const selectedPlaylistItemData = usePresenterStore(
-    selectSelectedPlaylistItemData
-  );
-  const activeSlideGroupData = usePresenterStore(selectSelectedSlideGroupData);
+  const selectedPlaylistItemData = useSelectedPlaylistItemData();
+  const activeSlideGroupData = useSelectedSlideGroupData();
   const slideGroup =
     selectedPlaylistItemData?.slideGroup || activeSlideGroupData;
   return (

@@ -8,9 +8,11 @@ import {
 import { createContext, useContext, useState, useEffect } from "react";
 import {
   usePresenterStore,
-  selectSelectedSlideGroupData,
-  selectSelectedPlaylistItemData,
-  selectActiveSlide,
+  useSelectedSlideGroupData,
+  useSelectedPlaylistItemData,
+  useSelectionStore,
+  useLibraryStore,
+  usePlaylistStore,
 } from "@/stores/presenterStore";
 import { CanvasSize } from "@/components/presenter/types";
 import { createDefaultTextObject } from "@/stores/utils/createDefaultTextObject";
@@ -43,29 +45,17 @@ interface EditContextType {
 const EditContext = createContext<EditContextType | undefined>(undefined);
 
 export const EditProvider = ({ children }: { children: React.ReactNode }) => {
-  const updateSlideInLibrary = usePresenterStore(
-    (state) => state.updateSlideInLibrary
-  );
-  const updateSlideInPlaylistItem = usePresenterStore(
-    (state) => state.updateSlideInPlaylistItem
-  );
-  const updatePlaylistItemSlideGroup = usePresenterStore(
-    (state) => state.updatePlaylistItemSlideGroup
-  );
-  const updateLibrary = usePresenterStore((state) => state.updateLibrary);
-  const selectedSlideGroup = usePresenterStore(
-    (state) => state.selectedSlideGroup
-  );
-  const selectedPlaylistItem = usePresenterStore(
-    (state) => state.selectedPlaylistItem
-  );
+  const updateSlideInLibrary = useLibraryStore((s) => s.updateSlideInLibrary);
+  const updateSlideInPlaylistItem = usePlaylistStore((s) => s.updateSlideInPlaylistItem);
+  const updatePlaylistItemSlideGroup = usePlaylistStore((s) => s.updatePlaylistItemSlideGroup);
+  const updateLibrary = useLibraryStore((s) => s.updateLibrary);
+  const selectedSlideGroup = useSelectionStore((s) => s.selectedSlideGroup);
+  const selectedPlaylistItem = useSelectionStore((s) => s.selectedPlaylistItem);
 
   // Get canvas size from the current slide group
-  const selectedPlaylistItemData = usePresenterStore(
-    selectSelectedPlaylistItemData
-  );
-  const activeSlideGroupData = usePresenterStore(selectSelectedSlideGroupData);
-  const activeSlide = usePresenterStore(selectActiveSlide);
+  const selectedPlaylistItemData = useSelectedPlaylistItemData();
+  const activeSlideGroupData = useSelectedSlideGroupData();
+  const activeSlide = useSelectionStore((s) => s.activeSlide);
   const slideGroup =
     selectedPlaylistItemData?.slideGroup || activeSlideGroupData;
   const canvasSize = slideGroup?.canvasSize || { width: 1920, height: 1080 };

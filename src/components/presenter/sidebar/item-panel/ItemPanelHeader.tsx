@@ -6,13 +6,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Plus } from "lucide-react";
-import { selectSelectedPlaylist, usePresenterStore } from "@/stores/presenterStore";
-import { selectSelectedLibrary } from "@/stores/presenterStore";
+import { useSelectedPlaylist, useSelectedLibrary } from "@/stores/presenterStore";
 import { usePresenterContext } from "@/context/presenter";
 
 export const ItemPanelHeader = () => {
-  const selectedLibrary = usePresenterStore(selectSelectedLibrary);
-  const selectedPlaylist = usePresenterStore(selectSelectedPlaylist);
+  const selectedLibrary = useSelectedLibrary();
+  const selectedPlaylist = useSelectedPlaylist();
   
   if (selectedLibrary) {
     return <ItemPanelLibraryHeader />;
@@ -24,7 +23,7 @@ export const ItemPanelHeader = () => {
 };
 
 const ItemPanelLibraryHeader = () => {
-  const selectedLibrary = usePresenterStore(selectSelectedLibrary);
+  const selectedLibrary = useSelectedLibrary();
   const { openAddPresentationDialog } = usePresenterContext();
   return (
     <div className="flex justify-between items-center text-[10px] uppercase p-2 bg-shade-3">
@@ -48,7 +47,7 @@ const ItemPanelLibraryHeader = () => {
 };
 
 const ItemPanelPlaylistHeader = () => {
-  const selectedPlaylist = usePresenterStore(selectSelectedPlaylist);
+  const selectedPlaylist = useSelectedPlaylist();
   return (
     <div className="flex justify-between items-center text-[10px] uppercase p-2 bg-shade-3">
       <span className="text-gray-400">{selectedPlaylist?.items.length} items</span>

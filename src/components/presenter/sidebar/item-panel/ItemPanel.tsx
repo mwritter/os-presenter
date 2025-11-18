@@ -1,9 +1,8 @@
 import { ItemPanelHeader } from "./ItemPanelHeader";
 import { ItemPanelFooter } from "./ItemPanelFooter";
 import {
-  selectSelectedPlaylist,
-  usePresenterStore,
-  selectSelectedLibrary,
+  useSelectedPlaylist,
+  useSelectedLibrary,
 } from "@/stores/presenterStore";
 import { ItemPanelProvider } from "./context";
 import { ItemPanelLibraryContent } from "./ItemPanelLibraryContent";
@@ -24,8 +23,8 @@ export const ItemPanel = () => {
 };
 
 const ItemPanelContent = () => {
-  const selectedLibrary = usePresenterStore(selectSelectedLibrary);
-  const selectedPlaylist = usePresenterStore(selectSelectedPlaylist);
+  const selectedLibrary = useSelectedLibrary();
+  const selectedPlaylist = useSelectedPlaylist();
 
   if (selectedLibrary) {
     return <ItemPanelLibraryContent />;

@@ -1,5 +1,5 @@
 import { Library } from "lucide-react";
-import { usePresenterStore, selectSelectedLibraryId } from "@/stores/presenterStore";
+import { useLibraryStore, useSelectionStore } from "@/stores/presenterStore";
 import { LibraryPanelItem } from "./LibraryPanelItem";
 
 type LibraryItemProps = {
@@ -8,11 +8,11 @@ type LibraryItemProps = {
 };
 
 export const LibraryItem = ({ id, name }: LibraryItemProps) => {
-  const selectedLibraryId = usePresenterStore(selectSelectedLibraryId);
-  const selectLibrary = usePresenterStore((state) => state.selectLibrary);
+  const selectedLibraryId = useSelectionStore((s) => s.selectedLibraryId);
+  const selectLibrary = useSelectionStore((s) => s.selectLibrary);
   const isSelected = selectedLibraryId === id;
-  const updateLibrary = usePresenterStore((state) => state.updateLibrary);
-  const removeLibrary = usePresenterStore((state) => state.removeLibrary);
+  const updateLibrary = useLibraryStore((s) => s.updateLibrary);
+  const removeLibrary = useLibraryStore((s) => s.removeLibrary);
   return (
     <LibraryPanelItem
       id={id}

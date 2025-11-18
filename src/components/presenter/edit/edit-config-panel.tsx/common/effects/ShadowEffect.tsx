@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Box, Minus, Plus } from "lucide-react";
 import { useState } from "react";
-import { ColorPicker } from "@/components/feature/ColorPicker/ColorPicker";
+import { ColorPicker } from "@/components/feature/color-picker/ColorPicker";
 import { Input } from "@/components/ui/input";
 import { ShadowEffectType } from "./types";
 

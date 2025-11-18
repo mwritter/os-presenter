@@ -1,7 +1,7 @@
 import { List } from "lucide-react";
 import {
-  usePresenterStore,
-  selectSelectedPlaylistId,
+  usePlaylistStore,
+  useSelectionStore,
 } from "@/stores/presenterStore";
 import { LibraryPanelItem } from "./LibraryPanelItem";
 
@@ -11,11 +11,11 @@ type PlaylistItemProps = {
 };
 
 export const PlaylistItem = ({ id, name }: PlaylistItemProps) => {
-  const selectedPlaylistId = usePresenterStore(selectSelectedPlaylistId);
-  const selectPlaylist = usePresenterStore((state) => state.selectPlaylist);
+  const selectedPlaylistId = useSelectionStore((s) => s.selectedPlaylistId);
+  const selectPlaylist = useSelectionStore((s) => s.selectPlaylist);
   const isSelected = selectedPlaylistId === id;
-  const updatePlaylist = usePresenterStore((state) => state.updatePlaylist);
-  const removePlaylist = usePresenterStore((state) => state.removePlaylist);
+  const updatePlaylist = usePlaylistStore((s) => s.updatePlaylist);
+  const removePlaylist = usePlaylistStore((s) => s.removePlaylist);
 
   return (
     <LibraryPanelItem

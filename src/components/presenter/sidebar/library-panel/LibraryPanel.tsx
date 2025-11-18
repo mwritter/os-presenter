@@ -1,10 +1,6 @@
 import { PlaylistItem } from "./PlaylistItem";
 import { LibraryItem } from "./LibraryItem";
-import {
-  usePresenterStore,
-  selectLibraries,
-  selectPlaylists,
-} from "@/stores/presenterStore";
+import { useLibraryStore, usePlaylistStore } from "@/stores/presenterStore";
 import { Plus } from "lucide-react";
 import {
   DropdownMenu,
@@ -17,10 +13,10 @@ import { usePresenterContext } from "@/context/presenter";
 
 export const LibraryPanel = () => {
   const { openAddPresentationDialog } = usePresenterContext();
-  const libraries = usePresenterStore(selectLibraries);
-  const playlists = usePresenterStore(selectPlaylists);
-  const addLibrary = usePresenterStore((state) => state.addLibrary);
-  const addPlaylist = usePresenterStore((state) => state.addPlaylist);
+  const libraries = useLibraryStore((s) => s.libraries);
+  const playlists = usePlaylistStore((s) => s.playlists);
+  const addLibrary = useLibraryStore((s) => s.addLibrary);
+  const addPlaylist = usePlaylistStore((s) => s.addPlaylist);
 
   const handleNewLibrary = () => {
     const now = new Date().toISOString();

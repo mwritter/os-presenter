@@ -1,6 +1,6 @@
 import { SVGProps } from "react";
 
-export const Square = ({
+export const Rectangle = ({
   fillColor,
   strokeColor,
   strokeWidth,
@@ -37,4 +37,3 @@ export const Square = ({
     </svg>
   );
 };
-

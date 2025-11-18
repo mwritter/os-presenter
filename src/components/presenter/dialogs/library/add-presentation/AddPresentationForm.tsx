@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CANVAS_PRESETS, DEFAULT_CANVAS_PRESET} from "@/consts/canvas";
-import { selectLibraries, selectSelectedLibrary, usePresenterStore } from "@/stores/presenterStore";
+import { useLibraryStore, useSelectedLibrary } from "@/stores/presenterStore";
 import { useState } from "react";
 
 interface AddPresentationFormProps {
@@ -18,8 +18,8 @@ interface AddPresentationFormProps {
 export const AddPresentationForm = ({ onSubmit }: AddPresentationFormProps) => {
   const [presentationName, setPresentationName] = useState<string>("");
   const [canvasPreset, setCanvasPreset] = useState<CanvasPreset>(DEFAULT_CANVAS_PRESET);
-  const libraries = usePresenterStore(selectLibraries);
-  const selectedLibrary = usePresenterStore(selectSelectedLibrary);
+  const libraries = useLibraryStore((s) => s.libraries);
+  const selectedLibrary = useSelectedLibrary();
   const [selectedLibraryId, setSelectedLibraryId] = useState<string | undefined>(selectedLibrary?.id ?? undefined);
 
   const handleCanvasSizeChange = (value: string) => {

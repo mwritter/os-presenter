@@ -1,7 +1,7 @@
 import { Slide } from "@/components/feature/slide/Slide";
 import { SlideData } from "@/components/feature/slide/types";
 import { ShowViewEmptyState } from "./ShowViewEmpty";
-import { File } from "lucide-react";
+import { ShowViewSlideGridHeader } from "./ShowViewSlideGridHeader";
 
 type ShowViewSlideGridProps = {
   slides: SlideData[];
@@ -31,18 +31,6 @@ export const ShowViewSlideGrid = ({
             <Slide id={slide.id} data={slide} />
           </div>
         ))}
-      </div>
-    </div>
-  );
-};
-
-// This is the header for the slide grid, it could be a library or a playlist item
-const ShowViewSlideGridHeader = ({ title }: { title: string }) => {
-  return (
-    <div className="flex justify-between items-center text-xs p-2 text-white bg-shade-4 sticky top-0 z-10">
-      <div className="flex items-center gap-2">
-        <File className="size-3.5" />
-        {title}
       </div>
     </div>
   );

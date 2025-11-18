@@ -1,4 +1,4 @@
-import { ColorPicker } from "@/components/feature/ColorPicker/ColorPicker";
+import { ColorPicker } from "@/components/feature/color-picker/ColorPicker";
 import { Label } from "@/components/ui/label";
 import {
   Select,

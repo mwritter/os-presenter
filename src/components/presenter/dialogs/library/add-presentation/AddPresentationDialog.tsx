@@ -8,8 +8,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  selectSelectedLibrary,
-  usePresenterStore,
+  useSelectedLibrary,
+  useLibraryStore,
 } from "@/stores/presenterStore";
 import { useEffect, useState } from "react";
 import { CanvasSize } from "../../../types";
@@ -22,8 +22,8 @@ export const AddPresentationDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {
-  const selectedLibrary = usePresenterStore(selectSelectedLibrary);
-  const addLibrarySlideGroup = usePresenterStore((state) => state.addLibrarySlideGroup);
+  const selectedLibrary = useSelectedLibrary();
+  const addLibrarySlideGroup = useLibraryStore((s) => s.addLibrarySlideGroup);
   const [selectedLibraryId, setSelectedLibraryId] = useState<string | undefined>();
 
   useEffect(() => {

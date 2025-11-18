@@ -1,8 +1,7 @@
 import {
-  selectSelectedLibrary,
-  selectSelectedSlideGroupId,
-  selectPlaylists,
-  usePresenterStore,
+  useSelectedLibrary,
+  usePlaylistStore,
+  useSelectionStore,
 } from "@/stores/presenterStore";
 import {
   ContextMenu,
@@ -19,12 +18,12 @@ import { File } from "lucide-react";
 import { useItemPanelContext } from "./context";
 
 export const ItemPanelLibraryContent = () => {
-  const selectedLibrary = usePresenterStore(selectSelectedLibrary);
-  const selectedSlideGroupId = usePresenterStore(selectSelectedSlideGroupId);
-  const selectSlideGroup = usePresenterStore((state) => state.selectSlideGroup);
-  const playlists = usePresenterStore(selectPlaylists);
-  const addSlideGroupToPlaylist = usePresenterStore(
-    (state) => state.addSlideGroupToPlaylist
+  const selectedLibrary = useSelectedLibrary();
+  const selectedSlideGroupId = useSelectionStore((s) => s.selectedSlideGroup?.index ?? null);
+  const selectSlideGroup = useSelectionStore((s) => s.selectSlideGroup);
+  const playlists = usePlaylistStore((s) => s.playlists);
+  const addSlideGroupToPlaylist = usePlaylistStore(
+    (s) => s.addSlideGroupToPlaylist
   );
   const { filter } = useItemPanelContext();
 

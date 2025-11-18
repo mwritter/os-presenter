@@ -1,6 +1,14 @@
 import { useRef, useEffect } from "react";
-import Moveable, { OnDragEnd, OnResizeEnd, OnRotateEnd } from "react-moveable";
-import { SlideObject } from "../types";
+import Moveable, {
+  OnDrag,
+  OnDragEnd,
+  OnResize,
+  OnResizeEnd,
+  OnRotate,
+  OnRotateEnd,
+} from "react-moveable";
+import { SlideObject } from "../../types";
+import { getMoveableGuidelines } from "./utils/getMoveableGuidelines";
 
 export type MoveableWrapperProps = {
   object: SlideObject;
@@ -19,32 +27,6 @@ export const MoveableWrapper = ({
 }: MoveableWrapperProps) => {
   const moveableRef = useRef<Moveable>(null);
   const targetElementRef = useRef<HTMLElement | null>(null);
-
-  // Store reference to the target element
-  useEffect(() => {
-    if (typeof target === "string") {
-      targetElementRef.current = document.querySelector(target) as HTMLElement;
-    } else {
-      targetElementRef.current = target as HTMLElement;
-    }
-  }, [target]);
-
-  // Calculate guidelines for snapping to edges and center
-  const guidelines = container.current
-    ? {
-        horizontalGuidelines: [
-          0, // top edge
-          container.current.offsetHeight / 2, // vertical center
-          container.current.offsetHeight, // bottom edge
-        ],
-        verticalGuidelines: [
-          0, // left edge
-          container.current.offsetWidth / 2, // horizontal center
-          container.current.offsetWidth, // right edge
-        ],
-      }
-    : { horizontalGuidelines: [], verticalGuidelines: [] };
-
   // Scale the snap threshold to maintain consistent behavior at different zoom levels
   const scaledSnapThreshold = 50 * scale;
 
@@ -62,6 +44,24 @@ export const MoveableWrapper = ({
     object.scaleX,
     object.scaleY,
   ]);
+
+  // Store reference to the target element
+  useEffect(() => {
+    if (typeof target === "string") {
+      targetElementRef.current = document.querySelector(target) as HTMLElement;
+    } else {
+      targetElementRef.current = target as HTMLElement;
+    }
+  }, [target]);
+
+  const guidelines = getMoveableGuidelines(container.current);
+
+  const handleDrag = (e: OnDrag) => {
+    const rotation = object.rotation || 0;
+    const scaleX = object.scaleX ?? 1;
+    const scaleY = object.scaleY ?? 1;
+    e.target.style.transform = `translate(${e.translate[0]}px, ${e.translate[1]}px) scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
+  };
 
   const handleDragEnd = (e: OnDragEnd) => {
     requestAnimationFrame(() => {
@@ -91,6 +91,21 @@ export const MoveableWrapper = ({
         },
       });
     });
+  };
+
+  const handleResize = (e: OnResize) => {
+    const MIN_SIZE = 1;
+
+    // Enforce minimum size
+    const width = Math.max(e.width, MIN_SIZE);
+    const height = Math.max(e.height, MIN_SIZE);
+    const rotation = object.rotation || 0;
+    const scaleX = object.scaleX ?? 1;
+    const scaleY = object.scaleY ?? 1;
+
+    e.target.style.width = `${width}px`;
+    e.target.style.height = `${height}px`;
+    e.target.style.transform = `translate(${e.drag.translate[0]}px, ${e.drag.translate[1]}px) scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
   };
 
   const handleResizeEnd = (e: OnResizeEnd) => {
@@ -133,6 +148,12 @@ export const MoveableWrapper = ({
         },
       });
     });
+  };
+
+  const handleRotate = (e: OnRotate) => {
+    const scaleX = object.scaleX ?? 1;
+    const scaleY = object.scaleY ?? 1;
+    e.target.style.transform = `translate(0px, 0px) scale(${scaleX}, ${scaleY}) rotate(${e.rotation}deg)`;
   };
 
   const handleRotateEnd = (e: OnRotateEnd) => {
@@ -185,35 +206,11 @@ export const MoveableWrapper = ({
       keepRatio={false}
       renderDirections={["nw", "n", "ne", "w", "e", "sw", "s", "se"]}
       rotationPosition="top"
-      onDrag={(e) => {
-        // Update position during drag
-        const rotation = object.rotation || 0;
-        const scaleX = object.scaleX ?? 1;
-        const scaleY = object.scaleY ?? 1;
-        e.target.style.transform = `translate(${e.translate[0]}px, ${e.translate[1]}px) scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
-      }}
+      onDrag={handleDrag}
       onDragEnd={handleDragEnd}
-      onResize={(e) => {
-        const MIN_SIZE = 1;
-
-        // Enforce minimum size
-        const width = Math.max(e.width, MIN_SIZE);
-        const height = Math.max(e.height, MIN_SIZE);
-        const rotation = object.rotation || 0;
-        const scaleX = object.scaleX ?? 1;
-        const scaleY = object.scaleY ?? 1;
-
-        e.target.style.width = `${width}px`;
-        e.target.style.height = `${height}px`;
-        e.target.style.transform = `translate(${e.drag.translate[0]}px, ${e.drag.translate[1]}px) scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
-      }}
+      onResize={handleResize}
       onResizeEnd={handleResizeEnd}
-      onRotate={(e) => {
-        // Update rotation during rotate
-        const scaleX = object.scaleX ?? 1;
-        const scaleY = object.scaleY ?? 1;
-        e.target.style.transform = `translate(0px, 0px) scale(${scaleX}, ${scaleY}) rotate(${e.rotation}deg)`;
-      }}
+      onRotate={handleRotate}
       onRotateEnd={handleRotateEnd}
     />
   );

@@ -4,21 +4,17 @@ import { ShowViewEmptyState } from "@/components/presenter/show/ShowViewEmpty";
 import { ShowViewFooter } from "@/components/presenter/show/ShowViewFooter";
 import { ShowViewSlideGrid } from "@/components/presenter/show/ShowViewSlideGrid";
 import {
-  selectSelectedPlaylistItemData,
-  selectSelectedSlideGroupData,
-  selectSelectedSlideGroup,
-  selectSelectedPlaylistItem,
-  usePresenterStore,
+  useSelectedPlaylistItemData,
+  useSelectedSlideGroupData,
+  useSelectionStore,
+  useLibraryStore,
+  usePlaylistStore,
 } from "@/stores/presenterStore";
 
 const Show = () => {
   // Check if a library item or playlist item is selected
-  const selectedSlideGroupData = usePresenterStore(
-    selectSelectedSlideGroupData
-  );
-  const selectedPlaylistItemData = usePresenterStore(
-    selectSelectedPlaylistItemData
-  );
+  const selectedSlideGroupData = useSelectedSlideGroupData();
+  const selectedPlaylistItemData = useSelectedPlaylistItemData();
   return (
     <>
       {selectedSlideGroupData && <ShowViewLibraryContent />}
@@ -34,13 +30,10 @@ export default Show;
 
 /* For Library Items this should be one header and one grid */
 const ShowViewLibraryContent = () => {
-  const selectedSlideGroupData = usePresenterStore(
-    selectSelectedSlideGroupData
-  );
-  const selectedSlideGroup = usePresenterStore(selectSelectedSlideGroup);
-  const addSlideToSlideGroup = usePresenterStore(
-    (state) => state.addSlideToSlideGroup
-  );
+  const selectedSlideGroupData = useSelectedSlideGroupData();
+  const selectedSlideGroup = useSelectionStore((s) => s.selectedSlideGroup);
+  const addSlideToSlideGroup = useLibraryStore((s) => s.addSlideToSlideGroup);
+
   const handleAddBlankSlide = () => {
     if (!selectedSlideGroup) return;
     addSlideToSlideGroup(
@@ -63,11 +56,11 @@ const ShowViewLibraryContent = () => {
 
 /* For Playlist Items this should be a collection of headers and grids */
 const ShowViewPlaylistContent = () => {
-  const selectedPlaylistItem = usePresenterStore(selectSelectedPlaylistItem);
-  const addSlideToPlaylistItem = usePresenterStore(
-    (state) => state.addSlideToPlaylistItem
+  const selectedPlaylistItem = useSelectionStore((s) => s.selectedPlaylistItem);
+  const addSlideToPlaylistItem = usePlaylistStore(
+    (s) => s.addSlideToPlaylistItem
   );
-  const playlist = usePresenterStore((s) =>
+  const playlist = usePlaylistStore((s) =>
     s.playlists.find((p) => p.id === selectedPlaylistItem?.playlistId)
   );
   const handleAddBlankSlide = () => {
