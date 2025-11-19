@@ -11,5 +11,7 @@ export const getShape = ({ object }: { object: ShapeObject }) => {
       return Circle;
     case "triangle":
       return Triangle;
+    default:
+      return null; // Default to rectangle if shape type is invalid
   }
 };

@@ -1,6 +1,6 @@
-import { hsvaToHex } from "@uiw/react-color";
 import { Slider } from "@/components/ui/slider";
 import { useColorPicker } from "../../context";
+import { hsvaToRgba } from "../../utils/colorConversions";
 
 export const ColorWheelOpacitySlider = () => {
   const { baseColor, brightness, opacity, setOpacity, setHsva } =
@@ -31,7 +31,7 @@ export const ColorWheelOpacitySlider = () => {
             style={{
               background: `linear-gradient(to right, 
                         transparent, 
-                        ${hsvaToHex({ ...baseColor, v: brightness, a: 1 })})`,
+                        ${hsvaToRgba({ ...baseColor, v: brightness, a: 1 })})`,
             }}
           />
         </div>

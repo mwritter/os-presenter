@@ -145,7 +145,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       scaleY: 1,
       zIndex: (selectedSlide?.objects?.length || 0) + 1,
       shapeType,
-      fillColor: "#3b82f6",
+      fillColor: "rgba(59, 130, 246, 1)",
     };
 
     updateSlideObjects((objects) => [...objects, newObject]);
@@ -285,7 +285,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
             ...obj,
             content,
             fontSize: 48,
-            color: "#FFFFFF",
+            color: "rgba(255, 255, 255, 1)",
             alignment: { horizontal: "center" as const, vertical: "center" as const },
             fontFamily: "Arial",
             fontStyle: "normal" as const,

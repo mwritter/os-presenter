@@ -17,7 +17,7 @@ export const ShapeStroke = ({
   const hasStroke = !!(strokeColor && strokeWidth);
 
   const handleAddStroke = () => {
-    onChange({ strokeColor: "#000000", strokeWidth: 1 });
+    onChange({ strokeColor: "rgba(0, 0, 0, 1)", strokeWidth: 1 });
   };
 
   const handleRemoveStroke = () => {
@@ -59,21 +59,10 @@ const ShapeStrokeItem = ({
   onChange: (update: { strokeColor?: string; strokeWidth?: number }) => void;
 }) => {
   return (
-    <div className="flex flex-col gap-3 pl-2">
-      <div className="flex items-center justify-between gap-2">
-        <Label className="text-xs!" htmlFor="shape-stroke-color">
-          Color
-        </Label>
-        <ColorPicker
-          value={strokeColor}
-          onChange={(color) =>
-            onChange({ strokeColor: color, strokeWidth: strokeWidth })
-          }
-        />
-      </div>
-      <div className="flex items-center justify-between gap-2">
-        <Label className="text-xs! flex-1" htmlFor="shape-stroke-width">
-          Width
+    <div className="flex items-center justify-between gap-3 pl-2">
+      <div className="flex items-center justify-end gap-2">
+        <Label className="text-xs!" htmlFor="shape-stroke-width">
+          W
         </Label>
         <Input
           className="text-xs! h-min w-[10ch]"
@@ -88,6 +77,12 @@ const ShapeStrokeItem = ({
           }}
         />
       </div>
+      <ColorPicker
+        value={strokeColor}
+        onChange={(color) =>
+          onChange({ strokeColor: color, strokeWidth: strokeWidth })
+        }
+      />
     </div>
   );
 };

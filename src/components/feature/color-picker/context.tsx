@@ -3,14 +3,16 @@ import {
   useContext,
   useState,
   useEffect,
+  useRef,
   ReactNode,
 } from "react";
-import { HsvaColor, hsvaToHex, hexToHsva } from "@uiw/react-color";
+import { HsvaColor } from "@uiw/react-color";
+import { hsvaToRgba, rgbaToHsva } from "./utils/colorConversions";
 
 interface ColorPickerContextValue {
   // Main color state
   hsva: HsvaColor;
-  hexColor: string;
+  rgbaColor: string;
   setHsva: (hsva: HsvaColor) => void;
 
   // Internal color wheel state (for independent brightness/opacity control)
@@ -36,8 +38,8 @@ export const useColorPicker = () => {
 
 interface ColorPickerProviderProps {
   children: ReactNode;
-  value?: string; // hex color value from parent
-  onChange?: (color: string) => void;
+  value?: string; // rgba color value from parent (also supports hex for backward compatibility)
+  onChange?: (color: string) => void; // returns rgba format
 }
 
 export const ColorPickerProvider = ({
@@ -47,10 +49,13 @@ export const ColorPickerProvider = ({
 }: ColorPickerProviderProps) => {
   // Initialize from external value or default
   const initialHsva = externalValue
-    ? hexToHsva(externalValue)
+    ? rgbaToHsva(externalValue)
     : { h: 0, s: 0, v: 0, a: 1 };
-  
+
   const [hsva, setHsva] = useState<HsvaColor>(initialHsva);
+
+  // Track if the change is from external source to prevent infinite loops
+  const isExternalChange = useRef(false);
 
   // Internal state for color wheel
   const [baseColor, setBaseColor] = useState({
@@ -63,7 +68,8 @@ export const ColorPickerProvider = ({
   // Sync with external value changes
   useEffect(() => {
     if (externalValue) {
-      const newHsva = hexToHsva(externalValue);
+      const newHsva = rgbaToHsva(externalValue);
+      isExternalChange.current = true;
       setHsva(newHsva);
     }
   }, [externalValue]);
@@ -76,23 +82,28 @@ export const ColorPickerProvider = ({
     }
     setBrightness(hsva.v);
     setOpacity(hsva.a);
+
+    // Reset the external change flag after syncing internal state
+    if (isExternalChange.current) {
+      isExternalChange.current = false;
+    }
   }, [hsva]);
 
-  // Notify parent of changes (separate effect to avoid dependency issues)
+  // Notify parent of changes (only for internal changes)
   useEffect(() => {
-    if (onChange) {
-      const newHexColor = hsvaToHex(hsva);
-      onChange(newHexColor);
+    if (onChange && !isExternalChange.current) {
+      const newRgbaColor = hsvaToRgba(hsva);
+      onChange(newRgbaColor);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hsva]);
 
-  // Convert to hex for display
-  const hexColor = hsvaToHex(hsva);
+  // Convert to rgba for display
+  const rgbaColor = hsvaToRgba(hsva);
 
   const contextValue: ColorPickerContextValue = {
     hsva,
-    hexColor,
+    rgbaColor,
     setHsva,
     baseColor,
     brightness,

@@ -1,4 +1,4 @@
-import { hexToHsva, Swatch } from "@uiw/react-color";
+import { Swatch } from "@uiw/react-color";
 import { getDefaultColorSwatchArray } from "../../utils/getDefaultColorSwatchArray";
 import {
   Popover,
@@ -10,19 +10,20 @@ import { PopoverArrow } from "@radix-ui/react-popover";
 import { useEffect, useState } from "react";
 import { ColorSwatchTriggerButton } from "./ColorSwatchTriggerButton";
 import { useColorPicker } from "../../context";
+import { rgbaToHsva } from "../../utils/colorConversions";
 
 export const ColorSwatchContent = () => {
-  const { hexColor, setHsva } = useColorPicker();
+  const { rgbaColor, setHsva } = useColorPicker();
   const [openSwatch, setOpenSwatch] = useState(false);
 
   useEffect(() => {
     setOpenSwatch(false);
-  }, [hexColor]);
+  }, [rgbaColor]);
 
   return (
     <Popover open={openSwatch} onOpenChange={setOpenSwatch}>
       <PopoverTrigger asChild>
-        <ColorSwatchTriggerButton hexColor={hexColor} />
+        <ColorSwatchTriggerButton color={rgbaColor} />
       </PopoverTrigger>
       <PopoverContent
         className="w-min p-0 bg-shade-1 border-none box-shadow-md mr-2"
@@ -30,11 +31,11 @@ export const ColorSwatchContent = () => {
       >
         <Swatch
           colors={getDefaultColorSwatchArray()}
-          color={hexColor}
+          color={rgbaColor}
           rectRender={(props) => (
             <ColorSwatchButton
               {...props}
-              onClick={() => setHsva(hexToHsva(props.color))}
+              onClick={() => setHsva(rgbaToHsva(props.color))}
             />
           )}
           onChange={(hsvColor) => {

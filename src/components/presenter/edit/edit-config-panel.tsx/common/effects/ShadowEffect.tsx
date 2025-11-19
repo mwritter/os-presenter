@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Box, Minus, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ColorPicker } from "@/components/feature/color-picker/ColorPicker";
 import { Input } from "@/components/ui/input";
 import { ShadowEffectType } from "./types";
@@ -18,11 +18,10 @@ export const ShadowEffect = ({
   const handleAddShadowEffect = () => {
     onChange({
       type: "shadow",
-      color: "#000000",
+      color: "rgba(0, 0, 0, 1)",
       offsetX: 0,
       offsetY: 10,
-      blurRadius: 10,
-      spreadRadius: 0,
+      blurRadius: 0,
     });
   };
 
@@ -68,6 +67,12 @@ const ShapeShadowItem = ({
   onChange: (effect: ShadowEffectType) => void;
 }) => {
   const [state, setState] = useState<ShadowEffectType>(value);
+
+  // Sync internal state when external value changes (e.g., when selecting a different object)
+  useEffect(() => {
+    setState(value);
+  }, [value]);
+
   return (
     <div className="flex flex-col gap-3 pl-2">
       <div className="flex items-center justify-between gap-2">
@@ -83,34 +88,46 @@ const ShapeShadowItem = ({
           }}
         />
       </div>
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center justify-between gap-2">
-          <Label className="text-xs!" htmlFor="shape-shadow-offset-x">
-            Offset X
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
+          <Label className="text-[10px]!" htmlFor="shape-shadow-offset-x">
+            X
           </Label>
           <Input
-            className="text-xs! h-min w-[10ch]"
+            className="text-xs! h-min flex-1"
             type="number"
             step="1"
+            min={-100}
+            max={100}
             value={state.offsetX}
             onChange={(e) => {
-              const newState = { ...state, offsetX: Number(e.target.value) };
+              const value = Math.max(
+                -100,
+                Math.min(100, Number(e.target.value))
+              );
+              const newState = { ...state, offsetX: value };
               setState(newState);
               onChange(newState);
             }}
           />
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <Label className="text-xs!" htmlFor="shape-shadow-offset-y">
-            Offset Y
+        <div className="flex items-center justify-between gap-2 flex-1">
+          <Label className="text-[10px]" htmlFor="shape-shadow-offset-y">
+            Y
           </Label>
           <Input
-            className="text-xs! h-min w-[10ch]"
+            className="text-xs! h-min flex-1"
             type="number"
             step="1"
+            min={-100}
+            max={100}
             value={state.offsetY}
             onChange={(e) => {
-              const newState = { ...state, offsetY: Number(e.target.value) };
+              const value = Math.max(
+                -100,
+                Math.min(100, Number(e.target.value))
+              );
+              const newState = { ...state, offsetY: value };
               setState(newState);
               onChange(newState);
             }}
@@ -118,36 +135,18 @@ const ShapeShadowItem = ({
         </div>
       </div>
       <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-1 items-center justify-between gap-2">
-          <Label className="text-xs!" htmlFor="shape-shadow-blur-radius">
+        <div className="flex flex-1 items-center justify-end gap-2">
+          <Label className="text-[10px]!" htmlFor="shape-shadow-blur-radius">
             Blur
           </Label>
           <Input
-            className="text-xs! h-min"
+            className="text-xs! h-min w-[10ch]"
             type="number"
             step="1"
+            min={0}
             value={state.blurRadius}
             onChange={(e) => {
               const newState = { ...state, blurRadius: Number(e.target.value) };
-              setState(newState);
-              onChange(newState);
-            }}
-          />
-        </div>
-        <div className="flex flex-1 items-center justify-between gap-2">
-          <Label className="text-xs!" htmlFor="shape-shadow-spread-radius">
-            Spread
-          </Label>
-          <Input
-            className="text-xs! h-min"
-            type="number"
-            step="1"
-            value={state.spreadRadius}
-            onChange={(e) => {
-              const newState = {
-                ...state,
-                spreadRadius: Number(e.target.value),
-              };
               setState(newState);
               onChange(newState);
             }}

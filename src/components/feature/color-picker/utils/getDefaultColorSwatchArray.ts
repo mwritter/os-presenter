@@ -1,4 +1,4 @@
-import { hsvaToHex } from "@uiw/react-color";
+import { hsvaToRgba } from "./colorConversions";
 import { DEFAULT_COLOR_SWATCH_SHADES } from "../constants";
 
 export const getDefaultColorSwatchArray = () => {
@@ -11,8 +11,8 @@ export const getDefaultColorSwatchArray = () => {
         DEFAULT_COLOR_SWATCH_SHADES[
           colorKey as keyof typeof DEFAULT_COLOR_SWATCH_SHADES
         ][i];
-      // Convert HSVA to hex for the Swatch component
-      colors.push(hsvaToHex(hsvaColor));
+      // Convert HSVA to rgba for the Swatch component
+      colors.push(hsvaToRgba(hsvaColor));
     }
   }
   return colors;

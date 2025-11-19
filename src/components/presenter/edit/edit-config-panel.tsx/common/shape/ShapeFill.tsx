@@ -15,7 +15,7 @@ export const ShapeFill = ({
   const hasFill = !!value;
 
   const handleAddFill = () => {
-    onChange("#3b82f6"); // Default blue color
+    onChange("rgba(59, 130, 246, 1)"); // Default blue color
   };
 
   const handleRemoveFill = () => {

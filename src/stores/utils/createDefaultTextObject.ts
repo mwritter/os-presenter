@@ -18,7 +18,7 @@ export const createDefaultTextObject = (canvasSize: CanvasSize): TextObject => {
     zIndex: 1,
     content: "",
     fontSize: 48,
-    color: "#FFFFFF",
+    color: "rgba(255, 255, 255, 1)",
     alignment: { horizontal: "center", vertical: "center" },
     fontFamily: "Arial",
     fontStyle: "normal",

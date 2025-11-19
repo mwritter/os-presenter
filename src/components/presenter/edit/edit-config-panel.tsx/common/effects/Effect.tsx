@@ -27,7 +27,6 @@ export const Effect = ({
         offsetX: shadow.offsetX,
         offsetY: shadow.offsetY,
         blurRadius: shadow.blurRadius,
-        spreadRadius: shadow.spreadRadius,
       };
       onChange({ ...value, shadow: shadowData });
     }

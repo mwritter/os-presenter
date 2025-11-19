@@ -23,7 +23,6 @@ export type ShadowEffect = {
   offsetX: number;
   offsetY: number;
   blurRadius: number;
-  spreadRadius: number;
 };
 
 // Effect container type

@@ -3,8 +3,8 @@ import { ColorWheelContent } from "./common/color-wheel/ColorWheelContent";
 import { ColorSwatchContent } from "./common/color-swatch/ColorSwatchContent";
 
 export type ColorPickerProps = {
-  value?: string; // hex color value
-  onChange?: (color: string) => void;
+  value?: string; // rgba color value (also supports hex for backward compatibility)
+  onChange?: (color: string) => void; // returns rgba format
 };
 
 export const ColorPicker = ({ value, onChange }: ColorPickerProps) => {

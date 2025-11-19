@@ -4,7 +4,7 @@ import { ShadowEffect, TextObject } from "../../../types";
 // Helper function to convert ShadowEffect to CSS box-shadow
 const getShadowStyle = (shadow?: ShadowEffect): string => {
   if (!shadow) return "none";
-  return `${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blurRadius}px ${shadow.spreadRadius}px ${shadow.color}`;
+  return `${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blurRadius}px ${shadow.color}`;
 };
 
 export const getContainerStyles = ({

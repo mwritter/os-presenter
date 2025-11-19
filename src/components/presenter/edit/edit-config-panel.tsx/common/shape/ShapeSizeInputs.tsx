@@ -49,7 +49,10 @@ export const ShapeSizeWidthInput = ({
   onChange: (update: { width?: number }) => void;
 }) => {
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex items-center gap-2">
+      <Label className="text-[10px]!" htmlFor="shape-size-width">
+        W
+      </Label>
       <Input
         className="text-xs! h-min"
         id="shape-size-width"
@@ -61,9 +64,6 @@ export const ShapeSizeWidthInput = ({
           onChange({ width: Number(e.target.value) });
         }}
       />
-      <Label className="text-xs!" htmlFor="shape-size-width">
-        Width
-      </Label>
     </div>
   );
 };
@@ -76,7 +76,10 @@ export const ShapeSizeHeightInput = ({
   onChange: (update: { height?: number }) => void;
 }) => {
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex items-center gap-2">
+      <Label className="text-[10px]!" htmlFor="shape-size-height">
+        H
+      </Label>
       <Input
         className="text-xs! h-min"
         id="shape-size-height"
@@ -88,9 +91,6 @@ export const ShapeSizeHeightInput = ({
           onChange({ height: Number(e.target.value) });
         }}
       />
-      <Label className="text-xs!" htmlFor="shape-size-height">
-        Height
-      </Label>
     </div>
   );
 };

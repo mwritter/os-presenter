@@ -1,17 +1,17 @@
 import { ButtonHTMLAttributes } from "react";
 
 export const ColorSwatchTriggerButton = ({
-  hexColor,
+  color,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
-  hexColor: string;
+  color: string;
   className?: string;
 }) => {
   return (
     <button
       {...props}
       className="aspect-video w-10 rounded-tl-sm rounded-bl-sm"
-      style={{ backgroundColor: hexColor }}
+      style={{ backgroundColor: color }}
     />
   );
 };

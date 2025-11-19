@@ -2,7 +2,6 @@ import { ShapeObject as ShapeObjectType, SlideObject } from "../../types";
 import { cn } from "@/lib/utils";
 import { useTextEditing } from "../hooks/use-text-editing";
 import { getContainerStyles } from "./utils/getContainerStyles";
-import { getObjectStyles } from "./utils/getObjectStyles";
 import { getShape } from "./utils/getShape";
 
 export type ShapeObjectProps = {
@@ -37,9 +36,10 @@ export const ShapeObject = ({
     isEditable,
   });
 
-  const shapeStyle = getObjectStyles({ object: shapeObject });
-
   const Shape = getShape({ object: shapeObject });
+
+  // If shape type is invalid, don't render anything
+  if (!Shape) return null;
 
   return (
     <div
@@ -53,7 +53,7 @@ export const ShapeObject = ({
         fillColor={shapeObject.fillColor}
         strokeColor={shapeObject.strokeColor}
         strokeWidth={shapeObject.strokeWidth}
-        style={shapeStyle}
+        shadow={shapeObject.effect?.shadow}
       />
 
       {(textContent || isEditing) && (

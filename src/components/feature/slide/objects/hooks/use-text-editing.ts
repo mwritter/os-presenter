@@ -149,7 +149,7 @@ export const useTextEditing = ({
           display: "flex",
           alignItems: getAlignItems(object.alignment?.vertical),
           justifyContent: "center",
-          overflow: isEditable && isSelected ? "visible" : "hidden",
+          overflow: "visible",
         }
       : {};
 
@@ -160,7 +160,7 @@ export const useTextEditing = ({
     border: "none",
     outline: "none",
     fontSize: `${object.fontSize || 48}px`,
-    color: object.color || "#FFFFFF",
+    color: object.color || "rgba(255, 255, 255, 1)",
     textAlign: object.alignment?.horizontal || "center",
     // fontFamily now contains the full font name (e.g., "American Typewriter Bold")
     fontFamily: object.fontFamily || "Arial",
@@ -181,7 +181,7 @@ export const useTextEditing = ({
     // Additional styles for direct mode
     ...(mode === "direct" && {
       maxHeight: isEditing ? "none" : "100%",
-      overflow: isEditing && isSelected ? "visible" : "hidden",
+      overflow: "visible",
     }),
   };
 

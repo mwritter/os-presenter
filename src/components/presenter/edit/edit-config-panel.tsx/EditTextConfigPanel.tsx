@@ -80,7 +80,7 @@ export const EditTextConfigPanel = () => {
         : undefined,
     color:
       ("color" in selectedObject ? selectedObject.color : undefined) ||
-      "#FFFFFF",
+      "rgba(255, 255, 255, 1)",
     alignment: ("alignment" in selectedObject && selectedObject.alignment
       ? selectedObject.alignment
       : {

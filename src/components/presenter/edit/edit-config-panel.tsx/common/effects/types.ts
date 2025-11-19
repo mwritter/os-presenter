@@ -4,7 +4,6 @@ export type ShadowEffectType = {
   offsetX: number;
   offsetY: number;
   blurRadius: number;
-  spreadRadius: number;
 };
 
 export type EffectType = {

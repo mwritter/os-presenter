@@ -43,18 +43,18 @@ export const ShapePositionXInput = ({
   onChange: (update: { x?: number }) => void;
 }) => {
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex items-center gap-2">
+      <Label className="text-[10px]!" htmlFor="shape-position-x">
+        X
+      </Label>
       <Input
         className="text-xs! h-min"
         id="shape-position-x"
         type="number"
-        step="0.01"
+        step="1"
         value={Number(value.toFixed(2))}
         onChange={(e) => onChange({ x: Number(e.target.value) })}
       />
-      <Label className="text-xs!" htmlFor="shape-position-x">
-        X
-      </Label>
     </div>
   );
 };
@@ -67,18 +67,18 @@ export const ShapePositionYInput = ({
   onChange: (update: { y?: number }) => void;
 }) => {
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex items-center gap-2">
+      <Label className="text-[10px]!" htmlFor="shape-position-y">
+        Y
+      </Label>
       <Input
         className="text-xs! h-min"
         id="shape-position-y"
         type="number"
-        step="0.01"
+        step="1"
         value={Number(value.toFixed(2))}
         onChange={(e) => onChange({ y: Number(e.target.value) })}
       />
-      <Label className="text-xs!" htmlFor="shape-position-y">
-        Y
-      </Label>
     </div>
   );
 };

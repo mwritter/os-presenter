@@ -60,8 +60,6 @@ pub struct ShadowEffect {
     pub offset_y: f64,
     #[serde(rename = "blurRadius")]
     pub blur_radius: f64,
-    #[serde(rename = "spreadRadius")]
-    pub spread_radius: f64,
 }
 
 // Effect container type

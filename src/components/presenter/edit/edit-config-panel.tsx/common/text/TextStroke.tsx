@@ -16,7 +16,7 @@ export const TextStroke = ({
   const hasStroke = !!(strokeColor && strokeWidth);
 
   const handleAddStroke = () => {
-    onChange({ strokeColor: "#000000", strokeWidth: 1 });
+    onChange({ strokeColor: "rgba(0, 0, 0, 1)", strokeWidth: 1 });
   };
 
   const handleRemoveStroke = () => {

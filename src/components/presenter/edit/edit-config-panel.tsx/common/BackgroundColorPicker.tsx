@@ -12,7 +12,7 @@ export const BackgroundColorPicker = ({
   value,
   onChange,
 }: BackgroundColorPickerProps) => {
-  const [color, setColor] = useState(value || "#000000");
+  const [color, setColor] = useState(value || "rgba(0, 0, 0, 1)");
   const hasBackground = !!value;
 
   // Sync with external value changes
