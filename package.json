@@ -1,10 +1,10 @@
 {
-  "name": "tauri-app",
+  "name": "os-presenter",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "react-router dev",
+    "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",

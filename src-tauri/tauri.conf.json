@@ -1,23 +1,22 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tauri-app",
+  "productName": "OS Presenter",
   "version": "0.1.0",
-  "identifier": "com.mwritter.tauri-app",
+  "identifier": "com.mwritter.os-presenter",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist"
+    "frontendDist": "../build/client"
   },
   "app": {
     "windows": [
       {
-        "title": "tauri-app",
+        "title": "OS Presenter",
         "width": 800,
         "height": 600,
         "minWidth": 800,
-        "minHeight": 600,
-        "url": "http://localhost:1420/presenter"
+        "minHeight": 600
       }
     ],
     "security": {

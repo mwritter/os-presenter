@@ -1,24 +1,19 @@
 import { SlideObject } from "./types";
-import { MoveableObject } from "./objects/moveable/MoveableObject";
+import { SlideObjectWrapper } from "./objects/SlideObjectWrapper";
 
 export type SlideObjectRendererProps = {
-  scale: number;
   objects: SlideObject[];
   isEditable?: boolean;
   selectedObjectId?: string | null;
-  canvasRef?: React.RefObject<HTMLElement>;
-  onUpdateObject?: (objectId: string, updates: Partial<SlideObject>) => void;
 };
 
 export const SlideObjectRenderer = ({
-  scale,
   objects = [],
   isEditable = false,
   selectedObjectId = null,
-  canvasRef,
-  onUpdateObject,
 }: SlideObjectRendererProps) => {
   const sortedObjects = [...objects].sort((a, b) => a.zIndex - b.zIndex);
+  const hasSelection = selectedObjectId !== null;
 
   return (
     <>
@@ -26,14 +21,12 @@ export const SlideObjectRenderer = ({
         const isSelected = selectedObjectId === object.id;
 
         return (
-          <MoveableObject
-            scale={scale}
+          <SlideObjectWrapper
             key={object.id}
             object={object}
             isSelected={isSelected}
             isEditable={isEditable}
-            canvasRef={canvasRef!}
-            onUpdateObject={onUpdateObject!}
+            hasSelection={hasSelection}
           />
         );
       })}

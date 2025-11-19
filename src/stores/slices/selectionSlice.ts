@@ -1,5 +1,7 @@
 import { StateCreator } from "zustand";
 import { SlideData } from "@/components/feature/slide/types";
+import { CanvasSize } from "@/components/presenter/types";
+import { emit } from "@tauri-apps/api/event";
 
 export interface SelectionSlice {
   selectedLibraryId: string | null;
@@ -15,6 +17,7 @@ export interface SelectionSlice {
   activeSlide: {
     id: string; // Globally unique slide ID
     data: SlideData; // Full slide data for audience view
+    canvasSize: CanvasSize; // Canvas size for proper rendering
   } | null;
 
   // Actions
@@ -24,7 +27,11 @@ export interface SelectionSlice {
   selectPlaylistItem: (itemId: string, playlistId: string) => void;
   clearSlideGroupSelection: () => void;
   clearPlaylistItemSelection: () => void;
-  setActiveSlide: (slideId: string, slideData: SlideData) => void;
+  setActiveSlide: (
+    slideId: string,
+    slideData: SlideData,
+    canvasSize?: CanvasSize
+  ) => void;
   clearActiveSlide: () => void;
 }
 
@@ -76,13 +83,25 @@ export const createSelectionSlice: StateCreator<
       selectedPlaylistItem: null,
     }),
 
-  setActiveSlide: (slideId, slideData) => {
-    set({ activeSlide: { id: slideId, data: slideData } });
+  setActiveSlide: (slideId, slideData, canvasSize = { width: 1920, height: 1080 }) => {
+    const activeSlide = { id: slideId, data: slideData, canvasSize };
+    set({ activeSlide });
 
-    // TODO: In the future, emit this to audience screens via Tauri events
+    // Emit Tauri event to audience windows
+    emit("active-slide-changed", activeSlide).catch((error) => {
+      console.error("Failed to emit active-slide-changed event:", error);
+    });
+
     console.log("Active slide changed:", slideId, slideData);
   },
 
-  clearActiveSlide: () => set({ activeSlide: null }),
+  clearActiveSlide: () => {
+    set({ activeSlide: null });
+    
+    // Emit clear event to audience windows
+    emit("active-slide-changed", null).catch((error) => {
+      console.error("Failed to emit active-slide-changed event:", error);
+    });
+  },
 });
 

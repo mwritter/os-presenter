@@ -1,7 +1,7 @@
 import { useEditContext } from "@/presenter/edit/context";
 import { Slide } from "@/components/feature/slide/Slide";
 import { EditViewObjectActionbar } from "./edit-object-action-bar/EditViewObjectActionbar";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { EditConfigPanel } from "./edit-config-panel.tsx/EditConfigPanel";
 
 export const EditViewContent = () => {
@@ -14,11 +14,12 @@ export const EditViewContent = () => {
     canvasSize,
   } = useEditContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isMoveableInteracting, setIsMoveableInteracting] = useState(false);
 
   const handleSlideMouseDown = (e: React.MouseEvent) => {
     console.log("handleSlideMouseDown", selectedObjectId);
-    // Don't start selecting if we're in edit mode
-    if (editingObjectId) return;
+    // Don't start selecting if we're in edit mode or interacting with Moveable
+    if (editingObjectId || isMoveableInteracting) return;
 
     const target = e.target as HTMLElement;
     const objectId =
@@ -40,14 +41,17 @@ export const EditViewContent = () => {
     if (editingObjectId) return;
 
     // Check if click is outside the slide container
-    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    if (
+      containerRef.current &&
+      !containerRef.current.contains(e.target as Node)
+    ) {
       selectObject(null);
     }
   };
 
   return (
     <div className="grid grid-cols-[1fr_300px] h-full w-full bg-shade-lighter">
-      <div 
+      <div
         className="flex flex-col justify-center items-center h-full w-full overflow-y-auto"
         onMouseDown={handleOuterClick}
       >
@@ -72,6 +76,7 @@ export const EditViewContent = () => {
                   selectedObjectId={selectedObjectId}
                   onUpdateObject={updateObject}
                   canvasSize={canvasSize}
+                  onMoveableInteractionChange={setIsMoveableInteracting}
                 />
               </div>
             </div>

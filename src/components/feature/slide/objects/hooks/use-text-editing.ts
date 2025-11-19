@@ -23,6 +23,7 @@ type TextableObject = {
   textStrokeWidth?: number;
   textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   textShadow?: ShadowEffect;
+  isLocked?: boolean;
 };
 
 type UseTextEditingOptions = {
@@ -98,7 +99,7 @@ export const useTextEditing = ({
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
-    if (isEditable) {
+    if (isEditable && !object.isLocked) {
       e.preventDefault();
       e.stopPropagation();
       setIsEditing(true);
@@ -175,6 +176,8 @@ export const useTextEditing = ({
     boxSizing: "border-box",
     cursor: isEditable && !isEditing ? "move" : "text",
     userSelect: isEditing ? "auto" : "none",
+    WebkitUserSelect: isEditing ? "auto" : "none",
+    MozUserSelect: isEditing ? "auto" : "none",
     wordWrap: "break-word",
     whiteSpace: "pre-wrap",
     pointerEvents: isEditing ? "auto" : "none",

@@ -32,6 +32,7 @@ interface EditContextType {
   updateObject: (objectId: string, updates: Partial<SlideObject>) => void;
   updateTextContent: (objectId: string, content: string) => void;
   deleteObject: (objectId: string) => void;
+  toggleObjectLock: (objectId: string) => void;
   reorderObject: (
     objectId: string,
     direction: "forward" | "backward" | "front" | "back"
@@ -46,8 +47,12 @@ const EditContext = createContext<EditContextType | undefined>(undefined);
 
 export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   const updateSlideInLibrary = useLibraryStore((s) => s.updateSlideInLibrary);
-  const updateSlideInPlaylistItem = usePlaylistStore((s) => s.updateSlideInPlaylistItem);
-  const updatePlaylistItemSlideGroup = usePlaylistStore((s) => s.updatePlaylistItemSlideGroup);
+  const updateSlideInPlaylistItem = usePlaylistStore(
+    (s) => s.updateSlideInPlaylistItem
+  );
+  const updatePlaylistItemSlideGroup = usePlaylistStore(
+    (s) => s.updatePlaylistItemSlideGroup
+  );
   const updateLibrary = useLibraryStore((s) => s.updateLibrary);
   const selectedSlideGroup = useSelectionStore((s) => s.selectedSlideGroup);
   const selectedPlaylistItem = useSelectionStore((s) => s.selectedPlaylistItem);
@@ -128,14 +133,23 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     setSelectedSlide(updatedSlide);
   };
 
+  // Helper function to get the next highest zIndex
+  const getNextZIndex = (objects: SlideObject[]): number => {
+    if (objects.length === 0) return 1;
+    return Math.max(...objects.map((o) => o.zIndex)) + 1;
+  };
+
   const addTextObject = () => {
+    const currentObjects = selectedSlide?.objects || [];
     const newObject = createDefaultTextObject(canvasSize);
+    newObject.zIndex = getNextZIndex(currentObjects);
 
     updateSlideObjects((objects) => [...objects, newObject]);
     setSelectedObjectId(newObject.id);
   };
 
   const addShapeObject = (shapeType: "rectangle" | "circle" | "triangle") => {
+    const currentObjects = selectedSlide?.objects || [];
     const newObject: ShapeObject = {
       id: crypto.randomUUID(),
       type: "shape",
@@ -143,7 +157,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       size: { width: 300, height: 300 },
       scaleX: 1,
       scaleY: 1,
-      zIndex: (selectedSlide?.objects?.length || 0) + 1,
+      zIndex: getNextZIndex(currentObjects),
       shapeType,
       fillColor: "rgba(59, 130, 246, 1)",
     };
@@ -153,6 +167,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addImageObject = (src: string) => {
+    const currentObjects = selectedSlide?.objects || [];
     const newObject: ImageObject = {
       id: crypto.randomUUID(),
       type: "image",
@@ -160,7 +175,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       size: { width: canvasSize.width * 0.6, height: canvasSize.height * 0.6 },
       scaleX: 1,
       scaleY: 1,
-      zIndex: (selectedSlide?.objects?.length || 0) + 1,
+      zIndex: getNextZIndex(currentObjects),
       src,
       objectFit: "cover",
     };
@@ -170,6 +185,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addVideoObject = (src: string) => {
+    const currentObjects = selectedSlide?.objects || [];
     const newObject: VideoObject = {
       id: crypto.randomUUID(),
       type: "video",
@@ -177,7 +193,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       size: { width: canvasSize.width * 0.6, height: canvasSize.height * 0.6 },
       scaleX: 1,
       scaleY: 1,
-      zIndex: (selectedSlide?.objects?.length || 0) + 1,
+      zIndex: getNextZIndex(currentObjects),
       src,
       autoPlay: false,
       loop: false,
@@ -203,6 +219,14 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     if (selectedObjectId === objectId) {
       setSelectedObjectId(null);
     }
+  };
+
+  const toggleObjectLock = (objectId: string) => {
+    updateSlideObjects((objects) =>
+      objects.map((obj) =>
+        obj.id === objectId ? { ...obj, isLocked: !obj.isLocked } : obj
+      )
+    );
   };
 
   const reorderObject = (
@@ -286,7 +310,10 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
             content,
             fontSize: 48,
             color: "rgba(255, 255, 255, 1)",
-            alignment: { horizontal: "center" as const, vertical: "center" as const },
+            alignment: {
+              horizontal: "center" as const,
+              vertical: "center" as const,
+            },
             fontFamily: "Arial",
             fontStyle: "normal" as const,
           } as SlideObject;
@@ -407,6 +434,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
         updateObject,
         updateTextContent,
         deleteObject,
+        toggleObjectLock,
         reorderObject,
         reorderObjects,
         updateSlideBackground,

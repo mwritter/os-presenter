@@ -76,7 +76,3 @@ export const PresentationCopyright = () => {
     </Accordion>
   );
 };
-
-const CopyrightTitle = () => {
-  return <div className="flex flex-col gap-2"></div>;
-};

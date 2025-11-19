@@ -6,15 +6,15 @@ import { getEmptyBackgroundStyle } from "./getBackgroundStyle";
 export const getSlideCanvasStyles = ({
   backgroundColor,
   canvasSize,
-  scale,
-  isEditable,
-  isReady,
+  scale = 1,
+  isEditable = false,
+  isReady = true,
 }: {
   backgroundColor?: string;
   canvasSize: CanvasSize;
-  scale: number;
-  isEditable: boolean;
-  isReady: boolean;
+  scale?: number;
+  isEditable?: boolean;
+  isReady?: boolean;
 }): CSSProperties => {
   const background = backgroundColor
     ? { backgroundColor }

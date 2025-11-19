@@ -16,6 +16,8 @@ export type MoveableWrapperProps = {
   onUpdate: (updates: Partial<SlideObject>) => void;
   scale: number;
   container: React.RefObject<HTMLElement>;
+  onInteractionStart?: () => void;
+  onInteractionEnd?: () => void;
 };
 
 export const MoveableWrapper = ({
@@ -24,9 +26,12 @@ export const MoveableWrapper = ({
   onUpdate,
   scale,
   container,
+  onInteractionStart,
+  onInteractionEnd,
 }: MoveableWrapperProps) => {
   const moveableRef = useRef<Moveable>(null);
   const targetElementRef = useRef<HTMLElement | null>(null);
+  const isInteractingRef = useRef(false);
   // Scale the snap threshold to maintain consistent behavior at different zoom levels
   const scaledSnapThreshold = 50 * scale;
 
@@ -57,6 +62,10 @@ export const MoveableWrapper = ({
   const guidelines = getMoveableGuidelines(container.current);
 
   const handleDrag = (e: OnDrag) => {
+    if (!isInteractingRef.current) {
+      isInteractingRef.current = true;
+      onInteractionStart?.();
+    }
     const rotation = object.rotation || 0;
     const scaleX = object.scaleX ?? 1;
     const scaleY = object.scaleY ?? 1;
@@ -64,6 +73,8 @@ export const MoveableWrapper = ({
   };
 
   const handleDragEnd = (e: OnDragEnd) => {
+    isInteractingRef.current = false;
+    onInteractionEnd?.();
     requestAnimationFrame(() => {
       // Update position in state
       const newX = object.position.x + e.lastEvent.translate[0];
@@ -94,6 +105,10 @@ export const MoveableWrapper = ({
   };
 
   const handleResize = (e: OnResize) => {
+    if (!isInteractingRef.current) {
+      isInteractingRef.current = true;
+      onInteractionStart?.();
+    }
     const MIN_SIZE = 1;
 
     // Enforce minimum size
@@ -109,6 +124,8 @@ export const MoveableWrapper = ({
   };
 
   const handleResizeEnd = (e: OnResizeEnd) => {
+    isInteractingRef.current = false;
+    onInteractionEnd?.();
     requestAnimationFrame(() => {
       const MIN_SIZE = 1;
 
@@ -151,12 +168,18 @@ export const MoveableWrapper = ({
   };
 
   const handleRotate = (e: OnRotate) => {
+    if (!isInteractingRef.current) {
+      isInteractingRef.current = true;
+      onInteractionStart?.();
+    }
     const scaleX = object.scaleX ?? 1;
     const scaleY = object.scaleY ?? 1;
     e.target.style.transform = `translate(0px, 0px) scale(${scaleX}, ${scaleY}) rotate(${e.rotation}deg)`;
   };
 
   const handleRotateEnd = (e: OnRotateEnd) => {
+    isInteractingRef.current = false;
+    onInteractionEnd?.();
     requestAnimationFrame(() => {
       onUpdate({
         rotation: e.lastEvent.rotate,

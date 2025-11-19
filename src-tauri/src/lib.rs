@@ -547,6 +547,55 @@ fn get_media_file_path(app: AppHandle, file_name: String) -> Result<String, Stri
         .map(|s| s.to_string())
 }
 
+// Audience window commands
+#[tauri::command]
+fn open_audience_window(app: AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+
+    // Check if audience window already exists
+    if app.get_webview_window("audience").is_some() {
+        return Err("Audience window is already open".to_string());
+    }
+
+    // Create the audience window
+    let window = tauri::WebviewWindowBuilder::new(
+        &app,
+        "audience",
+        tauri::WebviewUrl::App("/audience".into()),
+    )
+    .title("Audience View")
+    .fullscreen(true)
+    .decorations(false)
+    .build()
+    .map_err(|e| format!("Failed to create audience window: {}", e))?;
+
+    // Focus the window
+    window
+        .set_focus()
+        .map_err(|e| format!("Failed to focus window: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+fn close_audience_window(app: AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+
+    if let Some(window) = app.get_webview_window("audience") {
+        window
+            .close()
+            .map_err(|e| format!("Failed to close audience window: {}", e))?;
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+fn is_audience_window_open(app: AppHandle) -> bool {
+    use tauri::Manager;
+    app.get_webview_window("audience").is_some()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -566,6 +615,9 @@ pub fn run() {
             import_media_file,
             delete_media_item,
             get_media_file_path,
+            open_audience_window,
+            close_audience_window,
+            is_audience_window_open,
             tauri_plugin_font_variants::get_font_families,
             tauri_plugin_font_variants::get_font_variants,
         ])

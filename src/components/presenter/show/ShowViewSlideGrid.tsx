@@ -23,7 +23,7 @@ export const ShowViewSlideGrid = ({
         {slides.map((slide, index) => (
           <div
             key={slide.id + index}
-            className="border border-shade-1 shrink-0"
+            className="shrink-0"
             style={{
               flexBasis: "clamp(300px, calc((100% - 5rem) / 4), 300px)",
             }}

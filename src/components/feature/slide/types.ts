@@ -41,6 +41,7 @@ export type BaseSlideObject = {
   scaleX?: number; // scale factor for horizontal axis (negative for flip)
   scaleY?: number; // scale factor for vertical axis (negative for flip)
   zIndex: number;
+  isLocked?: boolean; // Hard lock - prevents all editing
 };
 
 // Text object with extended formatting

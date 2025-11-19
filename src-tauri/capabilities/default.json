@@ -2,12 +2,22 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": ["main", "audience"],
   "permissions": [
     "core:default",
     "opener:default",
     "dialog:default",
     "dialog:allow-open",
-    "dialog:allow-message"
+    "dialog:allow-message",
+    "core:event:allow-listen"
+  ],
+  "listen": [
+    {
+      "name": "active-slide-changed",
+      "payload": {
+        "id": "string",
+        "data": "string"
+      }
+    }
   ]
 }

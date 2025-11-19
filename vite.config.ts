@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { reactRouter } from "@react-router/dev/vite";
+import react from "@vitejs/plugin-react";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -14,8 +14,12 @@ const ReactCompilerConfig = {
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
+  base: "./",
+  build: {
+    outDir: "build/client",
+  },
   plugins: [
-    reactRouter({
+    react({
       babel: {
         plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
       },
