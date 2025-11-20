@@ -64,11 +64,15 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
   const slideGroup =
     selectedPlaylistItemData?.slideGroup || activeSlideGroupData;
   const canvasSize = slideGroup?.canvasSize || { width: 1920, height: 1080 };
-  const initalSlide =
-    activeSlide?.data ||
-    selectedPlaylistItemData?.slideGroup?.slides?.[0] ||
-    activeSlideGroupData?.slides?.[0] ||
-    null;
+  // check if active slide is in the slide group
+  const isActiveSlideInSlideGroup =
+    activeSlide && slideGroup?.slides?.some((s) => s.id === activeSlide.id);
+  const initalSlide = isActiveSlideInSlideGroup
+    ? activeSlide?.data ||
+      selectedPlaylistItemData?.slideGroup?.slides?.[0] ||
+      activeSlideGroupData?.slides?.[0] ||
+      null
+    : (selectedPlaylistItemData?.slideGroup?.slides?.[0] ?? null);
   const [selectedSlide, setSelectedSlide] = useState<SlideData | null>(
     initalSlide
   );

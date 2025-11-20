@@ -1,4 +1,5 @@
 import { MediaLibraryPanel } from "./media-library/MediaLibraryPanel";
+import { RightSidebar } from "./right-sidebar/RightSidebar";
 import { Sidebar } from "./sidebar/Sidebar";
 import {
   ResizableHandle,
@@ -13,9 +14,9 @@ export const ContentLayout = ({ children }: { children: React.ReactNode }) => {
         <ResizablePanelGroup id="horizontal-layout" direction="horizontal">
           <Sidebar />
           <ResizableHandle className="bg-black" />
-          <ResizablePanel id="content-panel">
-            {children}
-          </ResizablePanel>
+          <ResizablePanel id="content-panel">{children}</ResizablePanel>
+          <ResizableHandle className="bg-black" />
+          <RightSidebar />
         </ResizablePanelGroup>
       </ResizablePanel>
       <ResizableHandle className="bg-black" />

@@ -10,6 +10,8 @@ import {
   useLibraryStore,
   usePlaylistStore,
 } from "@/stores/presenterStore";
+import { useShowKeyboardNav } from "@/hooks/use-show-keyboard-nav";
+import { useEffect, useRef } from "react";
 
 const Show = () => {
   // Check if a library item or playlist item is selected
@@ -33,6 +35,27 @@ const ShowViewLibraryContent = () => {
   const selectedSlideGroupData = useSelectedSlideGroupData();
   const selectedSlideGroup = useSelectionStore((s) => s.selectedSlideGroup);
   const addSlideToSlideGroup = useLibraryStore((s) => s.addSlideToSlideGroup);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Setup keyboard navigation for single slide group
+  const slideGroups = selectedSlideGroupData
+    ? [
+        {
+          slides: selectedSlideGroupData.slides,
+          title: selectedSlideGroupData.title,
+        },
+      ]
+    : [];
+
+  const { handleKeyDown } = useShowKeyboardNav({
+    slideGroups,
+    enableMultiGroupNavigation: false,
+  });
+
+  // Focus the container when component mounts to ensure keyboard events work
+  useEffect(() => {
+    containerRef.current?.focus();
+  }, []);
 
   const handleAddBlankSlide = () => {
     if (!selectedSlideGroup) return;
@@ -41,12 +64,24 @@ const ShowViewLibraryContent = () => {
       selectedSlideGroup.index
     );
   };
+
+  const canvasSize = selectedSlideGroupData?.canvasSize || {
+    width: 1920,
+    height: 1080,
+  };
+
   return (
-    <div className="flex flex-col h-full w-full relative">
+    <div
+      ref={containerRef}
+      className="flex flex-col h-full w-full relative outline-none"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
       <div className="flex-1 overflow-y-auto">
         <ShowViewSlideGrid
           slides={selectedSlideGroupData?.slides ?? []}
           title={selectedSlideGroupData?.title ?? ""}
+          canvasSize={canvasSize}
         />
       </div>
       <ShowViewFooter onAddBlankSlide={handleAddBlankSlide} />
@@ -63,6 +98,25 @@ const ShowViewPlaylistContent = () => {
   const playlist = usePlaylistStore((s) =>
     s.playlists.find((p) => p.id === selectedPlaylistItem?.playlistId)
   );
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Setup keyboard navigation for multiple slide groups
+  const slideGroups =
+    playlist?.items.map((item) => ({
+      slides: item.slideGroup.slides,
+      title: item.slideGroup.title,
+    })) ?? [];
+
+  const { handleKeyDown } = useShowKeyboardNav({
+    slideGroups,
+    enableMultiGroupNavigation: true, // Enable double-press navigation between groups
+  });
+
+  // Focus the container when component mounts to ensure keyboard events work
+  useEffect(() => {
+    containerRef.current?.focus();
+  }, []);
+
   const handleAddBlankSlide = () => {
     if (!selectedPlaylistItem) return;
     addSlideToPlaylistItem(
@@ -70,17 +124,30 @@ const ShowViewPlaylistContent = () => {
       selectedPlaylistItem.id
     );
   };
+
   return (
-    <div className="flex flex-col h-full w-full relative">
+    <div
+      ref={containerRef}
+      className="flex flex-col h-full w-full relative outline-none"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
       <div className="flex-1 overflow-y-auto pb-20">
-        {playlist?.items.map((item) => (
-          <div key={item.id}>
-            <ShowViewSlideGrid
-              slides={item.slideGroup.slides}
-              title={item.slideGroup.title}
-            />
-          </div>
-        ))}
+        {playlist?.items.map((item) => {
+          const canvasSize = item.slideGroup.canvasSize || {
+            width: 1920,
+            height: 1080,
+          };
+          return (
+            <div key={item.id}>
+              <ShowViewSlideGrid
+                slides={item.slideGroup.slides}
+                title={item.slideGroup.title}
+                canvasSize={canvasSize}
+              />
+            </div>
+          );
+        })}
       </div>
       <ShowViewFooter onAddBlankSlide={handleAddBlankSlide} />
     </div>

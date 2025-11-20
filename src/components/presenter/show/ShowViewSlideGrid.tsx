@@ -1,16 +1,19 @@
 import { Slide } from "@/components/feature/slide/Slide";
 import { SlideData } from "@/components/feature/slide/types";
+import { CanvasSize } from "@/components/presenter/types";
 import { ShowViewEmptyState } from "./ShowViewEmpty";
 import { ShowViewSlideGridHeader } from "./ShowViewSlideGridHeader";
 
 type ShowViewSlideGridProps = {
   slides: SlideData[];
   title: string;
+  canvasSize: CanvasSize;
 };
 
 export const ShowViewSlideGrid = ({
   slides,
   title,
+  canvasSize,
 }: ShowViewSlideGridProps) => {
   if (!slides || slides.length === 0) {
     return <ShowViewEmptyState />;
@@ -28,7 +31,7 @@ export const ShowViewSlideGrid = ({
               flexBasis: "clamp(300px, calc((100% - 5rem) / 4), 300px)",
             }}
           >
-            <Slide id={slide.id} data={slide} />
+            <Slide id={slide.id} data={slide} canvasSize={canvasSize} />
           </div>
         ))}
       </div>
