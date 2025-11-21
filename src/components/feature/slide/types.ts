@@ -133,6 +133,8 @@ export type ImageObject = BaseSlideObject & {
 export type VideoObject = BaseSlideObject & {
   type: "video";
   src: string;
+  videoType?: "background" | "object"; // 'background' = controllable media library video, 'object' = auto-play edit view video
+  thumbnail?: string; // Thumbnail image for displaying on non-audience surfaces
   autoPlay?: boolean;
   loop?: boolean;
   muted?: boolean;

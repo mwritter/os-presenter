@@ -84,15 +84,25 @@ export const createSelectionSlice: StateCreator<
     }),
 
   setActiveSlide: (slideId, slideData, canvasSize = { width: 1920, height: 1080 }) => {
-    const activeSlide = { id: slideId, data: slideData, canvasSize };
+    // Migration: Add videoType to video objects that don't have it (for backwards compatibility)
+    const migratedData = {
+      ...slideData,
+      objects: slideData.objects?.map((obj) => {
+        if (obj.type === "video" && !obj.videoType) {
+          // Default to 'background' for videos without videoType (from media library)
+          return { ...obj, videoType: "background" as const };
+        }
+        return obj;
+      }),
+    };
+
+    const activeSlide = { id: slideId, data: migratedData, canvasSize };
     set({ activeSlide });
 
     // Emit Tauri event to audience windows
     emit("active-slide-changed", activeSlide).catch((error) => {
       console.error("Failed to emit active-slide-changed event:", error);
     });
-
-    console.log("Active slide changed:", slideId, slideData);
   },
 
   clearActiveSlide: () => {

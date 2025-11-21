@@ -9,6 +9,7 @@
     "dialog:default",
     "dialog:allow-open",
     "dialog:allow-message",
+    "dialog:allow-confirm",
     "core:event:allow-listen"
   ],
   "listen": [
@@ -17,6 +18,22 @@
       "payload": {
         "id": "string",
         "data": "string"
+      }
+    },
+    {
+      "name": "video:control",
+      "payload": {
+        "slideId": "string",
+        "action": "string"
+      }
+    },
+    {
+      "name": "video:state-update",
+      "payload": {
+        "slideId": "string",
+        "currentTime": "number",
+        "duration": "number",
+        "paused": "boolean"
       }
     }
   ]

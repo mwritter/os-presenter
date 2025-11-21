@@ -27,8 +27,14 @@ interface EditContextType {
   canvasSize: CanvasSize;
   addTextObject: () => void;
   addShapeObject: (shapeType: "rectangle" | "circle" | "triangle") => void;
-  addImageObject: (src: string) => void;
-  addVideoObject: (src: string) => void;
+  addImageObject: (
+    src: string,
+    dimensions?: { width: number; height: number }
+  ) => void;
+  addVideoObject: (
+    src: string,
+    dimensions?: { width: number; height: number }
+  ) => void;
   updateObject: (objectId: string, updates: Partial<SlideObject>) => void;
   updateTextContent: (objectId: string, content: string) => void;
   deleteObject: (objectId: string) => void;
@@ -170,13 +176,34 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     setSelectedObjectId(newObject.id);
   };
 
-  const addImageObject = (src: string) => {
+  const addImageObject = (
+    src: string,
+    dimensions?: { width: number; height: number }
+  ) => {
     const currentObjects = selectedSlide?.objects || [];
+
+    // Use actual dimensions if provided, otherwise fall back to canvas-based sizing
+    let size = {
+      width: canvasSize.width * 0.6,
+      height: canvasSize.height * 0.6,
+    };
+    let position = { x: canvasSize.width * 0.2, y: canvasSize.height * 0.2 };
+
+    if (dimensions) {
+      // Use actual media dimensions
+      size = { width: dimensions.width, height: dimensions.height };
+      // Center the image on the canvas
+      position = {
+        x: (canvasSize.width - dimensions.width) / 2,
+        y: (canvasSize.height - dimensions.height) / 2,
+      };
+    }
+
     const newObject: ImageObject = {
       id: crypto.randomUUID(),
       type: "image",
-      position: { x: canvasSize.width * 0.2, y: canvasSize.height * 0.2 },
-      size: { width: canvasSize.width * 0.6, height: canvasSize.height * 0.6 },
+      position,
+      size,
       scaleX: 1,
       scaleY: 1,
       zIndex: getNextZIndex(currentObjects),
@@ -188,19 +215,41 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     setSelectedObjectId(newObject.id);
   };
 
-  const addVideoObject = (src: string) => {
+  const addVideoObject = (
+    src: string,
+    dimensions?: { width: number; height: number }
+  ) => {
     const currentObjects = selectedSlide?.objects || [];
+
+    // Use actual dimensions if provided, otherwise fall back to canvas-based sizing
+    let size = {
+      width: canvasSize.width * 0.6,
+      height: canvasSize.height * 0.6,
+    };
+    let position = { x: canvasSize.width * 0.2, y: canvasSize.height * 0.2 };
+
+    if (dimensions) {
+      // Use actual media dimensions
+      size = { width: dimensions.width, height: dimensions.height };
+      // Center the video on the canvas
+      position = {
+        x: (canvasSize.width - dimensions.width) / 2,
+        y: (canvasSize.height - dimensions.height) / 2,
+      };
+    }
+
     const newObject: VideoObject = {
       id: crypto.randomUUID(),
       type: "video",
-      position: { x: canvasSize.width * 0.2, y: canvasSize.height * 0.2 },
-      size: { width: canvasSize.width * 0.6, height: canvasSize.height * 0.6 },
+      videoType: "object", // Edit view videos are non-controllable, auto-play objects
+      position,
+      size,
       scaleX: 1,
       scaleY: 1,
       zIndex: getNextZIndex(currentObjects),
       src,
-      autoPlay: false,
-      loop: false,
+      autoPlay: true, // Auto-play for edit view videos
+      loop: true, // Loop for edit view videos
       muted: true,
     };
 

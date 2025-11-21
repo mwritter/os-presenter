@@ -25,13 +25,15 @@ export const mediaItemToSlideData = (mediaItem: MediaItem): SlideData => {
     id: mediaItem.id,
     type: "video",
     src: mediaItem.source,
+    videoType: "background", // Media library videos are controllable
+    thumbnail: mediaItem.thumbnail, // Use media library thumbnail
     position: { x: 0, y: 0 },
     size: DEFAULT_CANVAS_PRESET.value,
     zIndex: 0,
     rotation: 0,
-    autoPlay: false,
-    loop: true,
-    muted: true,
+    autoPlay: true, // All videos auto-play by default
+    loop: true, // All videos loop by default
+    muted: false, // Background videos should have audio
   } satisfies VideoObject;
 
   return {

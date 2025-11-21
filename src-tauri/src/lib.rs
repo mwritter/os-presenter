@@ -249,6 +249,10 @@ pub struct VideoObject {
     #[serde(rename = "zIndex")]
     pub z_index: i32,
     pub src: String,
+    #[serde(rename = "videoType", skip_serializing_if = "Option::is_none")]
+    pub video_type: Option<String>, // "background" | "object"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub thumbnail: Option<String>,
     #[serde(rename = "autoPlay", skip_serializing_if = "Option::is_none")]
     pub auto_play: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]

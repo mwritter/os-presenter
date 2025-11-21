@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useTextEditing } from "../hooks/use-text-editing";
 import { getObjectStyles } from "./utils/getObjectStyles";
 import { getContainerStyles } from "./utils/getContainerStyles";
+import { useMediaSrc } from "../hooks/use-media-src";
 
 export type ImageObjectProps = {
   object: SlideObject;
@@ -18,6 +19,7 @@ export const ImageObject = ({
   if (object.type !== "image") return null;
 
   const imageObject = object as ImageObjectType;
+  const imageSrc = useMediaSrc(imageObject.src);
 
   const {
     contentRef,
@@ -46,7 +48,7 @@ export const ImageObject = ({
       onDoubleClick={handleDoubleClick}
       onMouseDown={handleMouseDown}
     >
-      <img src={imageObject.src} alt="" style={imageStyle} draggable={false} />
+      <img src={imageSrc} alt="" style={imageStyle} draggable={false} />
       {(textContent || isEditing) && (
         <div style={textOverlayStyle} className={cn({ editing: isEditing })}>
           <div

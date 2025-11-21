@@ -8,12 +8,20 @@ import { Circle, Shapes, Square } from "lucide-react";
 import { useEditContext } from "@/presenter/edit/context";
 import { EditViewObjectActionbarButton } from "./EditViewObjectActionbarButton";
 
-export const AddShapeActionbarButton = () => {
+export const AddShapeActionbarButton = ({
+  disabled,
+}: {
+  disabled?: boolean;
+}) => {
   const { addShapeObject } = useEditContext();
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <EditViewObjectActionbarButton icon={<Shapes />} label="Shape" />
+      <DropdownMenuTrigger asChild disabled={disabled}>
+        <EditViewObjectActionbarButton
+          icon={<Shapes />}
+          label="Shape"
+          disabled={disabled}
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onClick={() => addShapeObject("rectangle")}>

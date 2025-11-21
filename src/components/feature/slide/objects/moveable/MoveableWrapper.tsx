@@ -187,6 +187,9 @@ export const MoveableWrapper = ({
     });
   };
 
+  // Image and video objects should maintain aspect ratio when resizing
+  const shouldKeepRatio = object.type === "image" || object.type === "video";
+
   return (
     <Moveable
       ref={moveableRef}
@@ -226,7 +229,7 @@ export const MoveableWrapper = ({
       throttleDrag={0}
       throttleResize={0}
       throttleRotate={0}
-      keepRatio={false}
+      keepRatio={shouldKeepRatio}
       renderDirections={["nw", "n", "ne", "w", "e", "sw", "s", "se"]}
       rotationPosition="top"
       onDrag={handleDrag}

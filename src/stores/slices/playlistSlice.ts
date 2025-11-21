@@ -4,6 +4,8 @@ import { SlideData } from "@/components/feature/slide/types";
 import * as storage from "@/services/storage";
 import { createDefaultTextObject } from "../utils/createDefaultTextObject";
 import { LibrarySlice } from "./librarySlice";
+import { MediaItem } from "../mediaLibraryStore";
+import { mediaItemToSlideGroup } from "../utils/mediaItemToSlideGroup";
 
 export interface PlaylistSlice {
   playlists: Playlist[];
@@ -20,6 +22,7 @@ export interface PlaylistSlice {
     libraryId: string,
     slideGroupIndex: number
   ) => void;
+  addMediaItemToPlaylist: (playlistId: string, mediaItem: MediaItem) => void;
   updatePlaylistItemSlideGroup: (
     playlistId: string,
     itemId: string,
@@ -146,6 +149,47 @@ export const createPlaylistSlice: StateCreator<
         };
       }),
       createdAt: slideGroup.createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Create new playlist item with embedded slide group
+    const newItem = {
+      id: crypto.randomUUID(),
+      slideGroup: slideGroupCopy,
+      order: playlist.items.length,
+    };
+
+    get().updatePlaylist(playlistId, {
+      items: [...playlist.items, newItem],
+    });
+  },
+
+  addMediaItemToPlaylist: (playlistId, mediaItem) => {
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) {
+      console.error("Playlist not found");
+      return;
+    }
+
+    // Convert media item to slide group
+    const slideGroup = mediaItemToSlideGroup(mediaItem);
+
+    // Update meta with playlist context and regenerate slide IDs
+    const slideGroupCopy: SlideGroup = {
+      ...slideGroup,
+      meta: {
+        playlistId,
+        originLibraryId: undefined,
+        originSlideGroupId: undefined,
+      },
+      // Regenerate slide IDs with playlist prefix
+      slides: slideGroup.slides.map((slide) => {
+        const shortId = crypto.randomUUID().split("-")[0];
+        return {
+          ...slide,
+          id: `${playlistId}-${shortId}`,
+        };
+      }),
       updatedAt: new Date().toISOString(),
     };
 
