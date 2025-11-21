@@ -22,6 +22,7 @@ import { SlideData } from "@/components/feature/slide/types";
 import { Label } from "@/components/ui/label";
 import { useVideoState } from "@/hooks/use-video-state";
 import { useEffect, useState, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 export const PreviewPanel = () => {
   const activeSlide = useSelectionStore((s) => s.activeSlide);
@@ -278,7 +279,7 @@ const PreviewPanelVideoControls = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 py-10 bg-shade-2">
+    <div className="flex flex-col py-10 bg-shade-2">
       <div className="w-full max-w-[90%] mx-auto flex flex-col gap-1">
         <Slider
           className="w-full"
@@ -290,14 +291,19 @@ const PreviewPanelVideoControls = ({
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
         />
-        {isEnabled && (
-          <div className="flex justify-between text-xs text-muted-foreground px-1">
-            <span>{formatTime(displayTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
-        )}
+        <div
+          className={cn(
+            "flex justify-between text-xs text-muted-foreground px-1",
+            {
+              "opacity-0": !isEnabled,
+            }
+          )}
+        >
+          <span>{formatTime(displayTime)}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
       </div>
-      <div className="flex justify-center gap-2">
+      <div className="flex items-center justify-center gap-2">
         <Button
           variant="ghost"
           size="icon"

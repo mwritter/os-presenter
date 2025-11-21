@@ -6,6 +6,7 @@ import { getVideoStyles } from "./utils/getVideoStyles";
 import { useMediaSrc } from "../hooks/use-media-src";
 import { RefObject } from "react";
 import { useIsAudienceRoute } from "@/hooks/use-is-audience-route";
+import { useVideoThumbnail } from "@/hooks/use-video-thumbnail";
 
 export type VideoObjectProps = {
   object: SlideObject;
@@ -26,8 +27,14 @@ export const VideoObject = ({
 
   const videoObject = object as VideoObjectType;
   const videoSrc = useMediaSrc(videoObject.src);
-  const thumbnailSrc = videoObject.thumbnail
-    ? useMediaSrc(videoObject.thumbnail)
+
+  // Get thumbnail from video object or look it up from media library (fallback for old objects)
+  const thumbnailFromLibrary = useVideoThumbnail(
+    videoObject.src,
+    videoObject.thumbnail
+  );
+  const thumbnailSrc = thumbnailFromLibrary
+    ? useMediaSrc(thumbnailFromLibrary)
     : null;
   const isAudienceRoute = useIsAudienceRoute();
 

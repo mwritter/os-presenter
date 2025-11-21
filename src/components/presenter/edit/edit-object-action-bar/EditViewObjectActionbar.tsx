@@ -95,8 +95,16 @@ export const EditViewObjectActionbar = () => {
         const pathParts = decodedUrl.split("/");
         const filename = pathParts[pathParts.length - 1];
 
-        // Use the relative filename for storage, but pass dimensions
-        addVideoObject(filename, dimensions);
+        // Extract thumbnail filename if available
+        let thumbnailFilename: string | undefined;
+        if (mediaItem.thumbnail) {
+          const decodedThumbUrl = decodeURIComponent(mediaItem.thumbnail);
+          const thumbParts = decodedThumbUrl.split("/");
+          thumbnailFilename = thumbParts[thumbParts.length - 1];
+        }
+
+        // Use the relative filename for storage, pass dimensions and thumbnail
+        addVideoObject(filename, dimensions, thumbnailFilename);
       }
     } catch (error) {
       console.error("Failed to import video:", error);

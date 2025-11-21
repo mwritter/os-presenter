@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import * as storage from "@/services/storage";
+import { generateVideoThumbnail } from "@/utils/generateVideoThumbnail";
 
 export type MediaType = "image" | "video";
 
@@ -13,6 +14,7 @@ export interface MediaItem {
   createdAt: Date;
   updatedAt: Date;
   metadata?: Record<string, unknown>; // For any additional metadata
+  hash?: string; // SHA256 hash for deduplication
 }
 
 export interface MediaLibraryState {
@@ -139,7 +141,47 @@ export const useMediaLibraryStore = create<MediaLibraryState>((set, get) => ({
   importMedia: async (sourcePath: string) => {
     set({ isLoading: true });
     try {
-      const mediaItem = await storage.importMediaFile(sourcePath);
+      let mediaItem = await storage.importMediaFile(sourcePath);
+      
+      // Check if this media item already exists in our state (deduplication)
+      const existingItem = get().mediaItems.find((item) => item.id === mediaItem.id);
+      
+      if (existingItem) {
+        console.log("Media item already exists in library, reusing:", mediaItem.id);
+        set({ isLoading: false });
+        return existingItem;
+      }
+      
+      // Generate thumbnail for video files (only for new items)
+      if (mediaItem.type === "video") {
+        try {
+          console.log("Generating thumbnail for video:", mediaItem.id);
+          const thumbnailBlob = await generateVideoThumbnail(mediaItem.source);
+          
+          if (thumbnailBlob) {
+            // Save the thumbnail
+            const thumbnailFilename = await storage.saveThumbnail(
+              mediaItem.id,
+              thumbnailBlob
+            );
+            
+            // Update media item metadata with thumbnail
+            mediaItem = await storage.updateMediaThumbnail(
+              mediaItem.id,
+              thumbnailFilename
+            );
+            
+            console.log("Thumbnail generated successfully:", thumbnailFilename);
+          } else {
+            console.warn("Failed to generate thumbnail for video:", mediaItem.id);
+          }
+        } catch (thumbnailError) {
+          // Log error but don't fail the import
+          console.error("Error generating thumbnail:", thumbnailError);
+        }
+      }
+      
+      // Add the new media item to state
       set((state) => ({
         mediaItems: [...state.mediaItems, mediaItem],
         isLoading: false,

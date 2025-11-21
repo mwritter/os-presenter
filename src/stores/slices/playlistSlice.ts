@@ -199,6 +199,7 @@ export const createPlaylistSlice: StateCreator<
       slideGroup: slideGroupCopy,
       order: playlist.items.length,
     };
+    console.log("newItem", newItem);
 
     get().updatePlaylist(playlistId, {
       items: [...playlist.items, newItem],
@@ -319,4 +320,3 @@ export const createPlaylistSlice: StateCreator<
     }
   },
 });
-

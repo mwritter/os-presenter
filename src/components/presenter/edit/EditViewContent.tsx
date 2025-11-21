@@ -28,6 +28,12 @@ export const EditViewContent = () => {
 
     console.log("objectId", objectId);
     if (objectId) {
+      // Check if the object is a background video (which should not be selectable)
+      const clickedObject = selectedSlide?.objects?.find((obj) => obj.id === objectId);
+      if (clickedObject?.type === "video" && clickedObject.videoType === "background") {
+        // Don't select background videos
+        return;
+      }
       selectObject(objectId);
     } else {
       // Clicked on empty canvas, deselect

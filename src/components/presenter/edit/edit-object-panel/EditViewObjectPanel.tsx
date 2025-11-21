@@ -8,13 +8,26 @@ export const EditSlideObjectPanel = () => {
   const { selectedSlide } = useEditContext();
   const objects = selectedSlide?.objects || [];
 
+  // Filter out background videos for display
+  const editableObjects = useMemo(
+    () =>
+      objects.filter((obj) => {
+        // Hide background video objects from the panel
+        if (obj.type === "video" && obj.videoType === "background") {
+          return false;
+        }
+        return true;
+      }),
+    [objects]
+  );
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-2 bg-shade-4 border-b border-shade-1">
         <p className="text-gray-400 text-xs">Objects</p>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {objects.length === 0 ? (
+        {editableObjects.length === 0 ? (
           <p className="text-gray-500 text-xs p-4 text-center">
             No objects on slide
           </p>
@@ -31,9 +44,18 @@ const ReorderableObjectsList = () => {
   const objects = selectedSlide?.objects || [];
   const isReorderingRef = useRef(false);
 
-  // Create a stable sorted array
+  // Create a stable sorted array, filtering out background videos
   const sortedObjects = useMemo(
-    () => [...objects].sort((a, b) => b.zIndex - a.zIndex),
+    () =>
+      [...objects]
+        .filter((obj) => {
+          // Hide background video objects from the panel
+          if (obj.type === "video" && obj.videoType === "background") {
+            return false;
+          }
+          return true;
+        })
+        .sort((a, b) => b.zIndex - a.zIndex),
     [objects]
   );
 

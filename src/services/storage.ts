@@ -177,3 +177,58 @@ export async function getMediaFileUrl(fileName: string): Promise<string> {
   }
 }
 
+/**
+ * Save a video thumbnail image
+ * @param mediaId - The ID of the media item
+ * @param blob - The thumbnail image as a Blob
+ * @returns The filename of the saved thumbnail
+ */
+export async function saveThumbnail(mediaId: string, blob: Blob): Promise<string> {
+  try {
+    // Convert blob to array buffer then to Uint8Array
+    const arrayBuffer = await blob.arrayBuffer();
+    const thumbnailData = Array.from(new Uint8Array(arrayBuffer));
+    
+    // Invoke Rust command to save thumbnail
+    const thumbnailFilename = await invoke<string>('save_video_thumbnail', {
+      mediaId,
+      thumbnailData,
+    });
+    
+    return thumbnailFilename;
+  } catch (error) {
+    console.error('Failed to save thumbnail:', error);
+    throw new Error(`Failed to save thumbnail: ${error}`);
+  }
+}
+
+/**
+ * Update a media item's thumbnail field in metadata
+ * @param mediaId - The ID of the media item
+ * @param thumbnailFilename - The filename of the thumbnail
+ * @returns The updated media item
+ */
+export async function updateMediaThumbnail(
+  mediaId: string,
+  thumbnailFilename: string
+): Promise<MediaItem> {
+  try {
+    const item = await invoke<MediaItem>('update_media_thumbnail', {
+      mediaId,
+      thumbnailFilename,
+    });
+    
+    // Convert string dates back to Date objects and convert paths to full URLs
+    return {
+      ...item,
+      source: await getMediaFileUrl(item.source),
+      thumbnail: item.thumbnail ? await getMediaFileUrl(item.thumbnail) : undefined,
+      createdAt: new Date(item.createdAt),
+      updatedAt: new Date(item.updatedAt),
+    };
+  } catch (error) {
+    console.error('Failed to update media thumbnail:', error);
+    throw new Error(`Failed to update media thumbnail: ${error}`);
+  }
+}
+

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useRef, useCallback } from "react";
 import { SlideData } from "@/components/feature/slide/types";
 import { useSelectionStore } from "@/stores/presenterStore";
 import { CanvasSize } from "@/components/presenter/types";
@@ -82,11 +82,15 @@ export const useShowKeyboardNav = ({
     }
 
     const currentGroup = slideGroups[position.groupIndex];
-    const isLastSlideInGroup = position.slideIndex === currentGroup.slides.length - 1;
+    const isLastSlideInGroup =
+      position.slideIndex === currentGroup.slides.length - 1;
 
     if (isLastSlideInGroup) {
       // Check for double-press to move to next group
-      if (enableMultiGroupNavigation && position.groupIndex < slideGroups.length - 1) {
+      if (
+        enableMultiGroupNavigation &&
+        position.groupIndex < slideGroups.length - 1
+      ) {
         const now = Date.now();
         const lastPress = lastKeyPress.current;
 
@@ -212,5 +216,3 @@ export const useShowKeyboardNav = ({
 
   return { handleKeyDown };
 };
-
-

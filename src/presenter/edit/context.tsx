@@ -33,7 +33,8 @@ interface EditContextType {
   ) => void;
   addVideoObject: (
     src: string,
-    dimensions?: { width: number; height: number }
+    dimensions?: { width: number; height: number },
+    thumbnail?: string
   ) => void;
   updateObject: (objectId: string, updates: Partial<SlideObject>) => void;
   updateTextContent: (objectId: string, content: string) => void;
@@ -217,7 +218,8 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addVideoObject = (
     src: string,
-    dimensions?: { width: number; height: number }
+    dimensions?: { width: number; height: number },
+    thumbnail?: string
   ) => {
     const currentObjects = selectedSlide?.objects || [];
 
@@ -242,6 +244,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
       id: crypto.randomUUID(),
       type: "video",
       videoType: "object", // Edit view videos are non-controllable, auto-play objects
+      thumbnail, // Set thumbnail from media library if available
       position,
       size,
       scaleX: 1,

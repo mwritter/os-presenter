@@ -34,6 +34,7 @@ export const mediaItemToSlideData = (mediaItem: MediaItem): SlideData => {
     autoPlay: true, // All videos auto-play by default
     loop: true, // All videos loop by default
     muted: false, // Background videos should have audio
+    isLocked: true, // Background videos are locked (not editable in edit view)
   } satisfies VideoObject;
 
   return {

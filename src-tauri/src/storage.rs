@@ -3,6 +3,8 @@ use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 use std::fmt;
+use sha2::{Sha256, Digest};
+use std::io::Read;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StorageError {
@@ -144,6 +146,12 @@ pub fn copy_file(source: &PathBuf, dest: &PathBuf) -> StorageResult<()> {
     Ok(())
 }
 
+/// Write raw bytes to a file
+pub fn write_file(path: &PathBuf, data: &[u8]) -> StorageResult<()> {
+    fs::write(path, data)?;
+    Ok(())
+}
+
 /// Get file extension
 pub fn get_file_extension(path: &PathBuf) -> Option<String> {
     path.extension()
@@ -156,5 +164,23 @@ pub fn get_file_stem(path: &PathBuf) -> Option<String> {
     path.file_stem()
         .and_then(|s| s.to_str())
         .map(|s| s.to_string())
+}
+
+/// Compute SHA256 hash of a file
+pub fn compute_file_hash(path: &PathBuf) -> StorageResult<String> {
+    let mut file = fs::File::open(path)?;
+    let mut hasher = Sha256::new();
+    let mut buffer = [0; 8192]; // 8KB buffer
+
+    loop {
+        let bytes_read = file.read(&mut buffer)?;
+        if bytes_read == 0 {
+            break;
+        }
+        hasher.update(&buffer[..bytes_read]);
+    }
+
+    let result = hasher.finalize();
+    Ok(format!("{:x}", result))
 }
 

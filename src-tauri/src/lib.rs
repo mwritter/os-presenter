@@ -249,9 +249,8 @@ pub struct VideoObject {
     #[serde(rename = "zIndex")]
     pub z_index: i32,
     pub src: String,
-    #[serde(rename = "videoType", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "videoType")]
     pub video_type: Option<String>, // "background" | "object"
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub thumbnail: Option<String>,
     #[serde(rename = "autoPlay", skip_serializing_if = "Option::is_none")]
     pub auto_play: Option<bool>,
@@ -298,13 +297,14 @@ pub struct VideoObject {
 }
 
 // Union type for slide objects (using untagged enum)
+// Order matters: Video first to ensure proper deserialization
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum SlideObject {
+    Video(VideoObject),
+    Image(ImageObject),
     Text(TextObject),
     Shape(ShapeObject),
-    Image(ImageObject),
-    Video(VideoObject),
 }
 
 // New SlideData structure
@@ -399,6 +399,8 @@ pub struct MediaItem {
     #[serde(rename = "updatedAt")]
     pub updated_at: String,
     pub metadata: Option<JsonValue>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hash: Option<String>, // SHA256 hash for deduplication
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -470,6 +472,23 @@ fn import_media_file(app: AppHandle, source_path: String) -> Result<MediaItem, S
         return Err("Source file does not exist".to_string());
     }
 
+    // Compute hash of source file for deduplication
+    let file_hash = storage::compute_file_hash(&source).map_err(|e| e.message)?;
+
+    // Check if we already have this file in the media library
+    let metadata_dir = storage::get_media_metadata_dir(&app).map_err(|e| e.message)?;
+    let existing_items: Vec<MediaItem> =
+        storage::read_all_json_files(&metadata_dir).map_err(|e| e.message)?;
+
+    // Look for existing media item with same hash
+    if let Some(existing_item) = existing_items.iter().find(|item| {
+        item.hash.as_ref().map(|h| h == &file_hash).unwrap_or(false)
+    }) {
+        // File already exists, return the existing item
+        println!("Media file already exists with hash: {}", file_hash);
+        return Ok(existing_item.clone());
+    }
+
     // Generate unique ID for the media
     let media_id = Uuid::new_v4().to_string();
 
@@ -507,10 +526,10 @@ fn import_media_file(app: AppHandle, source_path: String) -> Result<MediaItem, S
         created_at: now.clone(),
         updated_at: now,
         metadata: None,
+        hash: Some(file_hash),
     };
 
     // Save metadata
-    let metadata_dir = storage::get_media_metadata_dir(&app).map_err(|e| e.message)?;
     let metadata_path = metadata_dir.join(format!("{}.json", media_id));
     storage::write_json_file(&metadata_path, &media_item).map_err(|e| e.message)?;
 
@@ -549,6 +568,50 @@ fn get_media_file_path(app: AppHandle, file_name: String) -> Result<String, Stri
         .to_str()
         .ok_or_else(|| "Invalid path".to_string())
         .map(|s| s.to_string())
+}
+
+#[tauri::command]
+fn save_video_thumbnail(
+    app: AppHandle,
+    media_id: String,
+    thumbnail_data: Vec<u8>,
+) -> Result<String, String> {
+    // Generate thumbnail filename
+    let thumbnail_filename = format!("{}_thumb.png", media_id);
+
+    // Get media files directory
+    let media_files_dir = storage::get_media_files_dir(&app).map_err(|e| e.message)?;
+    let thumbnail_path = media_files_dir.join(&thumbnail_filename);
+
+    // Write thumbnail data to file
+    storage::write_file(&thumbnail_path, &thumbnail_data).map_err(|e| e.message)?;
+
+    Ok(thumbnail_filename)
+}
+
+#[tauri::command]
+fn update_media_thumbnail(
+    app: AppHandle,
+    media_id: String,
+    thumbnail_filename: String,
+) -> Result<MediaItem, String> {
+    // Load existing media item metadata
+    let metadata_dir = storage::get_media_metadata_dir(&app).map_err(|e| e.message)?;
+    let metadata_path = metadata_dir.join(format!("{}.json", media_id));
+
+    let mut media_item =
+        storage::read_json_file::<MediaItem>(&metadata_path).map_err(|e| e.message)?;
+
+    // Update thumbnail field
+    media_item.thumbnail = Some(thumbnail_filename);
+
+    // Update timestamp
+    media_item.updated_at = chrono::Utc::now().to_rfc3339();
+
+    // Save updated metadata
+    storage::write_json_file(&metadata_path, &media_item).map_err(|e| e.message)?;
+
+    Ok(media_item)
 }
 
 // Audience window commands
@@ -619,6 +682,8 @@ pub fn run() {
             import_media_file,
             delete_media_item,
             get_media_file_path,
+            save_video_thumbnail,
+            update_media_thumbnail,
             open_audience_window,
             close_audience_window,
             is_audience_window_open,
