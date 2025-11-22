@@ -12,7 +12,7 @@ import {
 //  TODO: add functionality to the toolbar
 export const Toolbar = () => {
   const { toggle: toggleMediaLibrary } = useMediaLibraryContext();
-  const [isAudienceWindowOpen, setIsAudienceWindowOpen] = useState(false);
+  const [audienceWindowOpen, setAudienceWindowOpen] = useState(false);
 
   // Check if audience window is open on mount
   useEffect(() => {
@@ -22,7 +22,7 @@ export const Toolbar = () => {
   const checkAudienceWindowStatus = async () => {
     try {
       const isOpen = await isAudienceWindowOpen();
-      setIsAudienceWindowOpen(isOpen);
+      setAudienceWindowOpen(isOpen);
     } catch (error) {
       console.error("Failed to check audience window status:", error);
     }
@@ -30,12 +30,12 @@ export const Toolbar = () => {
 
   const handleToggleAudienceWindow = async () => {
     try {
-      if (isAudienceWindowOpen) {
+      if (audienceWindowOpen) {
         await closeAudienceWindow();
-        setIsAudienceWindowOpen(false);
+        setAudienceWindowOpen(false);
       } else {
         await openAudienceWindow();
-        setIsAudienceWindowOpen(true);
+        setAudienceWindowOpen(true);
       }
     } catch (error) {
       console.error("Failed to toggle audience window:", error);
@@ -56,9 +56,9 @@ export const Toolbar = () => {
         <IconButton Icon={Image} label="Media" onClick={toggleMediaLibrary} />
         <IconButton
           Icon={Monitor}
-          label={isAudienceWindowOpen ? "Close Audience" : "Open Audience"}
+          label={audienceWindowOpen ? "Close Audience" : "Open Audience"}
           onClick={handleToggleAudienceWindow}
-          className={isAudienceWindowOpen ? "ring-2 ring-amber-400" : ""}
+          className={audienceWindowOpen ? "ring-2 ring-amber-400" : ""}
         />
       </div>
     </div>

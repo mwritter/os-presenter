@@ -1,28 +1,82 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { emit } from "@tauri-apps/api/event";
 import {
   VideoControlCommand,
   VideoStateUpdate,
+  VideoReadyPayload,
+  VideoAckPayload,
   VIDEO_CONTROL_EVENT,
   VIDEO_STATE_UPDATE_EVENT,
+  VIDEO_READY_EVENT,
+  VIDEO_ACK_EVENT,
 } from "@/types/video-control";
 
 interface UseVideoSyncOptions {
   slideId: string;
   isActive: boolean; // Only sync when this slide is active
+  videoType: "background" | "object"; // Type of video for handshake logic
 }
 
 /**
  * Hook for audience view to sync video playback with presenter controls
  * Returns a ref to attach to the video element
  */
-export const useVideoSync = ({ slideId, isActive }: UseVideoSyncOptions) => {
+export const useVideoSync = ({
+  slideId,
+  isActive,
+  videoType,
+}: UseVideoSyncOptions) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const stateUpdateIntervalRef = useRef<number | null>(null);
+  const [hasReceivedAck, setHasReceivedAck] = useState(false);
+  const [videoAttached, setVideoAttached] = useState(0);
+  const hasSentReadySignal = useRef<boolean>(false);
+  const isBackgroundVideo = videoType === "background";
+
+  // Reset ready signal flag and ack state when slide changes
+  useEffect(() => {
+    hasSentReadySignal.current = false;
+    setHasReceivedAck(false);
+  }, [slideId]);
+
+  // Poll for video element being attached
+  useEffect(() => {
+    if (!isActive) return;
+
+    const interval = setInterval(() => {
+      if (videoRef.current) {
+        console.log("Video element detected via polling");
+        setVideoAttached((prev) => prev + 1);
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isActive, slideId]);
+
+  // Send video ready signal to presenter (for handshake)
+  const sendVideoReady = () => {
+    if (hasSentReadySignal.current) {
+      console.log("Already sent ready signal, skipping");
+      return;
+    }
+
+    console.log("Sending VIDEO_READY_EVENT", { slideId, videoType });
+    hasSentReadySignal.current = true;
+
+    const payload: VideoReadyPayload = {
+      slideId,
+      videoType,
+    };
+
+    emit(VIDEO_READY_EVENT, payload).catch((error) => {
+      console.error("Failed to emit video ready event:", error);
+    });
+  };
 
   // Send video state updates to presenter
-  const sendStateUpdate = useCallback(() => {
+  const sendStateUpdate = () => {
     const video = videoRef.current;
     if (!video || !isActive) return;
 
@@ -48,7 +102,34 @@ export const useVideoSync = ({ slideId, isActive }: UseVideoSyncOptions) => {
     emit(VIDEO_STATE_UPDATE_EVENT, state).catch((error) => {
       console.error("Failed to emit video state update:", error);
     });
-  }, [slideId, isActive]);
+  };
+
+  // Listen for acknowledgment from presenter (handshake)
+  useEffect(() => {
+    if (!isActive || !isBackgroundVideo) return;
+
+    const unlisten = listen<VideoAckPayload>(VIDEO_ACK_EVENT, (event) => {
+      const payload = event.payload;
+
+      // Only handle acks for this slide
+      if (payload.slideId !== slideId) return;
+
+      console.log("Received video acknowledgment from presenter");
+      setHasReceivedAck(true);
+
+      // Auto-play the video now that we have acknowledgment
+      const video = videoRef.current;
+      if (video) {
+        video.play().catch((error) => {
+          console.error("Failed to auto-play video after ack:", error);
+        });
+      }
+    });
+
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, [slideId, isActive, isBackgroundVideo]);
 
   // Handle video control commands from presenter
   useEffect(() => {
@@ -63,14 +144,22 @@ export const useVideoSync = ({ slideId, isActive }: UseVideoSyncOptions) => {
         // Only handle commands for this slide
         if (command.slideId !== slideId || !video) return;
 
+        // For background videos, only allow play commands after receiving ack
+        if (isBackgroundVideo && command.action === "play" && !hasReceivedAck) {
+          console.log("Ignoring play command - waiting for handshake");
+          return;
+        }
+
         switch (command.action) {
           case "play":
+            console.log("playing video");
             video.play().catch((error) => {
               console.error("Failed to play video:", error);
             });
             video.loop = true;
             break;
           case "pause":
+            console.log("pausing video");
             video.pause();
             video.loop = false;
             break;
@@ -99,15 +188,40 @@ export const useVideoSync = ({ slideId, isActive }: UseVideoSyncOptions) => {
     return () => {
       unlisten.then((fn) => fn());
     };
-  }, [slideId, isActive, sendStateUpdate]);
+  }, [slideId, isActive, isBackgroundVideo, hasReceivedAck]);
 
   // Setup state update interval and video event listeners
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !isActive) return;
+    if (!video || !isActive) {
+      console.log("Skipping event listener setup", {
+        hasVideo: !!video,
+        isActive,
+      });
+      return;
+    }
+
+    console.log("Setting up video event listeners", {
+      slideId,
+      isBackgroundVideo,
+      readyState: video.readyState,
+      currentTime: video.currentTime,
+    });
 
     // Set initial loop state to true (can be controlled dynamically via commands)
     video.loop = true;
+
+    // Check if video is already ready (readyState >= 3 means HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA)
+    // If so, send ready signal immediately for background videos
+    if (
+      isBackgroundVideo &&
+      !hasReceivedAck &&
+      !hasSentReadySignal.current &&
+      video.readyState >= 3
+    ) {
+      console.log("Video already ready - sending handshake signal immediately");
+      sendVideoReady();
+    }
 
     // Send state updates periodically while playing (every ~16ms for smooth 60fps updates)
     const startStateUpdates = () => {
@@ -144,9 +258,35 @@ export const useVideoSync = ({ slideId, isActive }: UseVideoSyncOptions) => {
     const handleSeeked = () => sendStateUpdate();
     const handleVolumeChange = () => sendStateUpdate();
     const handleRateChange = () => sendStateUpdate();
-    const handleLoadedMetadata = () => sendStateUpdate();
-    const handleCanPlay = () => sendStateUpdate();
-    const handleError = () => sendStateUpdate();
+    const handleLoadedMetadata = () => {
+      console.log("Video metadata loaded", {
+        isBackgroundVideo,
+        hasReceivedAck,
+      });
+      sendStateUpdate();
+    };
+    const handleCanPlay = () => {
+      console.log("Video can play", {
+        isBackgroundVideo,
+        hasReceivedAck,
+        hasSentReady: hasSentReadySignal.current,
+        slideId,
+      });
+      sendStateUpdate();
+      // For background videos, emit ready signal and wait for ack before playing
+      if (isBackgroundVideo && !hasReceivedAck && !hasSentReadySignal.current) {
+        console.log("Video ready - sending handshake signal to presenter", {
+          slideId,
+          videoType,
+        });
+        sendVideoReady();
+      }
+    };
+    const handleError = (e: Event) => {
+      const video = e.target as HTMLVideoElement;
+      console.error("Video error:", video.error);
+      sendStateUpdate();
+    };
 
     video.addEventListener("play", handlePlay);
     video.addEventListener("playing", handlePlaying);
@@ -180,7 +320,14 @@ export const useVideoSync = ({ slideId, isActive }: UseVideoSyncOptions) => {
       video.removeEventListener("error", handleError);
       stopStateUpdates();
     };
-  }, [isActive, sendStateUpdate]);
+  }, [
+    isActive,
+    isBackgroundVideo,
+    hasReceivedAck,
+    slideId,
+    videoType,
+    videoAttached,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => {

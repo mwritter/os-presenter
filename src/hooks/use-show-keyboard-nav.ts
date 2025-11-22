@@ -189,7 +189,6 @@ export const useShowKeyboardNav = ({
 
       // Track key press for double-press detection
       const now = Date.now();
-      const keyIdentifier = shiftKey && key === "Tab" ? "ShiftTab" : key;
 
       // Handle navigation keys
       if (key === "Tab") {

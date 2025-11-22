@@ -64,6 +64,8 @@ export const VideoObject = ({
   });
 
   const videoStyle = getVideoStyles({ isEditable });
+  const autoPlay =
+    (isAudienceRoute || forceShowVideo) && videoType === "object";
 
   return (
     <div
@@ -78,8 +80,8 @@ export const VideoObject = ({
         <video
           ref={videoRef}
           src={videoSrc}
-          autoPlay={true}
-          loop={true}
+          autoPlay={autoPlay}
+          loop={videoObject.loop ?? true}
           muted={isBackgroundVideo ? false : (videoObject.muted ?? true)}
           style={videoStyle}
         />

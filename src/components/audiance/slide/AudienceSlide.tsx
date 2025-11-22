@@ -32,25 +32,39 @@ export const AudienceSlide = ({ data, canvasSize }: AudienceSlideProps) => {
   // Use video sync hook for background videos
   const videoRef = useVideoSync({
     slideId: data.id,
-    isActive: true, // Audience slide is always active when visible
+    isActive: !!backgroundVideo,
+    videoType: "background",
   });
 
   // Attach video ref to the background video element after render
   useEffect(() => {
-    if (!backgroundVideo || !canvasRef.current) return;
+    if (!backgroundVideo || !canvasRef.current) {
+      console.log("No background video or canvas ref", {
+        backgroundVideo: !!backgroundVideo,
+        canvasRef: !!canvasRef.current,
+      });
+      return;
+    }
 
     // Find the video element with matching data attributes
     const videoElement = canvasRef.current.querySelector(
       `[data-object-id="${backgroundVideo.id}"][data-video-type="background"] video`
     ) as HTMLVideoElement;
 
+    console.log("Looking for video element", {
+      found: !!videoElement,
+      objectId: backgroundVideo.id,
+      slideId: data.id,
+    });
+
     if (videoElement && videoRef.current !== videoElement) {
+      console.log("Attaching video ref to element", {
+        slideId: data.id,
+      });
       videoRef.current = videoElement;
 
-      // Auto-play background video when slide becomes active
-      videoElement.play().catch((error) => {
-        console.error("Failed to auto-play background video:", error);
-      });
+      // Note: Auto-play is now controlled by the handshake protocol
+      // The video will play after receiving acknowledgment from presenter
     }
   }, [backgroundVideo, videoRef, data.id]);
 

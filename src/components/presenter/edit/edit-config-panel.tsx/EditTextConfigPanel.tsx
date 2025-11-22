@@ -15,6 +15,7 @@ import {
   useSystemFonts,
   getAvailableVariants,
   loadFontVariants,
+  FontVariantOption,
 } from "@/hooks/useSystemFonts";
 import { useEffect, useState } from "react";
 import { Effect as TextEffect } from "./common/effects/Effect";
@@ -22,7 +23,9 @@ import { Effect as TextEffect } from "./common/effects/Effect";
 export const EditTextConfigPanel = () => {
   const { selectedSlide, selectedObjectId, updateObject } = useEditContext();
   const { fontNames } = useSystemFonts();
-  const [, forceUpdate] = useState({});
+  const [availableVariants, setAvailableVariants] = useState<
+    FontVariantOption[] | undefined
+  >(undefined);
 
   // Find the selected object - works with text objects and objects with text overlay
   const selectedObject = selectedSlide?.objects?.find(
@@ -48,13 +51,14 @@ export const EditTextConfigPanel = () => {
 
   // Load font variants on demand when base font family changes
   useEffect(() => {
-    if (baseFontFamily) {
+    if (baseFontFamily && fontNames.length > 0) {
       loadFontVariants(baseFontFamily).then(() => {
-        // Force a rerender after variants are loaded
-        forceUpdate({});
+        // Update available variants after they're loaded
+        const variants = getAvailableVariants(baseFontFamily);
+        setAvailableVariants(variants);
       });
     }
-  }, [baseFontFamily]);
+  }, [baseFontFamily, fontNames.length]);
 
   // All object types can have text properties:
   // - Text objects: native text
@@ -96,10 +100,6 @@ export const EditTextConfigPanel = () => {
         ? selectedObject.textStrokeWidth
         : undefined,
   };
-
-  // Get available variants for the selected font
-  const availableVariants =
-    fontNames.length > 0 ? getAvailableVariants(baseFontFamily) : undefined;
 
   return (
     <div className="flex flex-col gap-3">

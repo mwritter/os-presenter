@@ -22,7 +22,19 @@ export interface VideoStateUpdate {
   seeking: boolean;
 }
 
+// Handshake event payloads
+export interface VideoReadyPayload {
+  slideId: string;
+  videoType: "background" | "object";
+}
+
+export interface VideoAckPayload {
+  slideId: string;
+}
+
 // Event names
 export const VIDEO_CONTROL_EVENT = "video:control";
 export const VIDEO_STATE_UPDATE_EVENT = "video:state-update";
+export const VIDEO_READY_EVENT = "video:ready";
+export const VIDEO_ACK_EVENT = "video:ack";
 

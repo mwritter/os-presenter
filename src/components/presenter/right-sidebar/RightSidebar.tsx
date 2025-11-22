@@ -10,21 +10,22 @@ export const RightSidebar = () => {
   const isEditRoute = useLocation().pathname.startsWith("/presenter/edit");
   return (
     <ResizablePanel
+      className="flex flex-col h-full"
       id={"right-sidebar-panel"}
-      defaultSize={20}
+      defaultSize={30}
       minSize={20}
       maxSize={30}
       hidden={isEditRoute}
     >
       <PreviewPanel />
       <ResizablePanelGroup id="right-sidebar-group" direction="vertical">
-        <ResizablePanel id="action-panel" className="bg-shade-2 min-h-[100px]">
+        <ResizablePanel id="action-panel" className="bg-shade-2" minSize={10}>
           {/* Action Panel for multiple presentation / external controls */}
           <div>Action Panel</div>
         </ResizablePanel>
         <ResizableHandle className="bg-black" />
-        <ResizablePanel id="item-panel" className="bg-shade-2 min-h-[100px]">
-          {/* Action Panel for multiple presentation / external controls */}
+        <ResizablePanel id="item-panel" className="bg-shade-2" minSize={10}>
+          {/* Item Panel certain actions */}
           <div>Item Panel</div>
         </ResizablePanel>
       </ResizablePanelGroup>

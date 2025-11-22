@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:preview": "npm run build && tauri dev -c src-tauri/tauri.conf.preview.json",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -54,7 +56,7 @@
     "@storybook/addon-docs": "^10.0.4",
     "@storybook/addon-vitest": "^10.0.4",
     "@storybook/react-vite": "^10.0.4",
-    "@tauri-apps/cli": "^2",
+    "@tauri-apps/cli": "^2.9.4",
     "@types/node": "^24.10.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
