@@ -6,9 +6,11 @@ import { useEffect, useRef, useState } from "react";
 interface PreviewPanelVideoSyncProps {
   handshakeState: HandshakeState;
   onRetryHandshake: () => void;
+  isEnabled: boolean;
 }
 
 export const PreviewPanelVideoSync = ({
+  isEnabled = false,
   handshakeState,
   onRetryHandshake,
 }: PreviewPanelVideoSyncProps) => {
@@ -17,7 +19,7 @@ export const PreviewPanelVideoSync = ({
 
   // only show a status after 3 seconds of waiting for handshake
   useEffect(() => {
-    if (timerRef.current) return;
+    if (!wait || !isEnabled) return;
     timerRef.current = setTimeout(() => {
       setWait(false);
     }, 3000);
@@ -26,7 +28,7 @@ export const PreviewPanelVideoSync = ({
         clearTimeout(timerRef.current);
       }
     };
-  }, []);
+  }, [wait, isEnabled]);
 
   return (
     <div className="flex justify-center items-center w-full max-w-[90%] mx-auto h-8">

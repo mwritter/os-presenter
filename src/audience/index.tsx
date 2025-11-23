@@ -8,6 +8,7 @@ const AudienceView = () => {
     <div className="w-full h-full">
       {activeSlide && (
         <AudienceSlide
+          key={activeSlide.id}
           data={activeSlide.data}
           canvasSize={activeSlide.canvasSize}
         />

@@ -68,12 +68,7 @@ const EditSlideGroupPanel = ({
             })}
             onClick={() => setSelectedSlide(slide)}
           >
-            <Slide
-              id={slide.id}
-              data={slide}
-              as="div"
-              canvasSize={canvasSize}
-            />
+            <Slide id={slide.id} data={slide} canvasSize={canvasSize} />
             <p className="text-white text-xs font-bold text-left">
               {index + 1}
             </p>

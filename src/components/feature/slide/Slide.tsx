@@ -9,30 +9,30 @@ import { useSlideScale } from "./hooks/use-slide-scale";
 import { useIsEditRoute } from "@/hooks/use-is-edit-route";
 import { getSlideCanvasStyles } from "./util/getSlideCanvasStyles";
 import { getSlideMaskOverlay } from "./util/getSlideMaskOverlay";
+import { SlideTag } from "./SlideTag";
 
 export type SlideProps = {
   id: string;
   data: SlideData;
-  as?: "button" | "div";
   isEditable?: boolean;
   selectedObjectId?: string | null;
   onUpdateObject?: (objectId: string, updates: Partial<SlideObject>) => void;
   canvasSize?: CanvasSize;
   onMoveableInteractionChange?: (isInteracting: boolean) => void;
+  onClick?: () => void;
 };
 
 export const Slide = ({
   id,
   data,
-  as = "button",
   isEditable = false,
   selectedObjectId = null,
   onUpdateObject,
   canvasSize = { width: 1920, height: 1080 },
   onMoveableInteractionChange,
+  onClick,
 }: SlideProps) => {
   const activeSlideId = useSelectionStore((s) => s.activeSlide?.id ?? null);
-  const setActiveSlide = useSelectionStore((s) => s.setActiveSlide);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const { scale, isReady } = useSlideScale({ canvasSize, containerRef });
@@ -43,10 +43,6 @@ export const Slide = ({
   const handleMoveableInteractionChange = (isInteracting: boolean) => {
     setIsMoveableInteracting(isInteracting);
     onMoveableInteractionChange?.(isInteracting);
-  };
-
-  const handleClick = () => {
-    setActiveSlide(id, data, canvasSize);
   };
 
   const canvasStyle = getSlideCanvasStyles({
@@ -61,21 +57,15 @@ export const Slide = ({
     ? getSlideMaskOverlay({ canvasSize, scale, isReady })
     : undefined;
 
-  const Comp = as === "button" ? "button" : "div";
-
   return (
     <div
       ref={containerRef}
       key={id}
       className="flex flex-col gap-4 aspect-video w-full relative"
     >
-      <Comp
-        type={as === "button" ? "button" : undefined}
-        onClick={as === "button" ? handleClick : undefined}
-        className={cn("transition-all duration-200 w-full h-full relative", {
-          "ring-1 ring-amber-400": isActive,
-          "hover:ring-2 hover:ring-white/30": !isActive && as === "button",
-        })}
+      <div
+        onClick={onClick}
+        className={cn("transition-all duration-200 w-full h-full relative")}
       >
         <div ref={canvasRef} style={canvasStyle}>
           {data.objects && data.objects.length > 0 && (
@@ -99,7 +89,7 @@ export const Slide = ({
             </>
           )}
         </div>
-      </Comp>
+      </div>
       {/* Mask overlay to gray out areas outside the slide in edit mode */}
       {maskOverlayStyle && <div style={maskOverlayStyle} />}
     </div>

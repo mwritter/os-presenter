@@ -11,6 +11,7 @@ import {
   VIDEO_READY_EVENT,
   VIDEO_ACK_EVENT,
 } from "@/types/video-control";
+import { useIsAudienceRoute } from "./use-is-audience-route";
 
 interface UseVideoSyncOptions {
   slideId: string;
@@ -33,6 +34,7 @@ export const useVideoSync = ({
   const [videoAttached, setVideoAttached] = useState(0);
   const hasSentReadySignal = useRef<boolean>(false);
   const isBackgroundVideo = videoType === "background";
+  const isAudienceRoute = useIsAudienceRoute();
 
   // Reset ready signal flag and ack state when slide changes
   useEffect(() => {
@@ -57,6 +59,12 @@ export const useVideoSync = ({
 
   // Send video ready signal to presenter (for handshake)
   const sendVideoReady = () => {
+    // Only send ready signal if we're on the audience route
+    if (!isAudienceRoute) {
+      console.log("Skipping ready signal - not on audience route");
+      return;
+    }
+
     if (hasSentReadySignal.current) {
       console.log("Already sent ready signal, skipping");
       return;
@@ -106,7 +114,31 @@ export const useVideoSync = ({
 
   // Listen for acknowledgment from presenter (handshake)
   useEffect(() => {
-    if (!isActive || !isBackgroundVideo) return;
+    const autoStartVideo = () => {
+      const video = videoRef.current;
+      if (video) {
+        video.play().catch((error) => {
+          console.error("Failed to auto-play video after ack:", error);
+        });
+      }
+    };
+
+    if (!isActive || !isBackgroundVideo || !isAudienceRoute) {
+      // If not on audience route, skip handshake and mark as "received"
+      if (
+        !isAudienceRoute &&
+        isActive &&
+        isBackgroundVideo &&
+        !hasReceivedAck
+      ) {
+        console.log(
+          "Skipping handshake - not on audience route, setting ack to true"
+        );
+        setHasReceivedAck(true);
+        autoStartVideo();
+      }
+      return;
+    }
 
     const unlisten = listen<VideoAckPayload>(VIDEO_ACK_EVENT, (event) => {
       const payload = event.payload;
@@ -118,18 +150,13 @@ export const useVideoSync = ({
       setHasReceivedAck(true);
 
       // Auto-play the video now that we have acknowledgment
-      const video = videoRef.current;
-      if (video) {
-        video.play().catch((error) => {
-          console.error("Failed to auto-play video after ack:", error);
-        });
-      }
+      autoStartVideo();
     });
 
     return () => {
       unlisten.then((fn) => fn());
     };
-  }, [slideId, isActive, isBackgroundVideo]);
+  }, [slideId, isActive, isBackgroundVideo, isAudienceRoute, hasReceivedAck]);
 
   // Handle video control commands from presenter
   useEffect(() => {
@@ -144,8 +171,13 @@ export const useVideoSync = ({
         // Only handle commands for this slide
         if (command.slideId !== slideId || !video) return;
 
-        // For background videos, only allow play commands after receiving ack
-        if (isBackgroundVideo && command.action === "play" && !hasReceivedAck) {
+        // For background videos on audience route, only allow play commands after receiving ack
+        if (
+          isAudienceRoute &&
+          isBackgroundVideo &&
+          command.action === "play" &&
+          !hasReceivedAck
+        ) {
           console.log("Ignoring play command - waiting for handshake");
           return;
         }
@@ -188,7 +220,7 @@ export const useVideoSync = ({
     return () => {
       unlisten.then((fn) => fn());
     };
-  }, [slideId, isActive, isBackgroundVideo, hasReceivedAck]);
+  }, [slideId, isActive, isBackgroundVideo, hasReceivedAck, isAudienceRoute]);
 
   // Setup state update interval and video event listeners
   useEffect(() => {
@@ -212,7 +244,7 @@ export const useVideoSync = ({
     video.loop = true;
 
     // Check if video is already ready (readyState >= 3 means HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA)
-    // If so, send ready signal immediately for background videos
+    // If so, send ready signal immediately for background videos (only on audience route)
     if (
       isBackgroundVideo &&
       !hasReceivedAck &&
@@ -220,7 +252,7 @@ export const useVideoSync = ({
       video.readyState >= 3
     ) {
       console.log("Video already ready - sending handshake signal immediately");
-      sendVideoReady();
+      sendVideoReady(); // This will check isAudienceRoute internally
     }
 
     // Send state updates periodically while playing (every ~16ms for smooth 60fps updates)
@@ -271,15 +303,17 @@ export const useVideoSync = ({
         hasReceivedAck,
         hasSentReady: hasSentReadySignal.current,
         slideId,
+        isAudienceRoute,
       });
       sendStateUpdate();
-      // For background videos, emit ready signal and wait for ack before playing
+      // For background videos on audience route, emit ready signal and wait for ack before playing
       if (isBackgroundVideo && !hasReceivedAck && !hasSentReadySignal.current) {
         console.log("Video ready - sending handshake signal to presenter", {
           slideId,
           videoType,
+          isAudienceRoute,
         });
-        sendVideoReady();
+        sendVideoReady(); // This will check isAudienceRoute internally
       }
     };
     const handleError = (e: Event) => {
@@ -327,6 +361,7 @@ export const useVideoSync = ({
     slideId,
     videoType,
     videoAttached,
+    isAudienceRoute,
   ]);
 
   // Cleanup on unmount

@@ -35,6 +35,8 @@ export const PreviewPanelVideoControls = ({
   return (
     <div className="flex flex-col pb-5 bg-shade-2">
       <PreviewPanelVideoSync
+        key={slideId}
+        isEnabled={isEnabled}
         handshakeState={handshakeState}
         onRetryHandshake={retryHandshake}
       />

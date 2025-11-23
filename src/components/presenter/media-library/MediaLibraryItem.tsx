@@ -63,11 +63,7 @@ export const MediaLibraryItem = ({ mediaItem }: MediaLibraryItemProps) => {
           }`}
           style={{ flexBasis: "clamp(200px, calc((100% - 5rem) / 4), 300px)" }}
         >
-          <Slide
-            id={mediaItem.id}
-            data={mediaItemToSlideData(mediaItem)}
-            as={"div"}
-          />
+          <Slide id={mediaItem.id} data={mediaItemToSlideData(mediaItem)} />
           <div className="flex flex-col items-start gap-0.5 w-full ml-2">
             <div className="text-white text-[8px] font-medium truncate w-full text-left">
               {mediaItem.name}

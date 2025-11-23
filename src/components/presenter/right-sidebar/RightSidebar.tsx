@@ -18,17 +18,6 @@ export const RightSidebar = () => {
       hidden={isEditRoute}
     >
       <PreviewPanel />
-      <ResizablePanelGroup id="right-sidebar-group" direction="vertical">
-        <ResizablePanel id="action-panel" className="bg-shade-2" minSize={10}>
-          {/* Action Panel for multiple presentation / external controls */}
-          <div>Action Panel</div>
-        </ResizablePanel>
-        <ResizableHandle className="bg-black" />
-        <ResizablePanel id="item-panel" className="bg-shade-2" minSize={10}>
-          {/* Item Panel certain actions */}
-          <div>Item Panel</div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
     </ResizablePanel>
   );
 };

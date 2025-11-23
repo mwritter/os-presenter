@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { SlideData } from "@/components/feature/slide/types";
+import { SlideData, VideoObject } from "@/components/feature/slide/types";
 import { CanvasSize } from "@/components/presenter/types";
 import { SlideObjectRenderer } from "@/components/feature/slide/SlideObjectRenderer";
 import { useSlideScale } from "@/components/feature/slide/hooks/use-slide-scale";
@@ -27,13 +27,13 @@ export const AudienceSlide = ({ data, canvasSize }: AudienceSlideProps) => {
   // Find background video for sync
   const backgroundVideo = data.objects?.find(
     (obj) => obj.type === "video" && obj.videoType === "background"
-  );
+  ) as VideoObject;
 
   // Use video sync hook for background videos
   const videoRef = useVideoSync({
     slideId: data.id,
-    isActive: !!backgroundVideo,
-    videoType: "background",
+    isActive: Boolean(backgroundVideo),
+    videoType: backgroundVideo?.videoType || "object",
   });
 
   // Attach video ref to the background video element after render

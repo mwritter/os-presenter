@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { listen } from "@tauri-apps/api/event";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { emit } from "@tauri-apps/api/event";
 import {
   VideoControlCommand,
@@ -11,12 +11,18 @@ import {
   VIDEO_READY_EVENT,
   VIDEO_ACK_EVENT,
 } from "@/types/video-control";
+import { isAudienceWindowOpen } from "@/services/audience";
 
 interface UseVideoStateOptions {
   slideId: string | null; // null when no slide is active
 }
 
-export type HandshakeState = "idle" | "pending" | "acknowledged" | "failed";
+export type HandshakeState =
+  | "idle"
+  | "pending"
+  | "acknowledged"
+  | "failed"
+  | "skipped";
 
 /**
  * Hook for presenter view to control video playback and receive state updates
@@ -50,44 +56,67 @@ export const useVideoState = ({ slideId }: UseVideoStateOptions) => {
   // Listen for video ready signal from audience (handshake)
   useEffect(() => {
     if (!slideId) return;
+    let unlisten: Promise<UnlistenFn> | null = null;
 
-    console.log("Setting up VIDEO_READY_EVENT listener for slide:", slideId);
+    const initHandshake = async () => {
+      const isOpen = await isAudienceWindowOpen();
+      // if the audience window is not open set the handshake state to failed
+      if (!isOpen) {
+        console.log("Audience window is not open - skipping handshake");
+        setHandshakeState("skipped");
 
-    const unlisten = listen<VideoReadyPayload>(VIDEO_READY_EVENT, (event) => {
-      const payload = event.payload;
-
-      console.log("Received VIDEO_READY_EVENT", {
-        payload,
-        currentSlideId: slideId,
-      });
-
-      // Only handle ready signals for this slide and background videos
-      if (payload.slideId !== slideId || payload.videoType !== "background") {
-        console.log("Ignoring ready signal - slideId or videoType mismatch");
+        // Clear any pending timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
         return;
       }
 
-      console.log("Received video ready signal from audience - acknowledging");
-      setHandshakeState("acknowledged");
+      console.log("Setting up VIDEO_READY_EVENT listener for slide:", slideId);
 
-      // Clear any pending timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
+      unlisten = listen<VideoReadyPayload>(VIDEO_READY_EVENT, (event) => {
+        const payload = event.payload;
 
-      // Send acknowledgment back to audience
-      const ackPayload: VideoAckPayload = {
-        slideId: payload.slideId,
-      };
+        console.log("Received VIDEO_READY_EVENT", {
+          payload,
+          currentSlideId: slideId,
+        });
 
-      emit(VIDEO_ACK_EVENT, ackPayload).catch((error) => {
-        console.error("Failed to emit video acknowledgment:", error);
+        // Only handle ready signals for this slide and background videos
+        if (payload.slideId !== slideId || payload.videoType !== "background") {
+          console.log("Ignoring ready signal - slideId or videoType mismatch");
+          return;
+        }
+
+        console.log(
+          "Received video ready signal from audience - acknowledging"
+        );
+        setHandshakeState("acknowledged");
+
+        // Clear any pending timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
+
+        // Send acknowledgment back to audience
+        const ackPayload: VideoAckPayload = {
+          slideId: payload.slideId,
+        };
+
+        emit(VIDEO_ACK_EVENT, ackPayload).catch((error) => {
+          console.error("Failed to emit video acknowledgment:", error);
+        });
       });
-    });
+    };
+
+    initHandshake();
 
     return () => {
-      unlisten.then((fn) => fn());
+      if (unlisten) {
+        unlisten.then((fn) => fn());
+      }
     };
   }, [slideId]);
 
