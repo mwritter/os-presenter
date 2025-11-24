@@ -61,7 +61,7 @@ const ShowViewLibraryContent = () => {
     if (!selectedSlideGroup) return;
     addSlideToSlideGroup(
       selectedSlideGroup.libraryId,
-      selectedSlideGroup.index
+      selectedSlideGroup.id
     );
   };
 

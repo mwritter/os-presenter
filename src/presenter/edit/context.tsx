@@ -135,7 +135,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     } else if (selectedSlideGroup) {
       updateSlideInLibrary(
         selectedSlideGroup.libraryId,
-        selectedSlideGroup.index,
+        selectedSlideGroup.id,
         selectedSlide.id,
         { objects: updatedObjects }
       );
@@ -399,7 +399,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
     } else if (selectedSlideGroup) {
       updateSlideInLibrary(
         selectedSlideGroup.libraryId,
-        selectedSlideGroup.index,
+        selectedSlideGroup.id,
         selectedSlide.id,
         { backgroundColor }
       );
@@ -429,11 +429,11 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
         .getState()
         .libraries.find((lib) => lib.id === selectedSlideGroup.libraryId);
       if (library) {
-        const updatedSlideGroups = [...library.slideGroups];
-        updatedSlideGroups[selectedSlideGroup.index] = {
-          ...updatedSlideGroups[selectedSlideGroup.index],
-          slides: updatedSlides,
-        };
+        const updatedSlideGroups = library.slideGroups.map((sg) =>
+          sg.id === selectedSlideGroup.id
+            ? { ...sg, slides: updatedSlides }
+            : sg
+        );
         updateLibrary(selectedSlideGroup.libraryId, {
           slideGroups: updatedSlideGroups,
         });
@@ -461,11 +461,11 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
         .getState()
         .libraries.find((lib) => lib.id === selectedSlideGroup.libraryId);
       if (library) {
-        const updatedSlideGroups = [...library.slideGroups];
-        updatedSlideGroups[selectedSlideGroup.index] = {
-          ...updatedSlideGroups[selectedSlideGroup.index],
-          canvasSize: newCanvasSize,
-        };
+        const updatedSlideGroups = library.slideGroups.map((sg) =>
+          sg.id === selectedSlideGroup.id
+            ? { ...sg, canvasSize: newCanvasSize }
+            : sg
+        );
         updateLibrary(selectedSlideGroup.libraryId, {
           slideGroups: updatedSlideGroups,
         });

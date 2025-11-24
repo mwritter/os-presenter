@@ -20,7 +20,7 @@ export interface PlaylistSlice {
   addSlideGroupToPlaylist: (
     playlistId: string,
     libraryId: string,
-    slideGroupIndex: number
+    slideGroupId: string
   ) => void;
   addMediaItemToPlaylist: (playlistId: string, mediaItem: MediaItem) => void;
   updatePlaylistItemSlideGroup: (
@@ -114,9 +114,9 @@ export const createPlaylistSlice: StateCreator<
     get().updatePlaylist(playlistId, { items: updatedItems });
   },
 
-  addSlideGroupToPlaylist: (playlistId, libraryId, slideGroupIndex) => {
+  addSlideGroupToPlaylist: (playlistId, libraryId, slideGroupId) => {
     const library = get().libraries.find((lib) => lib.id === libraryId);
-    const slideGroup = library?.slideGroups[slideGroupIndex];
+    const slideGroup = library?.slideGroups.find((sg) => sg.id === slideGroupId);
 
     if (!library || !slideGroup) {
       console.error("Library or slide group not found");
@@ -129,15 +129,14 @@ export const createPlaylistSlice: StateCreator<
       return;
     }
 
-    // Create a deep copy of the slide group with new meta and regenerated slide IDs
+    // Create a deep copy of the slide group with new ID, meta, and regenerated slide IDs
     const slideGroupCopy: SlideGroup = {
+      id: crypto.randomUUID(), // Generate new ID for the copy
       canvasSize: slideGroup.canvasSize,
       meta: {
         playlistId,
         originLibraryId: libraryId,
-        originSlideGroupId: slideGroup.meta?.libraryId
-          ? `${libraryId}-${slideGroupIndex}`
-          : undefined,
+        originSlideGroupId: slideGroup.id,
       },
       title: slideGroup.title,
       // Deep copy slides with new unique IDs: playlistId-shortUuid
@@ -177,6 +176,7 @@ export const createPlaylistSlice: StateCreator<
     // Update meta with playlist context and regenerate slide IDs
     const slideGroupCopy: SlideGroup = {
       ...slideGroup,
+      id: crypto.randomUUID(), // Ensure new ID for the copy
       meta: {
         playlistId,
         originLibraryId: undefined,
@@ -303,7 +303,31 @@ export const createPlaylistSlice: StateCreator<
     try {
       const playlists = await storage.loadPlaylists();
       console.log(`Loaded ${playlists.length} playlists`);
-      set({ playlists, isPlaylistLoading: false });
+      
+      // Migration: Ensure all slide groups have IDs
+      const migratedPlaylists = playlists.map((playlist) => ({
+        ...playlist,
+        items: playlist.items.map((item) => ({
+          ...item,
+          slideGroup: {
+            ...item.slideGroup,
+            id: item.slideGroup.id || crypto.randomUUID(), // Add ID if missing
+          },
+        })),
+      }));
+      
+      set({ playlists: migratedPlaylists, isPlaylistLoading: false });
+      
+      // Save migrated playlists back to disk if any were missing IDs
+      const needsMigration = playlists.some((pl) =>
+        pl.items.some((item) => !(item.slideGroup as any).id)
+      );
+      if (needsMigration) {
+        console.log("Migrating playlists to add slide group IDs...");
+        await Promise.all(
+          migratedPlaylists.map((pl) => storage.savePlaylist(pl))
+        );
+      }
     } catch (error) {
       console.error("Failed to load playlists:", error);
       set({ isPlaylistLoading: false });

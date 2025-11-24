@@ -342,6 +342,7 @@ pub struct CanvasSize {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlideGroup {
+    pub id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub meta: Option<SlideGroupMeta>,
     pub title: String,

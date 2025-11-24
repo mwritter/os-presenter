@@ -10,7 +10,10 @@
     "dialog:allow-open",
     "dialog:allow-message",
     "dialog:allow-confirm",
-    "core:event:allow-listen"
+    "core:event:allow-listen",
+    "core:menu:default",
+    "core:menu:allow-new",
+    "core:menu:allow-popup"
   ],
   "listen": [
     {

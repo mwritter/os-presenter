@@ -1,12 +1,7 @@
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Circle, Shapes, Square } from "lucide-react";
 import { useEditContext } from "@/presenter/edit/context";
 import { EditViewObjectActionbarButton } from "./EditViewObjectActionbarButton";
+import { useNativeMenu } from "@/components/feature/native-menu/hooks/use-native-menu";
 
 export const AddShapeActionbarButton = ({
   disabled,
@@ -14,37 +9,33 @@ export const AddShapeActionbarButton = ({
   disabled?: boolean;
 }) => {
   const { addShapeObject } = useEditContext();
+  
+  const { openNativeMenu } = useNativeMenu({
+    items: [
+      {
+        id: "rectangle",
+        text: "Rectangle",
+        action: () => addShapeObject("rectangle"),
+      },
+      {
+        id: "circle",
+        text: "Circle",
+        action: () => addShapeObject("circle"),
+      },
+      {
+        id: "triangle",
+        text: "Triangle",
+        action: () => addShapeObject("triangle"),
+      },
+    ],
+  });
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild disabled={disabled}>
-        <EditViewObjectActionbarButton
-          icon={<Shapes />}
-          label="Shape"
-          disabled={disabled}
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => addShapeObject("rectangle")}>
-          <Square className="mr-2 h-4 w-4" />
-          Rectangle
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => addShapeObject("circle")}>
-          <Circle className="mr-2 h-4 w-4" />
-          Circle
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => addShapeObject("triangle")}>
-          <svg
-            className="mr-2 h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M12 2 L22 22 L2 22 Z" />
-          </svg>
-          Triangle
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <EditViewObjectActionbarButton
+      icon={<Shapes />}
+      label="Shape"
+      disabled={disabled}
+      onClick={(e) => !disabled && openNativeMenu(e)}
+    />
   );
 };

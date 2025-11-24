@@ -33,6 +33,7 @@ export const AddPresentationDialog = ({
   const handleCreate = ({ presentationName, canvasSize }: { presentationName: string; canvasSize: CanvasSize }) => {
     if (!selectedLibraryId || !presentationName) return;
     addLibrarySlideGroup(selectedLibraryId, {
+      id: crypto.randomUUID(),
       meta: {
         libraryId: selectedLibraryId,
       },

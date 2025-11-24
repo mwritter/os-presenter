@@ -7,7 +7,7 @@ export interface SelectionSlice {
   selectedLibraryId: string | null;
   selectedPlaylistId: string | null;
   selectedSlideGroup: {
-    index: number; // Array index in library.slideGroups
+    id: string; // SlideGroup ID
     libraryId: string;
   } | null;
   selectedPlaylistItem: {
@@ -23,7 +23,7 @@ export interface SelectionSlice {
   // Actions
   selectLibrary: (id: string | null) => void;
   selectPlaylist: (id: string | null) => void;
-  selectSlideGroup: (slideGroupIndex: number, libraryId: string) => void;
+  selectSlideGroup: (slideGroupId: string, libraryId: string) => void;
   selectPlaylistItem: (itemId: string, playlistId: string) => void;
   clearSlideGroupSelection: () => void;
   clearPlaylistItemSelection: () => void;
@@ -61,9 +61,9 @@ export const createSelectionSlice: StateCreator<
       selectedLibraryId: null,
     }),
 
-  selectSlideGroup: (slideGroupIndex, libraryId) =>
+  selectSlideGroup: (slideGroupId, libraryId) =>
     set({
-      selectedSlideGroup: { index: slideGroupIndex, libraryId },
+      selectedSlideGroup: { id: slideGroupId, libraryId },
       selectedPlaylistItem: null,
     }),
 

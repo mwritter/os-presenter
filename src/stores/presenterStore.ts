@@ -33,6 +33,11 @@ export const usePresenterStore = create<PresenterStore>()((set, get, api) => {
         // Clear selection if the removed library was selected
         selectedLibraryId:
           state.selectedLibraryId === id ? null : state.selectedLibraryId,
+        // Clear slide group selection if it belongs to the removed library
+        selectedSlideGroup:
+          state.selectedSlideGroup?.libraryId === id
+            ? null
+            : state.selectedSlideGroup,
       }));
       // Delete from disk asynchronously
       storage.deleteLibrary(id).catch(console.error);
@@ -89,7 +94,7 @@ export const usePresenterStore = create<PresenterStore>()((set, get, api) => {
       else if (selectedSlideGroup) {
         state.addSlideToSlideGroup(
           selectedSlideGroup.libraryId,
-          selectedSlideGroup.index,
+          selectedSlideGroup.id,
           slideData
         );
       }
@@ -168,9 +173,9 @@ export const useSelectedPlaylist = () =>
 export const useSelectedSlideGroupData = () =>
   usePresenterStore((state) => {
     if (!state.selectedSlideGroup) return null;
-    const { index, libraryId } = state.selectedSlideGroup;
+    const { id, libraryId } = state.selectedSlideGroup;
     const library = state.libraries.find((lib) => lib.id === libraryId);
-    return library?.slideGroups[index] ?? null;
+    return library?.slideGroups.find((sg) => sg.id === id) ?? null;
   });
 
 export const useSelectedPlaylistItemData = () =>

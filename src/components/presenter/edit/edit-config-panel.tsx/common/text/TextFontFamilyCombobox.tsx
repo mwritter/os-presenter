@@ -39,56 +39,59 @@ export function TextFontFamilyCombobox({
   }, [externalValue]);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          style={{ fontFamily: value }}
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between text-xs! h-min! py-1"
-          disabled={isLoading}
-        >
-          {isLoading
-            ? "Loading fonts..."
-            : value
-              ? fontFamilies.find((fontFamily) => fontFamily.value === value)
-                  ?.label
-              : "Select font family..."}
-          <ChevronsUpDown className="opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="p-0">
-        <Command>
-          <CommandInput placeholder="Search font family..." className="h-9" />
-          <CommandList>
-            <CommandEmpty>No font family found.</CommandEmpty>
-            <CommandGroup>
-              {fontFamilies.map((fontFamily) => (
-                <CommandItem
-                  style={{ fontFamily: fontFamily.value }}
-                  key={fontFamily.value}
-                  value={fontFamily.value}
-                  onSelect={(currentValue) => {
-                    const newValue = currentValue === value ? "" : currentValue;
-                    setValue(newValue);
-                    onChange(newValue);
-                    setOpen(false);
-                  }}
-                >
-                  {fontFamily.label}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value === fontFamily.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            style={{ fontFamily: value }}
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between text-xs! h-min! py-1"
+            disabled={isLoading}
+          >
+            {isLoading
+              ? "Loading fonts..."
+              : value
+                ? fontFamilies.find((fontFamily) => fontFamily.value === value)
+                    ?.label
+                : "Select font family..."}
+            <ChevronsUpDown className="opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="p-0 bg-shade-1/50 backdrop-blur-md">
+          <Command className="bg-shade-1/10 backdrop-blur-md">
+            <CommandInput placeholder="Search font family..." className="h-9" />
+            <CommandList className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <CommandEmpty>No font family found.</CommandEmpty>
+              <CommandGroup>
+                {fontFamilies.map((fontFamily) => (
+                  <CommandItem
+                    style={{ fontFamily: fontFamily.value }}
+                    key={fontFamily.value}
+                    value={fontFamily.value}
+                    onSelect={(currentValue) => {
+                      const newValue =
+                        currentValue === value ? "" : currentValue;
+                      setValue(newValue);
+                      onChange(newValue);
+                      setOpen(false);
+                    }}
+                  >
+                    {fontFamily.label}
+                    <Check
+                      className={cn(
+                        "ml-auto",
+                        value === fontFamily.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }

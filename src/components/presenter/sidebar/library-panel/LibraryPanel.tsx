@@ -2,16 +2,43 @@ import { PlaylistItem } from "./PlaylistItem";
 import { LibraryItem } from "./LibraryItem";
 import { useLibraryStore, usePlaylistStore } from "@/stores/presenterStore";
 import { Plus } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { usePresenterContext } from "@/context/presenter";
+import { useNativeMenu } from "@/components/feature/native-menu/hooks/use-native-menu";
 
 export const LibraryPanel = () => {
+  const libraries = useLibraryStore((s) => s.libraries);
+  const playlists = usePlaylistStore((s) => s.playlists);
+
+  return (
+    <div className="flex flex-col gap-1 overflow-y-auto h-full">
+      <div>
+        <LibraryPanelHeader title="Library" withMenu />
+        {libraries.map((library) => (
+          <LibraryItem key={library.id} id={library.id} name={library.name} />
+        ))}
+      </div>
+      <div>
+        <LibraryPanelHeader title="Playlist" />
+        {playlists.map((playlist) => (
+          <PlaylistItem
+            key={playlist.id}
+            id={playlist.id}
+            name={playlist.name}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const LibraryPanelHeader = ({
+  title,
+  withMenu = false,
+}: {
+  title: string;
+  withMenu?: boolean;
+}) => {
   const { openAddPresentationDialog } = usePresenterContext();
   const libraries = useLibraryStore((s) => s.libraries);
   const playlists = usePlaylistStore((s) => s.playlists);
@@ -19,6 +46,7 @@ export const LibraryPanel = () => {
   const addPlaylist = usePlaylistStore((s) => s.addPlaylist);
 
   const handleNewLibrary = () => {
+    console.log("handle New Library");
     const now = new Date().toISOString();
     const newLibrary = {
       id: crypto.randomUUID(),
@@ -45,74 +73,44 @@ export const LibraryPanel = () => {
   const handleNewPresentation = () => {
     openAddPresentationDialog();
   };
+  const { openNativeMenu } = useNativeMenu({
+    items: [
+      {
+        id: "new-library",
+        text: "New Library",
+        action: () => {
+          handleNewLibrary();
+        },
+      },
+      {
+        id: "new-playlist",
+        text: "New Playlist",
+        action: () => {
+          handleNewPlaylist();
+        },
+      },
+      {
+        id: "new-presentation",
+        text: "New Presentation",
+        action: () => {
+          handleNewPresentation();
+        },
+      },
+    ],
+  });
 
-  return (
-    <div className="flex flex-col gap-1 overflow-y-auto h-full">
-      <div>
-        <LibraryPanelHeader
-          title="Library"
-          withMenu
-          onNewLibrary={handleNewLibrary}
-          onNewPlaylist={handleNewPlaylist}
-          onNewPresentation={handleNewPresentation}
-        />
-        {libraries.map((library) => (
-          <LibraryItem key={library.id} id={library.id} name={library.name} />
-        ))}
-      </div>
-      <div>
-        <LibraryPanelHeader title="Playlist" />
-        {playlists.map((playlist) => (
-          <PlaylistItem
-            key={playlist.id}
-            id={playlist.id}
-            name={playlist.name}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const LibraryPanelHeader = ({
-  title,
-  withMenu = false,
-  onNewLibrary,
-  onNewPlaylist,
-  onNewPresentation,
-}: {
-  title: string;
-  withMenu?: boolean;
-  onNewLibrary?: () => void;
-  onNewPlaylist?: () => void;
-  onNewPresentation?: () => void;
-}) => {
   return (
     <div className="p-2 flex items-center justify-between">
       <p className="text-gray-400 font-bold text-xs uppercase">{title}</p>
       {withMenu && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              className="rounded-sm text-gray-400 hover:bg-white/10 hover:text-gray-400"
-              variant="ghost"
-              size="icon-xs"
-            >
-              <Plus className="size-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="dark">
-            <DropdownMenuItem onClick={onNewLibrary}>
-              New Library
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onNewPlaylist}>
-              New Playlist
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onNewPresentation}>
-              New Presentation
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          className="rounded-sm text-gray-400 hover:bg-white/10 hover:text-gray-400"
+          variant="ghost"
+          size="icon-xs"
+          onClick={(e) => openNativeMenu(e)}
+        >
+          <Plus className="size-3" />
+        </Button>
       )}
     </div>
   );

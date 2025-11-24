@@ -11,6 +11,7 @@ export const mediaItemToSlideGroup = (mediaItem: MediaItem): SlideGroup => {
 
   // Create a slide group with the media slide
   return {
+    id: crypto.randomUUID(),
     canvasSize: DEFAULT_CANVAS_PRESET.value,
     title: mediaItem.name,
     slides: [slideData],

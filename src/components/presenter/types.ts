@@ -19,6 +19,7 @@ export type CanvasPreset = {
 };
 
 export type SlideGroup = {
+  id: string;
   meta?: SlideGroupMeta; // Metadata about origin/parent
   title: string;
   slides: SlideData[];
