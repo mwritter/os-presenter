@@ -1,15 +1,12 @@
 import { useRef, useState } from "react";
 import { SlideData, SlideObject } from "./types";
 import { cn } from "@/lib/utils";
-import { useSelectionStore } from "@/stores/presenterStore";
 import { SlideObjectRenderer } from "./SlideObjectRenderer";
 import { MoveableControlsLayer } from "./objects/moveable/MoveableControlsLayer";
 import { CanvasSize } from "@/components/presenter/types";
 import { useSlideScale } from "./hooks/use-slide-scale";
-import { useIsEditRoute } from "@/hooks/use-is-edit-route";
 import { getSlideCanvasStyles } from "./util/getSlideCanvasStyles";
 import { getSlideMaskOverlay } from "./util/getSlideMaskOverlay";
-import { SlideTag } from "./SlideTag";
 
 export type SlideProps = {
   id: string;
@@ -32,12 +29,9 @@ export const Slide = ({
   onMoveableInteractionChange,
   onClick,
 }: SlideProps) => {
-  const activeSlideId = useSelectionStore((s) => s.activeSlide?.id ?? null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const { scale, isReady } = useSlideScale({ canvasSize, containerRef });
-  const isEditRoute = useIsEditRoute();
-  const isActive = isEditRoute ? false : activeSlideId === id;
   const [isMoveableInteracting, setIsMoveableInteracting] = useState(false);
 
   const handleMoveableInteractionChange = (isInteracting: boolean) => {
