@@ -9,18 +9,22 @@ import {
 
 export const ContentLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ResizablePanelGroup id="main-layout" direction="vertical">
-      <ResizablePanel id="main-content" defaultSize={100}>
-        <ResizablePanelGroup id="horizontal-layout" direction="horizontal">
-          <Sidebar />
+    <ResizablePanelGroup id="outer-horizontal-layout" direction="horizontal">
+      <ResizablePanel id="left-section" defaultSize={100}>
+        <ResizablePanelGroup id="main-layout" direction="vertical">
+          <ResizablePanel id="main-content" defaultSize={100}>
+            <ResizablePanelGroup id="horizontal-layout" direction="horizontal">
+              <Sidebar />
+              <ResizableHandle className="bg-black" />
+              <ResizablePanel id="content-panel">{children}</ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
           <ResizableHandle className="bg-black" />
-          <ResizablePanel id="content-panel">{children}</ResizablePanel>
-          <ResizableHandle className="bg-black" />
-          <RightSidebar />
+          <MediaLibraryPanel />
         </ResizablePanelGroup>
       </ResizablePanel>
       <ResizableHandle className="bg-black" />
-      <MediaLibraryPanel />
+      <RightSidebar />
     </ResizablePanelGroup>
   );
 };

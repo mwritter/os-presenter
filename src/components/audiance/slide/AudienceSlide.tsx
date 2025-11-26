@@ -5,24 +5,29 @@ import { SlideObjectRenderer } from "@/components/feature/slide/SlideObjectRende
 import { useSlideScale } from "@/components/feature/slide/hooks/use-slide-scale";
 import { getSlideCanvasStyles } from "@/components/feature/slide/util/getSlideCanvasStyles";
 import { useVideoSync } from "@/hooks/use-video-sync";
+import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useIsAudienceRoute } from "@/hooks/use-is-audience-route";
 
 interface AudienceSlideProps {
   data: SlideData;
   canvasSize: CanvasSize;
+  useCache?: boolean;
 }
 
-/**
- * Simplified slide component for audience view
- * - No interactivity (no clicking, editing, or selection)
- * - Focuses only on proper scaling and display
- * - Respects the presentation's canvas size
- * - Handles video sync for 'background' type videos
- */
-export const AudienceSlide = ({ data, canvasSize }: AudienceSlideProps) => {
+export const AudienceSlide = ({
+  data,
+  canvasSize,
+  useCache,
+}: AudienceSlideProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
-
-  const { scale, isReady } = useSlideScale({ canvasSize, containerRef });
+  const isAudienceRoute = useIsAudienceRoute();
+  const { scale, isReady } = useSlideScale({
+    canvasSize,
+    containerRef,
+    useCache: useCache ?? isAudienceRoute,
+  });
 
   // Find background video for sync
   const backgroundVideo = data.objects?.find(
@@ -43,6 +48,10 @@ export const AudienceSlide = ({ data, canvasSize }: AudienceSlideProps) => {
         backgroundVideo: !!backgroundVideo,
         canvasRef: !!canvasRef.current,
       });
+      // Clear the video ref if there's no background video
+      if (videoRef.current && !backgroundVideo) {
+        videoRef.current = null;
+      }
       return;
     }
 
@@ -66,7 +75,7 @@ export const AudienceSlide = ({ data, canvasSize }: AudienceSlideProps) => {
       // Note: Auto-play is now controlled by the handshake protocol
       // The video will play after receiving acknowledgment from presenter
     }
-  }, [backgroundVideo, videoRef, data.id]);
+  }, [backgroundVideo?.id, videoRef, data.id]);
 
   const canvasStyle = getSlideCanvasStyles({
     backgroundColor: data.backgroundColor || "black",
@@ -77,20 +86,25 @@ export const AudienceSlide = ({ data, canvasSize }: AudienceSlideProps) => {
   });
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full flex items-center justify-center"
-    >
-      <div ref={canvasRef} style={canvasStyle}>
-        {data.objects && data.objects.length > 0 && (
-          <SlideObjectRenderer
-            objects={data.objects}
-            isEditable={false}
-            selectedObjectId={null}
-            forceShowVideo={true}
-          />
-        )}
-      </div>
-    </div>
+    <AnimatePresence>
+      <motion.div
+        ref={containerRef}
+        className={cn("w-full h-full flex items-center justify-center", {
+          backgroundColor: data.backgroundColor || "black",
+        })}
+      >
+        <div ref={canvasRef} style={canvasStyle}>
+          {data.objects && data.objects.length > 0 && (
+            <SlideObjectRenderer
+              key={data.id}
+              objects={data.objects}
+              isEditable={false}
+              selectedObjectId={null}
+              forceShowVideo={true}
+            />
+          )}
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };

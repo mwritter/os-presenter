@@ -6,7 +6,7 @@ import {
 } from "@/stores/presenterStore";
 import { File } from "lucide-react";
 import { useItemPanelContext } from "./context";
-import { useNativeMenu } from "@/components/feature/native-menu/hooks/use-native-menu";
+import { usePlaylistItemContextMenu } from "./hooks/use-playlist-item-context-menu";
 
 export const ItemPanelPlaylistContent = () => {
   const selectedPlaylist = useSelectedPlaylist();
@@ -40,35 +40,54 @@ export const ItemPanelPlaylistContent = () => {
         const isSelected = selectedPlaylistItemId === item.id;
         const title = item.slideGroup.title; // Access embedded slide group directly
 
-        const { openNativeMenu } = useNativeMenu({
-          items: [
-            {
-              id: "remove",
-              text: "Remove",
-              action: () => handleRemovePlaylistItem(item.id),
-            },
-          ],
-        });
-
         return (
-          <button
+          <PlaylistContentItem
             key={item.id}
-            className={cn(
-              "w-full hover:bg-white/10 p-1",
-              isSelected && "bg-white/20"
-            )}
-            onClick={() => handleSelectPlaylistItem(item.id)}
-            onContextMenu={(e) => openNativeMenu(e)}
-          >
-            <div className="flex items-center gap-2">
-              <File className="size-3.5" color="white" />
-              <span className="text-white text-sm whitespace-nowrap text-ellipsis overflow-hidden">
-                {title}
-              </span>
-            </div>
-          </button>
+            item={item}
+            isSelected={isSelected}
+            title={title}
+            onSelect={handleSelectPlaylistItem}
+            onRemove={handleRemovePlaylistItem}
+          />
         );
       })}
     </div>
+  );
+};
+
+const PlaylistContentItem = ({
+  item,
+  isSelected,
+  title,
+  onSelect,
+  onRemove,
+}: {
+  item: { id: string };
+  isSelected: boolean;
+  title: string;
+  onSelect: (itemId: string) => void;
+  onRemove: (itemId: string) => void;
+}) => {
+  const { openContextMenu } = usePlaylistItemContextMenu({
+    onRemove: () => onRemove(item.id),
+    id: item.id,
+  });
+
+  return (
+    <button
+      className={cn(
+        "w-full hover:bg-white/10 p-1",
+        isSelected && "bg-white/20"
+      )}
+      onClick={() => onSelect(item.id)}
+      onContextMenu={(e) => openContextMenu(e)}
+    >
+      <div className="flex items-center gap-2">
+        <File className="size-3.5" color="white" />
+        <span className="text-white text-sm whitespace-nowrap text-ellipsis overflow-hidden">
+          {title}
+        </span>
+      </div>
+    </button>
   );
 };

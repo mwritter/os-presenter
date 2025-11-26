@@ -7,7 +7,7 @@ import {
 import { mediaItemToSlideData } from "@/stores/utils/mediaItemToSlideData";
 import { usePlaylistStore } from "@/stores/presenterStore";
 import { confirm } from "@tauri-apps/plugin-dialog";
-import { useNativeMenu } from "@/components/feature/native-menu/hooks/use-native-menu";
+import { useContextMenu } from "./hooks/use-context-menu";
 
 export type MediaLibraryItemProps = {
   mediaItem: MediaItem;
@@ -40,42 +40,17 @@ export const MediaLibraryItem = ({ mediaItem }: MediaLibraryItemProps) => {
     }
   };
 
-  const { openNativeMenu } = useNativeMenu({
-    items: [
-      {
-        id: "add-to",
-        text: "Add To",
-        items:
-          playlists.length === 0
-            ? [
-                {
-                  id: "no-playlists",
-                  text: "No playlists available",
-                  enabled: false,
-                  action: () => {},
-                },
-              ]
-            : playlists.map((playlist) => ({
-                id: `playlist-${playlist.id}`,
-                text: playlist.name,
-                action: () => handleAddToPlaylist(playlist.id),
-              })),
-      },
-      {
-        item: "Separator" as const,
-      },
-      {
-        id: "delete",
-        text: "Delete",
-        action: handleDelete,
-      },
-    ],
+  const { openContextMenu } = useContextMenu({
+    onDelete: handleDelete,
+    onAddToPlaylist: handleAddToPlaylist,
+    id: mediaItem.id,
+    playlists: playlists,
   });
 
   return (
     <button
       onClick={() => selectMedia(mediaItem.id)}
-      onContextMenu={(e) => openNativeMenu(e)}
+      onContextMenu={(e) => openContextMenu(e)}
       className={`flex flex-col gap-2 p-2 rounded-md transition-colors cursor-pointer h-min shrink-0 ${
         isSelected ? "bg-white/20 ring-2 ring-white/40" : "hover:bg-white/10"
       }`}

@@ -5,11 +5,9 @@ import { CSSProperties } from "react";
 export const getSlideMaskOverlay = ({
   canvasSize,
   scale,
-  isReady,
 }: {
   canvasSize: CanvasSize;
   scale: number;
-  isReady: boolean;
 }): CSSProperties => {
   return {
     position: "absolute",
@@ -22,7 +20,5 @@ export const getSlideMaskOverlay = ({
     pointerEvents: "none",
     zIndex: 20,
     boxShadow: `0 0 0 9999px rgba(0, 0, 0, 0.4)`, // Gray overlay outside bounds
-    opacity: isReady ? 1 : 0,
-    transition: "opacity 200ms ease-in",
   };
 };

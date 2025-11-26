@@ -5,7 +5,8 @@ import {
   useSelectedLibrary,
 } from "@/stores/presenterStore";
 import { usePresenterContext } from "@/context/presenter";
-import { useNativeMenu } from "@/components/feature/native-menu/hooks/use-native-menu";
+import { useLibraryHeaderContextMenu } from "./hooks/use-library-header-context-menu";
+import { usePlaylistHeaderContextMenu } from "./hooks/use-playlist-header-context-menu";
 
 export const ItemPanelHeader = () => {
   const selectedLibrary = useSelectedLibrary();
@@ -24,14 +25,8 @@ const ItemPanelLibraryHeader = () => {
   const selectedLibrary = useSelectedLibrary();
   const { openAddPresentationDialog } = usePresenterContext();
 
-  const { openNativeMenu } = useNativeMenu({
-    items: [
-      {
-        id: "new-presentation",
-        text: "New Presentation",
-        action: openAddPresentationDialog,
-      },
-    ],
+  const { openContextMenu } = useLibraryHeaderContextMenu({
+    onNewPresentation: openAddPresentationDialog,
   });
 
   return (
@@ -43,7 +38,7 @@ const ItemPanelLibraryHeader = () => {
         className="rounded-sm text-gray-400 hover:bg-white/10 hover:text-gray-400"
         variant="ghost"
         size="icon-xs"
-        onClick={(e) => openNativeMenu(e)}
+        onClick={(e) => openContextMenu(e)}
       >
         <Plus className="size-3" />
       </Button>
@@ -54,25 +49,19 @@ const ItemPanelLibraryHeader = () => {
 const ItemPanelPlaylistHeader = () => {
   const selectedPlaylist = useSelectedPlaylist();
 
-  const { openNativeMenu } = useNativeMenu({
-    items: [
-      {
-        id: "new-header",
-        text: "New Header",
-        action: () => {
-          // TODO: Implement new header functionality
-          console.log("New Header clicked");
-        },
-      },
-      {
-        id: "new-placeholder",
-        text: "New Placeholder",
-        action: () => {
-          // TODO: Implement new placeholder functionality
-          console.log("New Placeholder clicked");
-        },
-      },
-    ],
+  const handleNewHeader = () => {
+    // TODO: Implement new header functionality
+    console.log("New Header clicked");
+  };
+
+  const handleNewPlaceholder = () => {
+    // TODO: Implement new placeholder functionality
+    console.log("New Placeholder clicked");
+  };
+
+  const { openContextMenu } = usePlaylistHeaderContextMenu({
+    onNewHeader: handleNewHeader,
+    onNewPlaceholder: handleNewPlaceholder,
   });
 
   return (
@@ -84,7 +73,7 @@ const ItemPanelPlaylistHeader = () => {
         className="rounded-sm text-gray-400 hover:bg-white/10 hover:text-gray-400"
         variant="ghost"
         size="icon-xs"
-        onClick={(e) => openNativeMenu(e)}
+        onClick={(e) => openContextMenu(e)}
       >
         <Plus className="size-3" />
       </Button>

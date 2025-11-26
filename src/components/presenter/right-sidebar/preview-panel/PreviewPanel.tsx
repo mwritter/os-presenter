@@ -6,7 +6,6 @@ import {} from "lucide-react";
 import { DEFAULT_CANVAS_PRESET } from "@/consts/canvas";
 import { CanvasSize } from "@/components/presenter/types";
 import { SlideData } from "@/components/feature/slide/types";
-import { Label } from "@/components/ui/label";
 import { PreviewPanelClearItemActions } from "./PreviewPanelClearItemActions";
 import { PreviewPanelVideoControls } from "./video-controls/PrevewPanelVideoControls";
 
@@ -31,29 +30,27 @@ export const PreviewPanel = () => {
 
   return (
     <>
-      <div
-        key={activeSlide?.id || "preview-panel"}
-        className="flex flex-col h-full w-full max-h-[250px] border-b border-black bg-shade-2 gap-2"
-      >
-        <div className="relative h-full w-full overflow-hidden">
-          <AudienceSlide data={slideData} canvasSize={canvasSize} />
-        </div>
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center justify-between px-1 @container">
-            <Label className="text-xs! @min-[200px]:block hidden">
-              Clear Items
-            </Label>
-            <Button
-              variant="outline"
-              className="text-xs! h-min w-full @min-[200px]:w-auto"
-            >
-              Clear to Logo
-            </Button>
+      <div className="flex flex-col h-full bg-shade-2">
+        <div
+          key={hasBackgroundVideo ? slideData.id : "preview-panel"}
+          className="flex  h-full w-full max-h-[250px] "
+        >
+          <div className="relative h-full w-full overflow-hidden">
+            <AudienceSlide data={slideData} canvasSize={canvasSize} />
           </div>
           <PreviewPanelClearItemActions />
         </div>
+        <div className="flex items-center justify-between gap-1 bg-shade-4 w-full py-1 px-2">
+          <span className="text-xs! h-min!">Screen 1</span>
+          <Button
+            variant="ghost"
+            className="text-xs! h-min! hover:bg-red-800/50!"
+          >
+            Clear to Logo
+          </Button>
+        </div>
+        <PreviewPanelVideoControls slideId={slideIdForVideoState} />
       </div>
-      <PreviewPanelVideoControls slideId={slideIdForVideoState} />
     </>
   );
 };

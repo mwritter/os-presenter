@@ -192,3 +192,13 @@ export const usePlaylistItemSlideGroup = (playlistId: string, itemId: string) =>
     const item = playlist?.items.find((i) => i.id === itemId);
     return item?.slideGroup ?? null;
   });
+
+export const useSelectedPlaylistItemPlaylist = () =>
+  usePresenterStore((state) => {
+    if (!state.selectedPlaylistItem) return null;
+    return (
+      state.playlists.find(
+        (pl) => pl.id === state.selectedPlaylistItem?.playlistId
+      ) ?? null
+    );
+  });

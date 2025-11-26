@@ -54,7 +54,7 @@ export const Slide = ({
   });
 
   const maskOverlayStyle = isEditable
-    ? getSlideMaskOverlay({ canvasSize, scale, isReady })
+    ? getSlideMaskOverlay({ canvasSize, scale })
     : undefined;
 
   return (

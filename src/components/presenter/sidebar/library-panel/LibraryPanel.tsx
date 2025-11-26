@@ -4,7 +4,7 @@ import { useLibraryStore, usePlaylistStore } from "@/stores/presenterStore";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePresenterContext } from "@/context/presenter";
-import { useNativeMenu } from "@/components/feature/native-menu/hooks/use-native-menu";
+import { useLibraryPanelContextMenu } from "./hooks/use-library-panel-context-menu";
 
 export const LibraryPanel = () => {
   const libraries = useLibraryStore((s) => s.libraries);
@@ -73,30 +73,11 @@ const LibraryPanelHeader = ({
   const handleNewPresentation = () => {
     openAddPresentationDialog();
   };
-  const { openNativeMenu } = useNativeMenu({
-    items: [
-      {
-        id: "new-library",
-        text: "New Library",
-        action: () => {
-          handleNewLibrary();
-        },
-      },
-      {
-        id: "new-playlist",
-        text: "New Playlist",
-        action: () => {
-          handleNewPlaylist();
-        },
-      },
-      {
-        id: "new-presentation",
-        text: "New Presentation",
-        action: () => {
-          handleNewPresentation();
-        },
-      },
-    ],
+
+  const { openContextMenu } = useLibraryPanelContextMenu({
+    onNewLibrary: handleNewLibrary,
+    onNewPlaylist: handleNewPlaylist,
+    onNewPresentation: handleNewPresentation,
   });
 
   return (
@@ -107,7 +88,7 @@ const LibraryPanelHeader = ({
           className="rounded-sm text-gray-400 hover:bg-white/10 hover:text-gray-400"
           variant="ghost"
           size="icon-xs"
-          onClick={(e) => openNativeMenu(e)}
+          onClick={(e) => openContextMenu(e)}
         >
           <Plus className="size-3" />
         </Button>

@@ -25,6 +25,7 @@ interface EditContextType {
   editingObjectId: string | null;
   setEditingObject: (objectId: string | null) => void;
   canvasSize: CanvasSize;
+  allSlides: SlideData[];
   addTextObject: () => void;
   addShapeObject: (shapeType: "rectangle" | "circle" | "triangle") => void;
   addImageObject: (
@@ -483,6 +484,7 @@ export const EditProvider = ({ children }: { children: React.ReactNode }) => {
         editingObjectId,
         setEditingObject,
         canvasSize,
+        allSlides: slideGroup?.slides || [],
         addTextObject,
         addShapeObject,
         addImageObject,

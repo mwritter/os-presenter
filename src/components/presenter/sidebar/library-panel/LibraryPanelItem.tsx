@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useContextMenu } from "./hooks/use-context-menu";
 import { InputValue } from "./types";
-import { useNativeMenu } from "@/components/feature/native-menu/hooks/use-native-menu";
 
 type LibraryPanelItemProps = {
   id: string;
@@ -21,69 +21,62 @@ export const LibraryPanelItem = ({
   onSelect,
   isSelected,
 }: LibraryPanelItemProps) => {
-  const [value, setValue] = useState<InputValue>({
+  const [renameState, setRenameState] = useState<InputValue>({
     mode: "view",
     text: name,
   });
   const itemInputRef = useRef<HTMLInputElement>(null);
-
-  const { openNativeMenu } = useNativeMenu({
-    items: [
-      {
-        id: `${id}-rename`,
-        text: "Rename",
-        action: () => setValue({ ...value, mode: "edit" }),
-      },
-      {
-        id: `${id}-delete`,
-        text: "Delete",
-        action: () => onDelete(id),
-      },
-    ],
+  const { openContextMenu } = useContextMenu({
+    onDelete,
+    onRename: () => setRenameState({ mode: "edit", text: name }),
+    id,
   });
+
   useEffect(() => {
-    if (value.mode === "edit") {
+    if (renameState.mode === "edit") {
       requestAnimationFrame(() => {
         itemInputRef.current?.focus();
       });
     }
-  }, [value.mode]);
+  }, [renameState.mode]);
 
   useEffect(() => {
-    if (value.mode === "view" && value.text !== name) {
-      onUpdate(id, { name: value.text });
+    if (renameState.mode === "view" && renameState.text !== name) {
+      onUpdate(id, { name: renameState.text });
     }
-  }, [value.text, value.mode]);
+  }, [renameState.text, renameState.mode]);
 
   return (
     <button
       onClick={() => onSelect(id)}
-      onContextMenu={(e) => openNativeMenu(e)}
+      onContextMenu={(e) => openContextMenu(e)}
       className={`flex items-center gap-2 py-1 p-5 w-full ${
         isSelected ? "bg-white/20" : "hover:bg-white/20"
       }`}
     >
       {icon}
       <div className="flex-1 text-left text-white text-xs whitespace-nowrap text-ellipsis overflow-hidden">
-        {value.mode === "edit" ? (
+        {renameState.mode === "edit" ? (
           <input
             ref={itemInputRef}
             className="border w-full bg-black"
             type="text"
-            value={value.text}
-            onChange={(e) => setValue({ ...value, text: e.target.value })}
-            onBlur={() => setValue({ ...value, mode: "view" })}
+            value={renameState.text}
+            onChange={(e) =>
+              setRenameState({ ...renameState, text: e.target.value })
+            }
+            onBlur={() => setRenameState({ ...renameState, mode: "view" })}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                setValue({ ...value, mode: "view" });
+                setRenameState({ ...renameState, mode: "view" });
               }
               if (e.key === "Escape") {
-                setValue({ text: name, mode: "view" });
+                setRenameState({ text: name, mode: "view" });
               }
             }}
           />
         ) : (
-          value.text
+          renameState.text
         )}
       </div>
     </button>

@@ -8,8 +8,7 @@ import { cn } from "@/lib/utils";
 import { File } from "lucide-react";
 import { useItemPanelContext } from "./context";
 import { SlideGroup } from "../../types";
-import { useNativeMenu } from "@/components/feature/native-menu/hooks/use-native-menu";
-import { useMemo } from "react";
+import { useContextMenu } from "./hooks/use-context-menu";
 
 export const ItemPanelLibraryContent = () => {
   const selectedLibrary = useSelectedLibrary();
@@ -93,49 +92,11 @@ const ItemPanelLibraryContentItem = ({
     addSlideGroupToPlaylist(playlistId, selectedLibrary.id, slideGroup.id);
   };
 
-  // Create playlist submenu items
-  const menuItems = useMemo(() => {
-    // Create the playlist submenu with a header
-    const playlistSubmenuItems =
-      playlists.length > 0
-        ? [
-            // Add "Playlists" header as a disabled item
-            {
-              id: "playlists-header",
-              text: "Playlists",
-              enabled: false,
-            },
-            // Add all playlist items with icon and indentation
-            ...playlists.map((playlist) => ({
-              id: `playlist-${playlist.id}`,
-              text: `  ${playlist.name}`,
-              action: () => handleAddToPlaylist(playlist.id),
-            })),
-          ]
-        : [
-            {
-              id: "no-playlists",
-              text: "  No playlists available",
-              enabled: false,
-            },
-          ];
-
-    return [
-      {
-        id: "add-to",
-        text: "Add To",
-        items: playlistSubmenuItems,
-      },
-      {
-        id: "delete",
-        text: "Delete",
-        action: handleDelete,
-      },
-    ];
-  }, [playlists, selectedLibrary, slideGroup.id]);
-
-  const { openNativeMenu } = useNativeMenu({
-    items: menuItems,
+  const { openContextMenu } = useContextMenu({
+    onDelete: handleDelete,
+    onAddToPlaylist: handleAddToPlaylist,
+    id: slideGroup.id,
+    playlists: playlists,
   });
 
   return (
@@ -145,7 +106,7 @@ const ItemPanelLibraryContentItem = ({
         isSelected && "bg-white/20"
       )}
       onClick={() => onClick(slideGroup.id)}
-      onContextMenu={(e) => openNativeMenu(e)}
+      onContextMenu={(e) => openContextMenu(e)}
     >
       <div className="flex items-center gap-2">
         <File className="size-3.5" color="white" />

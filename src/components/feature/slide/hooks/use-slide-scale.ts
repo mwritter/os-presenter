@@ -1,15 +1,27 @@
 import { CanvasSize } from "@/components/presenter/types";
 import { useEffect, useState } from "react";
 
+const cache = new Map<string, number>();
+
 export const useSlideScale = ({
   canvasSize,
   containerRef,
+  useCache,
 }: {
   canvasSize: CanvasSize;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  useCache?: boolean;
 }) => {
-  const [scale, setScale] = useState(0.1);
-  const [isReady, setIsReady] = useState(false);
+  const cached = useCache
+    ? cache.get(canvasSize.width + "x" + canvasSize.height)
+    : undefined;
+  const [scale, setScale] = useState<{
+    scale: number;
+    isReady: boolean;
+  }>({
+    scale: cached ?? 0.1,
+    isReady: cached !== undefined,
+  });
 
   useEffect(() => {
     let rafId: number | null = null;
@@ -34,8 +46,10 @@ export const useSlideScale = ({
         const scaleY = containerHeight / canvasSize.height;
         const newScale = Math.min(scaleX, scaleY);
 
-        setScale(newScale);
-        setIsReady(true);
+        if (useCache) {
+          cache.set(canvasSize.width + "x" + canvasSize.height, newScale);
+        }
+        setScale({ scale: newScale, isReady: true });
       });
     };
 
@@ -57,5 +71,5 @@ export const useSlideScale = ({
     };
   }, [canvasSize.width, canvasSize.height]);
 
-  return { scale, isReady };
+  return scale;
 };

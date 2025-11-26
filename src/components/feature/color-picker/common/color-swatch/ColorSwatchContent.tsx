@@ -26,7 +26,7 @@ export const ColorSwatchContent = () => {
         <ColorSwatchTriggerButton color={rgbaColor} />
       </PopoverTrigger>
       <PopoverContent
-        className="w-min p-0 bg-shade-1 border-none box-shadow-md mr-2"
+        className="w-min p-0 bg-shade-1/50 backdrop-blur-md box-shadow-md border mr-2"
         sideOffset={5}
       >
         <Swatch
@@ -42,7 +42,7 @@ export const ColorSwatchContent = () => {
             setHsva(hsvColor);
           }}
         />
-        <PopoverArrow className="fill-shade-1" />
+        <PopoverArrow fill="#464646" />
       </PopoverContent>
     </Popover>
   );

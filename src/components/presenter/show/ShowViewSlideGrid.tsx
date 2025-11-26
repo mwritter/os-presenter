@@ -3,12 +3,10 @@ import { SlideData } from "@/components/feature/slide/types";
 import { CanvasSize } from "@/components/presenter/types";
 import { ShowViewEmptyState } from "./ShowViewEmpty";
 import { ShowViewSlideGridHeader } from "./ShowViewSlideGridHeader";
-import {
-  selectMediaItems,
-  useMediaLibraryStore,
-} from "@/stores/mediaLibraryStore";
+import { useMediaLibraryStore } from "@/stores/mediaLibraryStore";
 import { useSelectionStore } from "@/stores/presenterStore";
 import { cn } from "@/lib/utils";
+import { MAX_GRID_COLUMNS, useShowViewContext } from "./context";
 
 type ShowViewSlideGridProps = {
   slides: SlideData[];
@@ -28,20 +26,24 @@ export const ShowViewSlideGrid = ({
     return <ShowViewEmptyState />;
   }
 
+  const { gridColumns } = useShowViewContext();
+
   return (
     <div className="flex flex-col gap-4 text-white/70 relative">
       <ShowViewSlideGridHeader title={title} />
-      <div className="flex flex-wrap gap-4 p-5">
+      <div
+        className="grid gap-4 p-5"
+        style={{
+          gridTemplateColumns: `repeat(${Math.max(MAX_GRID_COLUMNS - gridColumns, 1)}, 1fr)`,
+        }}
+      >
         {slides.map((slide, index) => (
           <div
-            key={slide.id + index}
-            className={cn("", {
+            key={slide.id}
+            className={cn("overflow-hidden", {
               "ring-1 ring-amber-400": activeSlideId === slide.id,
               "hover:ring-2 hover:ring-white/30": activeSlideId !== slide.id,
             })}
-            style={{
-              flexBasis: "clamp(400px, calc((100% - 5rem) / 4), 500px)",
-            }}
           >
             <Slide
               id={slide.id}

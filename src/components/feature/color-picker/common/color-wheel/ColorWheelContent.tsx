@@ -31,7 +31,7 @@ export const ColorWheelContent = () => {
         <ColorWheelTriggerButton />
       </PopoverTrigger>
       <PopoverContent
-        className="p-5 w-min bg-shade-1 border-none box-shadow-md mr-2"
+        className="p-5 w-min bg-shade-1/50 backdrop-blur-md box-shadow-md border mr-2"
         sideOffset={5}
       >
         <div className="flex flex-col gap-3">
@@ -42,7 +42,7 @@ export const ColorWheelContent = () => {
           <ColorWheelBrightnessSlider />
           <ColorWheelOpacitySlider />
         </div>
-        <PopoverArrow className="fill-shade-1" />
+        <PopoverArrow fill="#464646" />
       </PopoverContent>
     </Popover>
   );

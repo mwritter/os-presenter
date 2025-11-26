@@ -1,8 +1,4 @@
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
+import { ResizablePanel } from "@/components/ui/resizable";
 import { useLocation } from "react-router";
 import { PreviewPanel } from "./preview-panel/PreviewPanel";
 

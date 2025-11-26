@@ -4,6 +4,7 @@ import { Outlet } from "react-router";
 import { SidebarProvider } from "@/components/presenter/sidebar/context";
 import { Toolbar } from "@/components/presenter/toolbar/Toolbar";
 import { ContentLayout } from "@/components/presenter/ContentLayout";
+import { ShowViewProvider } from "@/components/presenter/show/context";
 
 const RootLayout = () => {
   return (
@@ -11,10 +12,12 @@ const RootLayout = () => {
       <PresenterProvider>
         <SidebarProvider>
           <MediaLibraryProvider>
-            <Toolbar />
-            <ContentLayout>
-              <Outlet />
-            </ContentLayout>
+            <ShowViewProvider>
+              <Toolbar />
+              <ContentLayout>
+                <Outlet />
+              </ContentLayout>
+            </ShowViewProvider>
           </MediaLibraryProvider>
         </SidebarProvider>
       </PresenterProvider>
