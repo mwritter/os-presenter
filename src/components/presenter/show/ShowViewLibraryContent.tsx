@@ -26,7 +26,6 @@ export const ShowViewLibraryContent = () => {
 
   const { handleKeyDown } = useShowKeyboardNav({
     slideGroups,
-    enableMultiGroupNavigation: false,
   });
 
   // Focus the container when component mounts to ensure keyboard events work

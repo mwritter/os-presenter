@@ -76,6 +76,32 @@ export const usePresenterStore = create<PresenterStore>()((set, get, api) => {
       }
     },
 
+    // Override setActiveSlide to auto-select the playlist item containing the slide
+    setActiveSlide: (slideId, slideData, canvasSize) => {
+      // Call the base implementation from selectionSlice
+      selectionSlice.setActiveSlide(slideId, slideData, canvasSize);
+
+      // Auto-select the playlist item that contains the active slide
+      const state = get();
+      const playlist = state.playlists.find((pl) =>
+        pl.items.some((item) =>
+          item.slideGroup.slides.some((slide) => slide.id === slideId)
+        )
+      );
+
+      if (playlist) {
+        const item = playlist.items.find((item) =>
+          item.slideGroup.slides.some((slide) => slide.id === slideId)
+        );
+        if (item) {
+          set({
+            selectedPlaylistItem: { id: item.id, playlistId: playlist.id },
+            selectedSlideGroup: null,
+          });
+        }
+      }
+    },
+
     // Cross-slice actions that need access to multiple slices
     addSlideToSelectedSlideGroup: (slideData) => {
       const state = get();

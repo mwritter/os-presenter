@@ -83,7 +83,11 @@ export const createSelectionSlice: StateCreator<
       selectedPlaylistItem: null,
     }),
 
-  setActiveSlide: (slideId, slideData, canvasSize = { width: 1920, height: 1080 }) => {
+  setActiveSlide: (
+    slideId,
+    slideData,
+    canvasSize = { width: 1920, height: 1080 }
+  ) => {
     // Migration: Add videoType to video objects that don't have it (for backwards compatibility)
     const migratedData = {
       ...slideData,
@@ -107,11 +111,10 @@ export const createSelectionSlice: StateCreator<
 
   clearActiveSlide: () => {
     set({ activeSlide: null });
-    
+
     // Emit clear event to audience windows
     emit("active-slide-changed", null).catch((error) => {
       console.error("Failed to emit active-slide-changed event:", error);
     });
   },
 });
-

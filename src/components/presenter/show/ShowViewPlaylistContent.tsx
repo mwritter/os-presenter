@@ -8,6 +8,7 @@ import {
   useSelectedPlaylistItemPlaylist,
 } from "@/stores/presenterStore";
 import { useShowViewSpacer } from "./hooks/use-show-view-spacer";
+import { useSmartScroll } from "./hooks/use-smart-scroll";
 
 export const ShowViewPlaylistContent = () => {
   const selectedPlaylistItem = useSelectionStore((s) => s.selectedPlaylistItem);
@@ -18,6 +19,8 @@ export const ShowViewPlaylistContent = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const prevSelectedItemIdRef = useRef<string | null>(null);
+  const prevActiveSlideIdRef = useRef<string | null>(null);
 
   // Setup keyboard navigation for multiple slide groups
   const slideGroups =
@@ -28,13 +31,19 @@ export const ShowViewPlaylistContent = () => {
 
   const { handleKeyDown } = useShowKeyboardNav({
     slideGroups,
-    enableMultiGroupNavigation: true, // Enable double-press navigation between groups
   });
 
   // Focus the container when component mounts to ensure keyboard events work
   useEffect(() => {
     containerRef.current?.focus();
   }, []);
+
+  useSmartScroll({
+    scrollContainerRef,
+    itemRefs,
+    prevSelectedItemIdRef,
+    prevActiveSlideIdRef,
+  });
 
   const spacerHeight = useShowViewSpacer({
     scrollContainerRef,
@@ -46,13 +55,6 @@ export const ShowViewPlaylistContent = () => {
       itemRefs.current.set(itemId, el);
     } else {
       itemRefs.current.delete(itemId);
-    }
-
-    if (itemId === selectedPlaylistItem?.id) {
-      scrollContainerRef.current?.scrollTo({
-        top: el?.offsetTop ?? 0,
-        behavior: "smooth",
-      });
     }
   };
 
