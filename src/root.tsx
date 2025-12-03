@@ -24,7 +24,7 @@ export default function Root() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div className="flex items-center justify-center h-screen w-screen bg-shade-3">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
           <p className="text-white text-lg">Initializing storage...</p>
@@ -35,7 +35,7 @@ export default function Root() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div className="flex items-center justify-center h-screen w-screen bg-shade-3">
         <div className="text-center max-w-md p-8 bg-red-900/20 border border-red-500 rounded-lg">
           <h2 className="text-red-500 text-xl font-bold mb-4">
             Storage Initialization Error
@@ -54,7 +54,7 @@ export default function Root() {
 
   if (!isInitialized) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div className="flex items-center justify-center h-screen w-screen bg-shade-3">
         <p className="text-white text-lg">Waiting for initialization...</p>
       </div>
     );

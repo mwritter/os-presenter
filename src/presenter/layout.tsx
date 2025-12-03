@@ -8,7 +8,7 @@ import { ShowViewProvider } from "@/components/presenter/show/context";
 
 const RootLayout = () => {
   return (
-    <div className="flex flex-col h-screen w-screen">
+    <div className="flex flex-col h-screen w-screen overflow-hidden">
       <PresenterProvider>
         <SidebarProvider>
           <MediaLibraryProvider>

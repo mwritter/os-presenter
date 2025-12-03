@@ -13,6 +13,8 @@
     "windows": [
       {
         "title": "OS Presenter",
+        "titleBarStyle": "overlay",
+        "resizable": true,
         "width": 800,
         "height": 600,
         "minWidth": 800,

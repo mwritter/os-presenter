@@ -8,11 +8,21 @@ import {
   closeAudienceWindow,
   isAudienceWindowOpen,
 } from "@/services/audience";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 //  TODO: add functionality to the toolbar
 export const Toolbar = () => {
   const { toggle: toggleMediaLibrary } = useMediaLibraryContext();
   const [audienceWindowOpen, setAudienceWindowOpen] = useState(false);
+
+  const handleDrag = async (e: React.MouseEvent) => {
+    // Only drag if not clicking on a button
+    const target = e.target as HTMLElement;
+    if (e.button === 0 && !target.closest("button")) {
+      e.preventDefault();
+      await getCurrentWindow().startDragging();
+    }
+  };
 
   // Check if audience window is open on mount
   useEffect(() => {
@@ -45,7 +55,10 @@ export const Toolbar = () => {
   };
 
   return (
-    <div className="flex gap-10 items-center p-2 bg-shade-1 border-b border-black/50 w-full overflow-x-auto [scrollbar-width:none]">
+    <div
+      onMouseDown={handleDrag}
+      className="flex gap-10 items-center p-2 pt-8 bg-shade-1 border-b border-black/50 w-full overflow-x-auto [scrollbar-width:none] select-none"
+    >
       <div className="flex items-center gap-2">
         <IconButton Icon={Search} label="Search" />
         <IconButton Icon={LetterText} label="Text" />
