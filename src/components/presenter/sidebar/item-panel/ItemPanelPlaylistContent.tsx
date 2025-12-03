@@ -7,22 +7,37 @@ import {
 import { File } from "lucide-react";
 import { useItemPanelContext } from "./context";
 import { usePlaylistItemContextMenu } from "./hooks/use-playlist-item-context-menu";
+import { Reorder } from "motion/react";
+import { PlaylistItem } from "@/components/presenter/types";
+import { useRef, useState } from "react";
 
 export const ItemPanelPlaylistContent = () => {
+  const isDraggingRef = useRef(false);
   const selectedPlaylist = useSelectedPlaylist();
   const selectedPlaylistItemId = useSelectionStore(
     (s) => s.selectedPlaylistItem?.id ?? null
   );
   const selectPlaylistItem = useSelectionStore((s) => s.selectPlaylistItem);
   const removePlaylistItem = usePlaylistStore((s) => s.removePlaylistItem);
+  const reorderPlaylistItems = usePlaylistStore((s) => s.reorderPlaylistItems);
   const { filter } = useItemPanelContext();
+
+  const [orderedItems, setOrderedItems] = useState<PlaylistItem[]>(
+    selectedPlaylist?.items ?? []
+  );
 
   const filteredItems =
     selectedPlaylist?.items.filter((item) => {
       return item.slideGroup.title.toLowerCase().includes(filter.toLowerCase());
     }) || [];
 
+  const handleReorder = (newOrderedItems: PlaylistItem[]) => {
+    if (filter) return;
+    setOrderedItems(newOrderedItems);
+  };
+
   const handleSelectPlaylistItem = (itemId: string) => {
+    if (isDraggingRef.current) return;
     selectPlaylistItem(itemId, selectedPlaylist!.id);
   };
 
@@ -34,24 +49,55 @@ export const ItemPanelPlaylistContent = () => {
 
   if (!selectedPlaylist) return null;
 
+  const items = filter ? filteredItems : orderedItems;
+
   return (
-    <div>
-      {filteredItems.map((item) => {
+    <Reorder.Group
+      className="group has-data-[dragging=true]:[&>:not([data-dragging=true])]:hover:bg-shade-2"
+      values={items}
+      onReorder={handleReorder}
+    >
+      {items.map((item) => {
         const isSelected = selectedPlaylistItemId === item.id;
         const title = item.slideGroup.title; // Access embedded slide group directly
 
         return (
-          <PlaylistContentItem
+          <Reorder.Item
+            className={cn("relative", {
+              "hover:bg-neutral-700": !isSelected,
+              "bg-neutral-700": isSelected,
+            })}
             key={item.id}
-            item={item}
-            isSelected={isSelected}
-            title={title}
-            onSelect={handleSelectPlaylistItem}
-            onRemove={handleRemovePlaylistItem}
-          />
+            value={item}
+            onPointerDown={(e) => {
+              console.log("onPointerDown", {
+                target: e.target,
+                currentTarget: e.currentTarget,
+              });
+              e.currentTarget.setAttribute("data-dragging", "true");
+            }}
+            onPointerUp={(e) => {
+              e.currentTarget.removeAttribute("data-dragging");
+            }}
+            onDragStart={() => {
+              isDraggingRef.current = true;
+            }}
+            onDragEnd={() => {
+              isDraggingRef.current = false;
+              reorderPlaylistItems(selectedPlaylist!.id, orderedItems);
+            }}
+          >
+            <PlaylistContentItem
+              item={item}
+              isSelected={isSelected}
+              title={title}
+              onSelect={handleSelectPlaylistItem}
+              onRemove={handleRemovePlaylistItem}
+            />
+          </Reorder.Item>
         );
       })}
-    </div>
+    </Reorder.Group>
   );
 };
 
@@ -75,10 +121,7 @@ const PlaylistContentItem = ({
 
   return (
     <button
-      className={cn(
-        "w-full hover:bg-white/10 p-1",
-        isSelected && "bg-white/20"
-      )}
+      className={cn("w-full p-1")}
       onClick={() => onSelect(item.id)}
       onContextMenu={(e) => openContextMenu(e)}
     >

@@ -39,6 +39,10 @@ export interface PlaylistSlice {
     slideId: string,
     updates: Partial<SlideData>
   ) => void;
+  reorderPlaylistItems: (
+    playlistId: string,
+    reorderedItems: { id: string; slideGroup: SlideGroup; order: number }[]
+  ) => void;
 
   // Persistence
   loadPlaylists: () => Promise<void>;
@@ -116,7 +120,9 @@ export const createPlaylistSlice: StateCreator<
 
   addSlideGroupToPlaylist: (playlistId, libraryId, slideGroupId) => {
     const library = get().libraries.find((lib) => lib.id === libraryId);
-    const slideGroup = library?.slideGroups.find((sg) => sg.id === slideGroupId);
+    const slideGroup = library?.slideGroups.find(
+      (sg) => sg.id === slideGroupId
+    );
 
     if (!library || !slideGroup) {
       console.error("Library or slide group not found");
@@ -297,13 +303,26 @@ export const createPlaylistSlice: StateCreator<
     get().updatePlaylist(playlistId, { items: updatedItems });
   },
 
+  reorderPlaylistItems: (playlistId, reorderedItems) => {
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) return;
+
+    // Update order property based on new positions
+    const updatedItems = reorderedItems.map((item, index) => ({
+      ...item,
+      order: index,
+    }));
+
+    get().updatePlaylist(playlistId, { items: updatedItems });
+  },
+
   loadPlaylists: async () => {
     console.log("Loading playlists from disk...");
     set({ isPlaylistLoading: true });
     try {
       const playlists = await storage.loadPlaylists();
       console.log(`Loaded ${playlists.length} playlists`);
-      
+
       // Migration: Ensure all slide groups have IDs
       const migratedPlaylists = playlists.map((playlist) => ({
         ...playlist,
@@ -315,9 +334,9 @@ export const createPlaylistSlice: StateCreator<
           },
         })),
       }));
-      
+
       set({ playlists: migratedPlaylists, isPlaylistLoading: false });
-      
+
       // Save migrated playlists back to disk if any were missing IDs
       const needsMigration = playlists.some((pl) =>
         pl.items.some((item) => !(item.slideGroup as any).id)
