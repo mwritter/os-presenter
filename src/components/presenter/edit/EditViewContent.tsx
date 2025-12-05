@@ -3,7 +3,7 @@ import { Slide } from "@/components/feature/slide/Slide";
 import { EditViewObjectActionbar } from "./edit-object-action-bar/EditViewObjectActionbar";
 import { useRef, useState } from "react";
 import { EditConfigPanel } from "./edit-config-panel.tsx/EditConfigPanel";
-
+import { AnimatePresence, motion } from "framer-motion";
 export const EditViewContent = () => {
   const {
     selectedSlide,
@@ -75,19 +75,29 @@ export const EditViewContent = () => {
                 className="w-full aspect-video relative"
                 onMouseDown={handleSlideMouseDown}
               >
-                <Slide
-                  id={selectedSlide.id}
-                  data={{
-                    ...selectedSlide,
-                    backgroundColor:
-                      selectedSlide.backgroundColor || "var(--color-shade-2)",
-                  }}
-                  isEditable
-                  selectedObjectId={selectedObjectId}
-                  onUpdateObject={updateObject}
-                  canvasSize={canvasSize}
-                  onMoveableInteractionChange={setIsMoveableInteracting}
-                />
+                <AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ delay: 0.06, duration: 0.3 }}
+                  >
+                    <Slide
+                      id={selectedSlide.id}
+                      data={{
+                        ...selectedSlide,
+                        backgroundColor:
+                          selectedSlide.backgroundColor ||
+                          "var(--color-shade-2)",
+                      }}
+                      isEditable
+                      selectedObjectId={selectedObjectId}
+                      onUpdateObject={updateObject}
+                      canvasSize={canvasSize}
+                      onMoveableInteractionChange={setIsMoveableInteracting}
+                    />
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </div>
           </>
