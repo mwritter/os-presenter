@@ -4,11 +4,21 @@ import * as storage from "@/services/storage";
 import { createLibrarySlice, LibrarySlice } from "./slices/librarySlice";
 import { createPlaylistSlice, PlaylistSlice } from "./slices/playlistSlice";
 import { createSelectionSlice, SelectionSlice } from "./slices/selectionSlice";
+import {
+  createSlideSelectionSlice,
+  SlideSelectionSlice,
+} from "./slices/slideSelectionSlice";
+import {
+  createSidebarSelectionSlice,
+  SidebarSelectionSlice,
+} from "./slices/sidebarSelectionSlice";
 
 // Combined store type
 type PresenterStore = LibrarySlice &
   PlaylistSlice &
-  SelectionSlice & {
+  SelectionSlice &
+  SlideSelectionSlice &
+  SidebarSelectionSlice & {
     // Cross-slice actions
     addSlideToSelectedSlideGroup: (slideData?: SlideData) => void;
     loadData: () => Promise<void>;
@@ -20,11 +30,15 @@ export const usePresenterStore = create<PresenterStore>()((set, get, api) => {
   const librarySlice = createLibrarySlice(set, get, api);
   const playlistSlice = createPlaylistSlice(set, get, api);
   const selectionSlice = createSelectionSlice(set, get, api);
+  const slideSelectionSlice = createSlideSelectionSlice(set, get, api);
+  const sidebarSelectionSlice = createSidebarSelectionSlice(set, get, api);
 
   return {
     ...librarySlice,
     ...playlistSlice,
     ...selectionSlice,
+    ...slideSelectionSlice,
+    ...sidebarSelectionSlice,
 
     // Override removeLibrary to clear selection if needed
     removeLibrary: (id: string) => {
@@ -161,6 +175,31 @@ export const usePresenterStore = create<PresenterStore>()((set, get, api) => {
         activeSlide: null,
         isLibraryLoading: false,
         isPlaylistLoading: false,
+        // Slide selection state
+        selectedSlideIds: [],
+        anchorSlideId: null,
+        lastSelectedSlideId: null,
+        isMultiSelectMode: false,
+        clipboard: null,
+        // Sidebar selection state
+        sidebarSelectedIds: {
+          library: [],
+          playlist: [],
+          libraryItem: [],
+          playlistItem: [],
+        },
+        sidebarAnchorId: {
+          library: null,
+          playlist: null,
+          libraryItem: null,
+          playlistItem: null,
+        },
+        sidebarIsMultiSelectMode: {
+          library: false,
+          playlist: false,
+          libraryItem: false,
+          playlistItem: false,
+        },
       });
     },
   };
@@ -175,6 +214,14 @@ export const usePlaylistStore = <T>(selector: (state: PlaylistSlice) => T): T =>
 
 export const useSelectionStore = <T>(
   selector: (state: SelectionSlice) => T
+): T => usePresenterStore(selector as (state: PresenterStore) => T);
+
+export const useSlideSelectionStore = <T>(
+  selector: (state: SlideSelectionSlice) => T
+): T => usePresenterStore(selector as (state: PresenterStore) => T);
+
+export const useSidebarSelectionStore = <T>(
+  selector: (state: SidebarSelectionSlice) => T
 ): T => usePresenterStore(selector as (state: PresenterStore) => T);
 
 // Convenience hook for cross-slice actions

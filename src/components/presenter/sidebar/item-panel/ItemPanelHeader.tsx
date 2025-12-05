@@ -64,10 +64,12 @@ const ItemPanelPlaylistHeader = () => {
     onNewPlaceholder: handleNewPlaceholder,
   });
 
+  const itemsCount = selectedPlaylist?.items.length ?? 0;
+
   return (
     <div className="flex justify-between items-center text-[10px] uppercase p-2 bg-shade-3">
       <span className="text-gray-400">
-        {selectedPlaylist?.items.length} items
+        {itemsCount} {`${itemsCount === 1 ? "item" : "items"}`}
       </span>
       <Button
         className="rounded-sm text-gray-400 hover:bg-white/10 hover:text-gray-400"

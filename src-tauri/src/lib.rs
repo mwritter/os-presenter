@@ -361,6 +361,8 @@ pub struct Library {
     pub name: String,
     #[serde(rename = "slideGroups")]
     pub slide_groups: Vec<SlideGroup>,
+    #[serde(default)]
+    pub order: Option<i32>,
     #[serde(rename = "createdAt")]
     pub created_at: String,
     #[serde(rename = "updatedAt")]
@@ -380,6 +382,8 @@ pub struct Playlist {
     pub id: String,
     pub name: String,
     pub items: Vec<PlaylistItem>,
+    #[serde(default)]
+    pub order: Option<i32>,
     #[serde(rename = "createdAt")]
     pub created_at: String,
     #[serde(rename = "updatedAt")]

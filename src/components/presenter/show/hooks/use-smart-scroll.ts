@@ -9,15 +9,18 @@ export const useSmartScroll = ({
   itemRefs,
   prevSelectedItemIdRef,
   prevActiveSlideIdRef,
+  skipScrollRef,
 }: {
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   itemRefs: React.RefObject<Map<string, HTMLDivElement>>;
   prevSelectedItemIdRef: React.RefObject<string | null>;
   prevActiveSlideIdRef: React.RefObject<string | null>;
+  skipScrollRef?: React.RefObject<boolean>;
 }) => {
   const selectedPlaylistItem = useSelectionStore((s) => s.selectedPlaylistItem);
   const activeSlide = useSelectionStore((s) => s.activeSlide);
   const playlist = useSelectedPlaylistItemPlaylist();
+
   // Smart scroll: only scroll when playlist item is manually selected, not when clicking a slide
   useEffect(() => {
     const currentItemId = selectedPlaylistItem?.id ?? null;
@@ -34,6 +37,12 @@ export const useSmartScroll = ({
 
     // If no item selected, don't scroll
     if (!currentItemId || !selectedPlaylistItem) return;
+
+    // If skip flag is set (internal click from show view), don't scroll
+    if (skipScrollRef?.current) {
+      skipScrollRef.current = false;
+      return;
+    }
 
     // Check if active slide changed at the same time (indicates user clicked a slide)
     const slideChangedSimultaneously = currentSlideId !== prevSlideId;
@@ -53,7 +62,7 @@ export const useSmartScroll = ({
       }
     }
 
-    // User manually selected the playlist item (keyboard or click) → scroll to it
+    // Scroll to the selected item
     const itemElement = itemRefs.current.get(currentItemId);
     if (itemElement && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({

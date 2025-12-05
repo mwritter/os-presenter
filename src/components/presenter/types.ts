@@ -32,6 +32,7 @@ export type Library = {
   id: string;
   name: string;
   slideGroups: SlideGroup[];
+  order?: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -46,6 +47,7 @@ export type Playlist = {
   id: string;
   name: string;
   items: PlaylistItem[];
+  order?: number;
   createdAt: string;
   updatedAt: string;
 };

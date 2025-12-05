@@ -18,7 +18,7 @@ export const EditViewObjectPanelItem = ({
     <div
       key={object.id}
       className={cn(
-        "p-2 border transition-all bg-shade-3 select-none active:z-10",
+        "p-2 border transition-all bg-shade-3 select-none active:z-10 ghost-no-bg ghost-no-ring",
         {
           "border-blue-400": isSelected,
         }

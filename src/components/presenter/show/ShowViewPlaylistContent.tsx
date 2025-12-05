@@ -15,12 +15,19 @@ export const ShowViewPlaylistContent = () => {
   const addSlideToPlaylistItem = usePlaylistStore(
     (s) => s.addSlideToPlaylistItem
   );
+  const reorderSlidesInPlaylistItem = usePlaylistStore(
+    (s) => s.reorderSlidesInPlaylistItem
+  );
+  const moveSlidesToPlaylistItem = usePlaylistStore(
+    (s) => s.moveSlidesToPlaylistItem
+  );
   const playlist = useSelectedPlaylistItemPlaylist();
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const prevSelectedItemIdRef = useRef<string | null>(null);
   const prevActiveSlideIdRef = useRef<string | null>(null);
+  const skipScrollRef = useRef<boolean>(false);
 
   // Setup keyboard navigation for multiple slide groups
   const slideGroups =
@@ -43,6 +50,7 @@ export const ShowViewPlaylistContent = () => {
     itemRefs,
     prevSelectedItemIdRef,
     prevActiveSlideIdRef,
+    skipScrollRef,
   });
 
   const spacerHeight = useShowViewSpacer({
@@ -86,6 +94,26 @@ export const ShowViewPlaylistContent = () => {
                 slides={item.slideGroup.slides}
                 title={item.slideGroup.title}
                 canvasSize={canvasSize}
+                slideGroupId={item.id}
+                playlistItemId={item.id}
+                playlistId={playlist!.id}
+                skipScrollRef={skipScrollRef}
+                onReorder={(slides) =>
+                  reorderSlidesInPlaylistItem(playlist!.id, item.id, slides)
+                }
+                onReceiveSlides={(
+                  slideIds,
+                  sourceGroupId,
+                  insertAfterSlideId
+                ) =>
+                  moveSlidesToPlaylistItem(
+                    playlist!.id,
+                    sourceGroupId,
+                    item.id,
+                    slideIds,
+                    insertAfterSlideId
+                  )
+                }
               />
             </div>
           );

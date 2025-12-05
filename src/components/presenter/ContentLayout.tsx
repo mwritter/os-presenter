@@ -6,8 +6,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { useGlobalDragCursor } from "@/hooks/use-global-drag-cursor";
 
 export const ContentLayout = ({ children }: { children: React.ReactNode }) => {
+  useGlobalDragCursor();
+
   return (
     <ResizablePanelGroup id="outer-horizontal-layout" direction="horizontal">
       <ResizablePanel id="left-section" defaultSize={100}>

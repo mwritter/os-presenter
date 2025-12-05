@@ -5,8 +5,8 @@ import {
   useSelectedLibrary,
 } from "@/stores/presenterStore";
 import { ItemPanelProvider } from "./context";
-import { ItemPanelLibraryContent } from "./ItemPanelLibraryContent";
-import { ItemPanelPlaylistContent } from "./ItemPanelPlaylistContent";
+import { ItemPanelLibraryContent } from "./item-panel-library/ItemPanelLibraryContent";
+import { ItemPanelPlaylistContent } from "./item-panel-playlist/ItemPanelPlaylistContent";
 
 export const ItemPanel = () => {
   return (

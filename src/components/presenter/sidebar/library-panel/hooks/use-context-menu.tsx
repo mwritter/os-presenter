@@ -4,10 +4,12 @@ export const useContextMenu = ({
   onDelete,
   onRename,
   id,
+  selectedCount = 0,
 }: {
   onDelete: (id: string) => void;
   onRename: (id: string) => void;
   id: string;
+  selectedCount?: number;
 }) => {
   const handleDelete = () => {
     onDelete(id);
@@ -20,22 +22,31 @@ export const useContextMenu = ({
   const openContextMenu = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Build context menu items based on selection
+    const isMultipleSelected = selectedCount > 1;
+    const deleteText = isMultipleSelected
+      ? `Delete ${selectedCount} Items`
+      : "Delete";
+
+    const contextMenuItems = [
+      {
+        id: `${id}-rename`,
+        text: "Rename",
+        action: handleRename,
+        // Disable rename when multiple items are selected
+        enabled: !isMultipleSelected,
+      },
+      {
+        id: `${id}-delete`,
+        text: deleteText,
+        action: handleDelete,
+      },
+    ];
+
     const menu = await Menu.new({ items: contextMenuItems });
     await menu.popup();
   };
-
-  const contextMenuItems = [
-    {
-      id: `${id}-rename`,
-      text: "Rename",
-      action: handleRename,
-    },
-    {
-      id: `${id}-delete`,
-      text: "Delete",
-      action: handleDelete,
-    },
-  ];
 
   return { openContextMenu };
 };

@@ -43,6 +43,19 @@ export interface PlaylistSlice {
     playlistId: string,
     reorderedItems: { id: string; slideGroup: SlideGroup; order: number }[]
   ) => void;
+  reorderPlaylists: (reorderedPlaylists: Playlist[]) => void;
+  reorderSlidesInPlaylistItem: (
+    playlistId: string,
+    itemId: string,
+    reorderedSlides: SlideData[]
+  ) => void;
+  moveSlidesToPlaylistItem: (
+    playlistId: string,
+    sourceItemId: string,
+    targetItemId: string,
+    slideIds: string[],
+    insertAfterSlideId?: string
+  ) => void;
 
   // Persistence
   loadPlaylists: () => Promise<void>;
@@ -312,6 +325,109 @@ export const createPlaylistSlice: StateCreator<
       ...item,
       order: index,
     }));
+
+    get().updatePlaylist(playlistId, { items: updatedItems });
+  },
+
+  reorderPlaylists: (reorderedPlaylists) => {
+    set({ playlists: reorderedPlaylists });
+    // Persist all reordered playlists to disk
+    Promise.all(
+      reorderedPlaylists.map((pl) => get().savePlaylistToDisk(pl))
+    ).catch(console.error);
+  },
+
+  reorderSlidesInPlaylistItem: (playlistId, itemId, reorderedSlides) => {
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) return;
+
+    const item = playlist.items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    const updatedItems = playlist.items.map((i) => {
+      if (i.id === itemId) {
+        return {
+          ...i,
+          slideGroup: {
+            ...i.slideGroup,
+            slides: reorderedSlides,
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      }
+      return i;
+    });
+
+    get().updatePlaylist(playlistId, { items: updatedItems });
+  },
+
+  moveSlidesToPlaylistItem: (
+    playlistId,
+    sourceItemId,
+    targetItemId,
+    slideIds,
+    insertAfterSlideId
+  ) => {
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) return;
+
+    const sourceItem = playlist.items.find((i) => i.id === sourceItemId);
+    const targetItem = playlist.items.find((i) => i.id === targetItemId);
+    if (!sourceItem || !targetItem) return;
+
+    // Get the slides to move from source
+    const slidesToMove = sourceItem.slideGroup.slides.filter((s) =>
+      slideIds.includes(s.id)
+    );
+    if (slidesToMove.length === 0) return;
+
+    // Remove slides from source
+    const sourceSlides = sourceItem.slideGroup.slides.filter(
+      (s) => !slideIds.includes(s.id)
+    );
+
+    // Calculate insert position in target
+    let insertIndex = targetItem.slideGroup.slides.length;
+    if (insertAfterSlideId) {
+      const afterIndex = targetItem.slideGroup.slides.findIndex(
+        (s) => s.id === insertAfterSlideId
+      );
+      if (afterIndex !== -1) {
+        insertIndex = afterIndex + 1;
+      }
+    }
+
+    // Insert slides into target
+    const targetSlides = [
+      ...targetItem.slideGroup.slides.slice(0, insertIndex),
+      ...slidesToMove,
+      ...targetItem.slideGroup.slides.slice(insertIndex),
+    ];
+
+    // Update both items
+    const updatedItems = playlist.items.map((i) => {
+      if (i.id === sourceItemId) {
+        return {
+          ...i,
+          slideGroup: {
+            ...i.slideGroup,
+            slides: sourceSlides,
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      }
+      if (i.id === targetItemId) {
+        return {
+          ...i,
+          slideGroup: {
+            ...i.slideGroup,
+            slides: targetSlides,
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      }
+      return i;
+    });
 
     get().updatePlaylist(playlistId, { items: updatedItems });
   },

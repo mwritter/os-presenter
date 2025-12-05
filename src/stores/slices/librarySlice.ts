@@ -13,6 +13,7 @@ export interface LibrarySlice {
   addLibrary: (library: Library) => void;
   updateLibrary: (id: string, updates: Partial<Library>) => void;
   removeLibrary: (id: string) => void;
+  reorderLibraries: (reorderedLibraries: Library[]) => void;
   addLibrarySlideGroup: (libraryId: string, slideGroup: SlideGroup) => void;
   removeLibrarySlideGroup: (libraryId: string, slideGroupId: string) => void;
   addSlideToSlideGroup: (
@@ -25,6 +26,11 @@ export interface LibrarySlice {
     slideGroupId: string,
     slideId: string,
     updates: Partial<SlideData>
+  ) => void;
+  reorderSlidesInLibrary: (
+    libraryId: string,
+    slideGroupId: string,
+    reorderedSlides: SlideData[]
   ) => void;
 
   // Persistence
@@ -85,6 +91,14 @@ export const createLibrarySlice: StateCreator<
     }));
     // Delete from disk asynchronously
     storage.deleteLibrary(id).catch(console.error);
+  },
+
+  reorderLibraries: (reorderedLibraries) => {
+    set({ libraries: reorderedLibraries });
+    // Persist all reordered libraries to disk
+    Promise.all(
+      reorderedLibraries.map((lib) => get().saveLibraryToDisk(lib))
+    ).catch(console.error);
   },
 
   addLibrarySlideGroup: (libraryId, slideGroup) => {
@@ -170,13 +184,35 @@ export const createLibrarySlice: StateCreator<
     });
   },
 
+  reorderSlidesInLibrary: (libraryId, slideGroupId, reorderedSlides) => {
+    const library = get().libraries.find((lib) => lib.id === libraryId);
+    if (!library) return;
+
+    const slideGroup = library.slideGroups.find((sg) => sg.id === slideGroupId);
+    if (!slideGroup) return;
+
+    const updatedSlideGroups = library.slideGroups.map((sg) =>
+      sg.id === slideGroupId
+        ? {
+            ...sg,
+            slides: reorderedSlides,
+            updatedAt: new Date().toISOString(),
+          }
+        : sg
+    );
+
+    get().updateLibrary(libraryId, {
+      slideGroups: updatedSlideGroups,
+    });
+  },
+
   loadLibraries: async () => {
     console.log("Loading libraries from disk...");
     set({ isLibraryLoading: true });
     try {
       const libraries = await storage.loadLibraries();
       console.log(`Loaded ${libraries.length} libraries`);
-      
+
       // Migration: Ensure all slide groups have IDs
       const migratedLibraries = libraries.map((library) => ({
         ...library,
@@ -185,9 +221,9 @@ export const createLibrarySlice: StateCreator<
           id: sg.id || crypto.randomUUID(), // Add ID if missing
         })),
       }));
-      
+
       set({ libraries: migratedLibraries, isLibraryLoading: false });
-      
+
       // Save migrated libraries back to disk if any were missing IDs
       const needsMigration = libraries.some((lib) =>
         lib.slideGroups.some((sg) => !(sg as any).id)
@@ -214,4 +250,3 @@ export const createLibrarySlice: StateCreator<
     }
   },
 });
-

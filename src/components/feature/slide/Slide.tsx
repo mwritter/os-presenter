@@ -16,7 +16,7 @@ export type SlideProps = {
   onUpdateObject?: (objectId: string, updates: Partial<SlideObject>) => void;
   canvasSize?: CanvasSize;
   onMoveableInteractionChange?: (isInteracting: boolean) => void;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
 };
 
 export const Slide = ({

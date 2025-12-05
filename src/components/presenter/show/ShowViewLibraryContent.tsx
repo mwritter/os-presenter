@@ -12,6 +12,9 @@ export const ShowViewLibraryContent = () => {
   const selectedSlideGroupData = useSelectedSlideGroupData();
   const selectedSlideGroup = useSelectionStore((s) => s.selectedSlideGroup);
   const addSlideToSlideGroup = useLibraryStore((s) => s.addSlideToSlideGroup);
+  const reorderSlidesInLibrary = useLibraryStore(
+    (s) => s.reorderSlidesInLibrary
+  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Setup keyboard navigation for single slide group
@@ -55,6 +58,16 @@ export const ShowViewLibraryContent = () => {
           slides={selectedSlideGroupData?.slides ?? []}
           title={selectedSlideGroupData?.title ?? ""}
           canvasSize={canvasSize}
+          slideGroupId={selectedSlideGroup?.id}
+          libraryId={selectedSlideGroup?.libraryId}
+          onReorder={(slides) => {
+            if (!selectedSlideGroup) return;
+            reorderSlidesInLibrary(
+              selectedSlideGroup.libraryId,
+              selectedSlideGroup.id,
+              slides
+            );
+          }}
         />
       </div>
       <ShowViewFooter onAddBlankSlide={handleAddBlankSlide} />

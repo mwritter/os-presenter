@@ -13,12 +13,13 @@
     "windows": [
       {
         "title": "OS Presenter",
-        "titleBarStyle": "overlay",
+        "titleBarStyle": "Overlay",
         "resizable": true,
         "width": 800,
         "height": 600,
         "minWidth": 800,
-        "minHeight": 600
+        "minHeight": 600,
+        "dragDropEnabled": false
       }
     ],
     "security": {
