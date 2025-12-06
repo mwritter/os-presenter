@@ -16,34 +16,49 @@ export function useItemReorder<T extends { id: string }>({
   }, [items, active]);
 
   const handleReorder = (
-    draggedItemId: string,
+    draggedItemIds: string | string[],
     targetItemId: string,
     position: "before" | "after"
   ) => {
     if (!active) return;
 
-    const draggedIndex = orderedItems.findIndex(
-      (item) => item.id === draggedItemId
-    );
+    // Normalize to array
+    const idsToMove = Array.isArray(draggedItemIds)
+      ? draggedItemIds
+      : [draggedItemIds];
+
+    // Get the items being dragged in their current order
+    const draggedItems = idsToMove
+      .map((id) => orderedItems.find((item) => item.id === id))
+      .filter((item): item is T => item !== undefined);
+
+    if (draggedItems.length === 0) return;
+
     const targetIndex = orderedItems.findIndex(
       (item) => item.id === targetItemId
     );
+    if (targetIndex === -1) return;
 
-    if (draggedIndex === -1 || targetIndex === -1) return;
-    if (draggedIndex === targetIndex) return;
+    // Don't reorder if dropping on one of the dragged items
+    if (idsToMove.includes(targetItemId)) return;
 
-    const newItems = [...orderedItems];
-    const [draggedItem] = newItems.splice(draggedIndex, 1);
+    // Remove all dragged items from the list
+    const newItems = orderedItems.filter(
+      (item) => !idsToMove.includes(item.id)
+    );
 
-    // Calculate new index after removal
-    let insertIndex = targetIndex;
-    if (draggedIndex < targetIndex) {
-      insertIndex = position === "after" ? targetIndex : targetIndex - 1;
-    } else {
-      insertIndex = position === "after" ? targetIndex + 1 : targetIndex;
-    }
+    // Find the new target index (after removing dragged items)
+    const newTargetIndex = newItems.findIndex(
+      (item) => item.id === targetItemId
+    );
+    if (newTargetIndex === -1) return;
 
-    newItems.splice(insertIndex, 0, draggedItem);
+    // Calculate insert index
+    const insertIndex =
+      position === "after" ? newTargetIndex + 1 : newTargetIndex;
+
+    // Insert all dragged items at the new position
+    newItems.splice(insertIndex, 0, ...draggedItems);
 
     // Update order property
     const reorderedItems = newItems.map((item, index) => ({

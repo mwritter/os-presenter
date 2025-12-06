@@ -4,8 +4,12 @@ import { useItemPanelContext } from "./context";
 
 export const ItemPanelFooter = () => {
   const { filter, setFilter } = useItemPanelContext();
+
   const clearFilter = () => {
     setFilter("");
+  };
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
   };
 
   return (
@@ -16,7 +20,7 @@ export const ItemPanelFooter = () => {
         </span>
         <input
           value={filter ?? ""}
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={handleFilterChange}
           type="text"
           placeholder="Filter"
           className="peer text-white w-full text-xs focus:ring-0 focus:outline-none"

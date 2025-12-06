@@ -1,4 +1,4 @@
-import { ItemPanelHeader } from "./ItemPanelHeader";
+import { ItemPanelHeader } from "./item-panel-header/ItemPanelHeader";
 import { ItemPanelFooter } from "./ItemPanelFooter";
 import {
   useSelectedPlaylist,
