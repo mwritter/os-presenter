@@ -20,6 +20,7 @@ export interface VideoStateUpdate {
   readyState: number; // HTMLMediaElement.readyState (0-4)
   error: string | null;
   seeking: boolean;
+  updatedAt: number; // Unix timestamp in milliseconds
 }
 
 // Handshake event payloads
@@ -37,4 +38,3 @@ export const VIDEO_CONTROL_EVENT = "video:control";
 export const VIDEO_STATE_UPDATE_EVENT = "video:state-update";
 export const VIDEO_READY_EVENT = "video:ready";
 export const VIDEO_ACK_EVENT = "video:ack";
-

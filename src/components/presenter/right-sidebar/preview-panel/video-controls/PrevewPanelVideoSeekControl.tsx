@@ -1,5 +1,4 @@
 import { Slider } from "@/components/ui/slider";
-import { useSmoothVideoTime } from "./hooks/use-smooth-video-time";
 import { useVideoSeek } from "./hooks/use-video-seek";
 import { formatTime } from "./utils/formatTime";
 import { cn } from "@/lib/utils";
@@ -22,9 +21,8 @@ export const PreviewPanelVideoSeekControl = ({
   onPlay,
   currentTime,
   duration,
-  playbackRate,
 }: PreviewPanelVideoSeekControlProps) => {
-  const { handleSliderChange, handleSliderCommit, isDragging } = useVideoSeek({
+  const { handleSliderChange, handleSliderCommit } = useVideoSeek({
     isEnabled,
     isPaused,
     onPause,
@@ -32,21 +30,13 @@ export const PreviewPanelVideoSeekControl = ({
     onPlay,
   });
 
-  const { displayTime } = useSmoothVideoTime({
-    currentTime,
-    isPaused,
-    playbackRate,
-    isDragging,
-    isEnabled,
-    duration,
-  });
   return (
     <div className="w-full max-w-[90%] mx-auto flex flex-col gap-1">
       <Slider
         className="w-full"
         hideThumb={!isEnabled}
         disabled={!isEnabled}
-        value={[isEnabled ? displayTime : 0]}
+        value={[isEnabled ? currentTime : 0]}
         max={duration > 0 ? duration : 100}
         step={0.1}
         onValueChange={handleSliderChange}
@@ -60,7 +50,7 @@ export const PreviewPanelVideoSeekControl = ({
           }
         )}
       >
-        <span>{formatTime(displayTime)}</span>
+        <span>{formatTime(currentTime)}</span>
         <span>{formatTime(duration)}</span>
       </div>
     </div>

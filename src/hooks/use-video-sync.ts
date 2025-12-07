@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { emit } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import {
   VideoControlCommand,
   VideoStateUpdate,
   VideoReadyPayload,
   VideoAckPayload,
   VIDEO_CONTROL_EVENT,
-  VIDEO_STATE_UPDATE_EVENT,
   VIDEO_READY_EVENT,
   VIDEO_ACK_EVENT,
 } from "@/types/video-control";
@@ -83,10 +83,11 @@ export const useVideoSync = ({
     });
   };
 
-  // Send video state updates to presenter
+  // Send video state updates to backend (which broadcasts to presenter)
   const sendStateUpdate = () => {
     const video = videoRef.current;
-    if (!video || !isActive) return;
+    // Only send state updates from the audience route
+    if (!video || !isActive || !isAudienceRoute) return;
 
     const buffered =
       video.buffered.length > 0
@@ -105,10 +106,12 @@ export const useVideoSync = ({
       readyState: video.readyState,
       error: video.error ? video.error.message : null,
       seeking: video.seeking,
+      updatedAt: Date.now(),
     };
 
-    emit(VIDEO_STATE_UPDATE_EVENT, state).catch((error) => {
-      console.error("Failed to emit video state update:", error);
+    // Send state to backend via Tauri command (backend handles broadcasting)
+    invoke("update_video_state", { state }).catch((error) => {
+      console.error("Failed to update video state:", error);
     });
   };
 

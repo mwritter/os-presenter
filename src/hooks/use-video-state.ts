@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { emit } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import {
   VideoControlCommand,
   VideoStateUpdate,
@@ -127,12 +128,22 @@ export const useVideoState = ({ slideId }: UseVideoStateOptions) => {
       setVideoState(null);
       setHandshakeState("idle");
 
+      // Clear backend video state to stop broadcast timer
+      invoke("clear_video_state").catch((error) => {
+        console.error("Failed to clear video state:", error);
+      });
+
       // Clear any pending timeout
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
     } else {
+      // Clear previous video state when switching slides
+      invoke("clear_video_state").catch((error) => {
+        console.error("Failed to clear video state:", error);
+      });
+
       // Set to pending when a new slide with video becomes active
       console.log("Setting handshake to pending for slide:", slideId);
       setHandshakeState("pending");

@@ -36,7 +36,7 @@ export const useSmoothVideoTime = ({
     // 3. Time difference is significant (> 0.5s, likely a seek or buffering)
     const playStateChanged = lastPausedStateRef.current !== isPaused;
     const needsSync =
-      isPaused || isDragging || playStateChanged || timeDifference > 0.5;
+      isPaused || isDragging || playStateChanged || timeDifference > 0.15;
 
     if (needsSync) {
       baseTimeRef.current = currentTime;
