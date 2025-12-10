@@ -10,16 +10,34 @@
     "frontendDist": "../build/client"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
+        "label": "main",
         "title": "OS Presenter",
         "titleBarStyle": "Overlay",
         "resizable": true,
-        "width": 800,
-        "height": 600,
-        "minWidth": 800,
-        "minHeight": 600,
+        "transparent": true,
+        "width": 1200,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 720,
         "dragDropEnabled": false
+      },
+      {
+        "label": "audience",
+        "url": "/audience",
+        "titleBarStyle": "Overlay",
+        "title": "Audience View",
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "resizable": true,
+        "shadow": false,
+        "width": 1200,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 720
       }
     ],
     "security": {

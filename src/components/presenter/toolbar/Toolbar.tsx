@@ -2,55 +2,19 @@ import { Image, LetterText, Monitor, Paintbrush, Search } from "lucide-react";
 import { useMediaLibraryContext } from "../media-library/context";
 import { IconButton } from "@/components/feature/icon-button/IconButton";
 import { NavigationControls } from "./NavigationControls";
-import { useState, useEffect } from "react";
-import {
-  openAudienceWindow,
-  closeAudienceWindow,
-  isAudienceWindowOpen,
-} from "@/services/audience";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useAudienceWindowState } from "./hooks/use-audience-window-state";
 
-//  TODO: add functionality to the toolbar
 export const Toolbar = () => {
   const { toggle: toggleMediaLibrary } = useMediaLibraryContext();
-  const [audienceWindowOpen, setAudienceWindowOpen] = useState(false);
+  const { audienceWindowVisible, handleToggleAudienceWindow } =
+    useAudienceWindowState();
 
   const handleDrag = async (e: React.MouseEvent) => {
-    // Only drag if not clicking on a button
     const target = e.target as HTMLElement;
     if (e.button === 0 && !target.closest("button")) {
       e.preventDefault();
       await getCurrentWindow().startDragging();
-    }
-  };
-
-  // Check if audience window is open on mount
-  useEffect(() => {
-    checkAudienceWindowStatus();
-  }, []);
-
-  const checkAudienceWindowStatus = async () => {
-    try {
-      const isOpen = await isAudienceWindowOpen();
-      setAudienceWindowOpen(isOpen);
-    } catch (error) {
-      console.error("Failed to check audience window status:", error);
-    }
-  };
-
-  const handleToggleAudienceWindow = async () => {
-    try {
-      if (audienceWindowOpen) {
-        await closeAudienceWindow();
-        setAudienceWindowOpen(false);
-      } else {
-        await openAudienceWindow();
-        setAudienceWindowOpen(true);
-      }
-    } catch (error) {
-      console.error("Failed to toggle audience window:", error);
-      // Re-check status in case of error
-      checkAudienceWindowStatus();
     }
   };
 
@@ -69,9 +33,9 @@ export const Toolbar = () => {
         <IconButton Icon={Image} label="Media" onClick={toggleMediaLibrary} />
         <IconButton
           Icon={Monitor}
-          label={audienceWindowOpen ? "Close Audience" : "Open Audience"}
+          label={"Audience"}
           onClick={handleToggleAudienceWindow}
-          className={audienceWindowOpen ? "ring-2 ring-amber-400" : ""}
+          className={audienceWindowVisible ? "ring-2 ring-amber-400" : ""}
         />
       </div>
     </div>

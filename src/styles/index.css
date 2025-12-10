@@ -129,7 +129,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-shade-3 text-foreground;
+    @apply text-foreground;
     overflow: hidden;
   }
 

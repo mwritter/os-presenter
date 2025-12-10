@@ -2,7 +2,7 @@ import { Outlet } from "react-router";
 
 const AudienceLayout = () => {
   return (
-    <div className="w-screen h-screen overflow-hidden bg-black">
+    <div className="w-screen h-screen overflow-hidden bg-transparent">
       <Outlet />
     </div>
   );

@@ -568,9 +568,10 @@ fn import_media_file(app: AppHandle, source_path: String) -> Result<MediaItem, S
         storage::read_all_json_files(&metadata_dir).map_err(|e| e.message)?;
 
     // Look for existing media item with same hash
-    if let Some(existing_item) = existing_items.iter().find(|item| {
-        item.hash.as_ref().map(|h| h == &file_hash).unwrap_or(false)
-    }) {
+    if let Some(existing_item) = existing_items
+        .iter()
+        .find(|item| item.hash.as_ref().map(|h| h == &file_hash).unwrap_or(false))
+    {
         // File already exists, return the existing item
         println!("Media file already exists with hash: {}", file_hash);
         return Ok(existing_item.clone());
@@ -702,24 +703,24 @@ fn update_media_thumbnail(
 }
 
 // Audience window commands
-#[tauri::command]
-fn open_audience_window(app: AppHandle) -> Result<(), String> {
-    // Check if audience window already exists
-    if app.get_webview_window("audience").is_some() {
-        return Err("Audience window is already open".to_string());
-    }
+// The audience window is created at app startup (configured in tauri.conf.json)
+// These commands show/hide it rather than creating/destroying it
 
-    // Create the audience window
-    let window = tauri::WebviewWindowBuilder::new(
-        &app,
-        "audience",
-        tauri::WebviewUrl::App("/audience".into()),
-    )
-    .title("Audience View")
-    .fullscreen(true)
-    .decorations(false)
-    .build()
-    .map_err(|e| format!("Failed to create audience window: {}", e))?;
+#[tauri::command]
+fn show_audience_window(app: AppHandle) -> Result<(), String> {
+    let window = app
+        .get_webview_window("audience")
+        .ok_or_else(|| "Audience window not found".to_string())?;
+
+    // Show the window
+    window
+        .show()
+        .map_err(|e| format!("Failed to show audience window: {}", e))?;
+
+    // Set always on top
+    window
+        .set_always_on_top(true)
+        .map_err(|e| format!("Failed to set always on top: {}", e))?;
 
     // Focus the window
     window
@@ -730,19 +731,29 @@ fn open_audience_window(app: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn close_audience_window(app: AppHandle) -> Result<(), String> {
+fn hide_audience_window(app: AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("audience") {
+        // Remove always on top
+        let _ = window.set_always_on_top(false);
+
+        // Hide the window
         window
-            .close()
-            .map_err(|e| format!("Failed to close audience window: {}", e))?;
+            .hide()
+            .map_err(|e| format!("Failed to hide audience window: {}", e))?;
     }
 
     Ok(())
 }
 
 #[tauri::command]
-fn is_audience_window_open(app: AppHandle) -> bool {
-    app.get_webview_window("audience").is_some()
+fn is_audience_window_visible(app: AppHandle) -> Result<bool, String> {
+    let window = app
+        .get_webview_window("audience")
+        .ok_or_else(|| "Audience window not found".to_string())?;
+
+    window
+        .is_visible()
+        .map_err(|e| format!("Failed to check window visibility: {}", e))
 }
 
 // ===== Video Sync Commands =====
@@ -808,7 +819,7 @@ fn update_video_state(
 
 /// Clear video state and stop broadcast timer
 #[tauri::command]
-fn clear_video_state(app_state: State<'_, AppState>) -> Result<(), String> {
+fn clear_video_state(app: AppHandle, app_state: State<'_, AppState>) -> Result<(), String> {
     let mut manager = app_state
         .video_sync
         .lock()
@@ -824,6 +835,9 @@ fn clear_video_state(app_state: State<'_, AppState>) -> Result<(), String> {
     manager.state = None;
     manager.broadcast_active = false;
     manager.stop_signal = None;
+
+    // Emit cleared event to presenter so it can clear its local state
+    let _ = app.emit_to("main", "video:state-cleared", ());
 
     println!("Cleared video state");
     Ok(())
@@ -913,14 +927,23 @@ pub fn run() {
             get_media_file_path,
             save_video_thumbnail,
             update_media_thumbnail,
-            open_audience_window,
-            close_audience_window,
-            is_audience_window_open,
+            show_audience_window,
+            hide_audience_window,
+            is_audience_window_visible,
             update_video_state,
             clear_video_state,
             tauri_plugin_font_variants::get_font_families,
             tauri_plugin_font_variants::get_font_variants,
         ])
+        .on_window_event(|window, event| {
+            // When the main window is closed, exit the entire application
+            if window.label() == "main" {
+                if let tauri::WindowEvent::CloseRequested { .. } = event {
+                    // Exit the application when main window is closed
+                    std::process::exit(0);
+                }
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

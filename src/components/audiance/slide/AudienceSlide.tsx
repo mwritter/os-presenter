@@ -8,6 +8,7 @@ import { useVideoSync } from "@/hooks/use-video-sync";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useIsAudienceRoute } from "@/hooks/use-is-audience-route";
+import { useVideoState } from "@/hooks/use-video-state";
 
 interface AudienceSlideProps {
   data: SlideData;
@@ -33,6 +34,8 @@ export const AudienceSlide = ({
   const backgroundVideo = data.objects?.find(
     (obj) => obj.type === "video" && obj.videoType === "background"
   ) as VideoObject;
+
+  const { videoState } = useVideoState({ slideId: data.id });
 
   // Use video sync hook for background videos
   const videoRef = useVideoSync({
@@ -71,11 +74,20 @@ export const AudienceSlide = ({
         slideId: data.id,
       });
       videoRef.current = videoElement;
-
-      // Note: Auto-play is now controlled by the handshake protocol
-      // The video will play after receiving acknowledgment from presenter
     }
   }, [backgroundVideo?.id, videoRef, data.id]);
+
+  // Sync video pause state from audience (for preview panel)
+  useEffect(() => {
+    if (videoState?.paused === undefined || !videoRef.current) return;
+
+    const video = videoRef.current;
+    if (videoState?.paused && !video.paused) {
+      video.pause();
+    } else if (!videoState?.paused && video.paused) {
+      video.play().catch(console.warn);
+    }
+  }, [videoState?.paused]);
 
   const canvasStyle = getSlideCanvasStyles({
     backgroundColor: data.backgroundColor || "black",

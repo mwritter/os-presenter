@@ -12,7 +12,6 @@ import {
   VIDEO_READY_EVENT,
   VIDEO_ACK_EVENT,
 } from "@/types/video-control";
-import { isAudienceWindowOpen } from "@/services/audience";
 
 interface UseVideoStateOptions {
   slideId: string | null; // null when no slide is active
@@ -54,26 +53,26 @@ export const useVideoState = ({ slideId }: UseVideoStateOptions) => {
     };
   }, [slideId]);
 
+  // Listen for video state cleared event (when audience window is hidden)
+  useEffect(() => {
+    const unlisten = listen("video:state-cleared", () => {
+      console.log("Video state cleared by audience - resetting local state");
+      setVideoState(null);
+    });
+
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, []);
+
   // Listen for video ready signal from audience (handshake)
+  // Note: The audience window always exists (created at app startup), even when hidden
+  // The handshake will work regardless of window visibility since the webview keeps running
   useEffect(() => {
     if (!slideId) return;
     let unlisten: Promise<UnlistenFn> | null = null;
 
     const initHandshake = async () => {
-      const isOpen = await isAudienceWindowOpen();
-      // if the audience window is not open set the handshake state to failed
-      if (!isOpen) {
-        console.log("Audience window is not open - skipping handshake");
-        setHandshakeState("skipped");
-
-        // Clear any pending timeout
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-          timeoutRef.current = null;
-        }
-        return;
-      }
-
       console.log("Setting up VIDEO_READY_EVENT listener for slide:", slideId);
 
       unlisten = listen<VideoReadyPayload>(VIDEO_READY_EVENT, (event) => {
