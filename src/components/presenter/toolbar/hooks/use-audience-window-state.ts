@@ -5,8 +5,7 @@ import {
   onAudienceVisible,
   showAudienceWindow,
 } from "@/services/audience";
-import { useEffect } from "react";
-import { useState } from "storybook/internal/preview-api";
+import { useEffect, useState } from "react";
 
 export const useAudienceWindowState = () => {
   const [audienceWindowVisible, setAudienceWindowVisible] = useState(false);
