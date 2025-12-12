@@ -10,7 +10,7 @@ export const EditConfigPanelTabTrigger = ({
   return (
     <TabsTrigger
       value={value}
-      className="data-[state=active]:bg-blue-500! text-xs p-1 rounded-none"
+      className="data-[state=active]:bg-selected! text-xs p-1 rounded-none"
     >
       {children}
     </TabsTrigger>

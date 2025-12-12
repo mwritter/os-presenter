@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { ShowViewFooter } from "./ShowViewFooter";
 import { ShowViewSlideGrid } from "./ShowViewSlideGrid";
+import { ShowViewDndProvider } from "./ShowViewDndProvider";
 import { useShowKeyboardNav } from "@/hooks/use-show-keyboard-nav";
 import {
   usePlaylistStore,
@@ -17,9 +18,6 @@ export const ShowViewPlaylistContent = () => {
   );
   const reorderSlidesInPlaylistItem = usePlaylistStore(
     (s) => s.reorderSlidesInPlaylistItem
-  );
-  const moveSlidesToPlaylistItem = usePlaylistStore(
-    (s) => s.moveSlidesToPlaylistItem
   );
   const playlist = useSelectedPlaylistItemPlaylist();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -74,58 +72,51 @@ export const ShowViewPlaylistContent = () => {
     );
   };
 
-  return (
-    <div
-      ref={containerRef}
-      className="flex flex-col h-full w-full relative outline-none"
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-    >
-      <div ref={scrollContainerRef} className="h-screen overflow-y-auto">
-        {playlist?.items.map((item) => {
-          const canvasSize = item.slideGroup.canvasSize || {
-            width: 1920,
-            height: 1080,
-          };
+  if (!playlist) {
+    return null;
+  }
 
-          return (
-            <div key={item.id} ref={(el) => handleItemRef(item.id, el)}>
-              <ShowViewSlideGrid
-                slides={item.slideGroup.slides}
-                title={item.slideGroup.title}
-                canvasSize={canvasSize}
-                slideGroupId={item.id}
-                playlistItemId={item.id}
-                playlistId={playlist!.id}
-                skipScrollRef={skipScrollRef}
-                onReorder={(slides) =>
-                  reorderSlidesInPlaylistItem(playlist!.id, item.id, slides)
-                }
-                onReceiveSlides={(
-                  slideIds,
-                  sourceGroupId,
-                  insertAfterSlideId
-                ) =>
-                  moveSlidesToPlaylistItem(
-                    playlist!.id,
-                    sourceGroupId,
-                    item.id,
-                    slideIds,
-                    insertAfterSlideId
-                  )
-                }
-              />
-            </div>
-          );
-        })}
-        {/* Spacer equal to height of all items except last, preventing scroll past last item */}
-        <div
-          style={{
-            height: `${spacerHeight}px`,
-          }}
-        />
+  return (
+    <ShowViewDndProvider playlistId={playlist.id}>
+      <div
+        ref={containerRef}
+        className="flex flex-col h-full w-full relative outline-none"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+      >
+        <div ref={scrollContainerRef} className="h-screen overflow-y-auto">
+          {playlist.items.map((item) => {
+            const canvasSize = item.slideGroup.canvasSize || {
+              width: 1920,
+              height: 1080,
+            };
+
+            return (
+              <div key={item.id} ref={(el) => handleItemRef(item.id, el)}>
+                <ShowViewSlideGrid
+                  slides={item.slideGroup.slides}
+                  title={item.slideGroup.title}
+                  canvasSize={canvasSize}
+                  slideGroupId={item.id}
+                  playlistItemId={item.id}
+                  playlistId={playlist.id}
+                  skipScrollRef={skipScrollRef}
+                  onReorder={(slides) =>
+                    reorderSlidesInPlaylistItem(playlist.id, item.id, slides)
+                  }
+                />
+              </div>
+            );
+          })}
+          {/* Spacer equal to height of all items except last, preventing scroll past last item */}
+          <div
+            style={{
+              height: `${spacerHeight}px`,
+            }}
+          />
+        </div>
+        <ShowViewFooter onAddBlankSlide={handleAddBlankSlide} />
       </div>
-      <ShowViewFooter onAddBlankSlide={handleAddBlankSlide} />
-    </div>
+    </ShowViewDndProvider>
   );
 };

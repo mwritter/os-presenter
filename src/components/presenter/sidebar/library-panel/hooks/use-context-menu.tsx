@@ -4,12 +4,12 @@ export const useContextMenu = ({
   onDelete,
   onRename,
   id,
-  selectedCount = 0,
+  selectedCount,
 }: {
   onDelete: (id: string) => void;
   onRename: (id: string) => void;
   id: string;
-  selectedCount?: number;
+  selectedCount: number;
 }) => {
   const handleDelete = () => {
     onDelete(id);
@@ -23,26 +23,21 @@ export const useContextMenu = ({
     e.preventDefault();
     e.stopPropagation();
 
-    // Build context menu items based on selection
-    const isMultipleSelected = selectedCount > 1;
-    const deleteText = isMultipleSelected
-      ? `Delete ${selectedCount} Items`
-      : "Delete";
-
     const contextMenuItems = [
       {
         id: `${id}-rename`,
         text: "Rename",
         action: handleRename,
         // Disable rename when multiple items are selected
-        enabled: !isMultipleSelected,
+        enabled: selectedCount === 1,
       },
       {
         id: `${id}-delete`,
-        text: deleteText,
+        text: `Delete`,
         action: handleDelete,
+        enabled: true,
       },
-    ];
+    ].filter(({ enabled }) => enabled);
 
     const menu = await Menu.new({ items: contextMenuItems });
     await menu.popup();

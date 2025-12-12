@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { ShowViewFooter } from "./ShowViewFooter";
 import { ShowViewSlideGrid } from "./ShowViewSlideGrid";
+import { ShowViewDndProvider } from "./ShowViewDndProvider";
 import { useShowKeyboardNav } from "@/hooks/use-show-keyboard-nav";
 import {
   useLibraryStore,
@@ -46,31 +47,37 @@ export const ShowViewLibraryContent = () => {
     height: 1080,
   };
 
+  // Library view uses a dummy playlistId since there's only one grid
+  // and no cross-grid movement is possible
   return (
-    <div
-      ref={containerRef}
-      className="flex flex-col h-full w-full relative outline-none"
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-    >
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <ShowViewSlideGrid
-          slides={selectedSlideGroupData?.slides ?? []}
-          title={selectedSlideGroupData?.title ?? ""}
-          canvasSize={canvasSize}
-          slideGroupId={selectedSlideGroup?.id}
-          libraryId={selectedSlideGroup?.libraryId}
-          onReorder={(slides) => {
-            if (!selectedSlideGroup) return;
-            reorderSlidesInLibrary(
-              selectedSlideGroup.libraryId,
-              selectedSlideGroup.id,
-              slides
-            );
-          }}
-        />
+    <ShowViewDndProvider playlistId="library">
+      <div
+        ref={containerRef}
+        className="flex flex-col h-full w-full relative outline-none"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+      >
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          <ShowViewSlideGrid
+            slides={selectedSlideGroupData?.slides ?? []}
+            title={selectedSlideGroupData?.title ?? ""}
+            canvasSize={canvasSize}
+            slideGroupId={selectedSlideGroup?.id}
+            libraryId={selectedSlideGroup?.libraryId}
+            playlistItemId={selectedSlideGroup?.id}
+            playlistId="library"
+            onReorder={(slides) => {
+              if (!selectedSlideGroup) return;
+              reorderSlidesInLibrary(
+                selectedSlideGroup.libraryId,
+                selectedSlideGroup.id,
+                slides
+              );
+            }}
+          />
+        </div>
+        <ShowViewFooter onAddBlankSlide={handleAddBlankSlide} />
       </div>
-      <ShowViewFooter onAddBlankSlide={handleAddBlankSlide} />
-    </div>
+    </ShowViewDndProvider>
   );
 };

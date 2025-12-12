@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
+use std::fmt;
 use std::fs;
+use std::io::Read;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
-use std::fmt;
-use sha2::{Sha256, Digest};
-use std::io::Read;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StorageError {
@@ -103,9 +103,7 @@ pub fn write_json_file<T: Serialize>(path: &PathBuf, data: &T) -> StorageResult<
 }
 
 /// Read all JSON files from a directory
-pub fn read_all_json_files<T: for<'de> Deserialize<'de>>(
-    dir: &PathBuf,
-) -> StorageResult<Vec<T>> {
+pub fn read_all_json_files<T: for<'de> Deserialize<'de>>(dir: &PathBuf) -> StorageResult<Vec<T>> {
     let mut items = Vec::new();
 
     if !dir.exists() {
@@ -183,4 +181,3 @@ pub fn compute_file_hash(path: &PathBuf) -> StorageResult<String> {
     let result = hasher.finalize();
     Ok(format!("{:x}", result))
 }
-

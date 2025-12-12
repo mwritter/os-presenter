@@ -16,7 +16,7 @@ import {
   getAvailableVariants,
   loadFontVariants,
   FontVariantOption,
-} from "@/hooks/useSystemFonts";
+} from "@/hooks/use-system-fonts";
 import { useEffect, useState } from "react";
 import { Effect as TextEffect } from "./common/effects/Effect";
 
@@ -51,7 +51,9 @@ export const EditTextConfigPanel = () => {
 
   // Load font variants on demand when base font family changes
   useEffect(() => {
+    console.log("baseFontFamily", { baseFontFamily, fontNames });
     if (baseFontFamily && fontNames.length > 0) {
+      console.log("Loading baseFontFamily", baseFontFamily);
       loadFontVariants(baseFontFamily).then(() => {
         // Update available variants after they're loaded
         const variants = getAvailableVariants(baseFontFamily);
@@ -121,6 +123,7 @@ export const EditTextConfigPanel = () => {
               fontFamily={textProps.baseFontFamily}
               selectedStyle={textProps.fontVariant}
               onChange={(fullFontName) => {
+                console.log("fullFontName", fullFontName);
                 // Extract the style name from the full font name
                 const selectedVariant = availableVariants?.find(
                   (v) => v.fullName === fullFontName

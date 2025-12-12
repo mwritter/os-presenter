@@ -1,6 +1,7 @@
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useEditContextSafe } from "@/presenter/edit/context";
 import { TextAlignment, ShadowEffect } from "@/components/feature/slide/types";
+import { loadFontVariants } from "@/hooks/use-system-fonts";
 
 // Helper function to convert ShadowEffect to CSS text-shadow
 const getTextShadowStyle = (shadow?: ShadowEffect): string => {
@@ -67,6 +68,8 @@ export const useTextEditing = ({
       selection?.removeAllRanges();
       selection?.addRange(range);
     }
+    console.log("Loading font variants for Inter");
+    loadFontVariants("Inter");
   }, [isEditing]);
 
   // Exit editing mode when object is deselected
@@ -164,7 +167,7 @@ export const useTextEditing = ({
     color: object.color || "rgba(255, 255, 255, 1)",
     textAlign: object.alignment?.horizontal || "center",
     // fontFamily now contains the full font name (e.g., "American Typewriter Bold")
-    fontFamily: object.fontFamily || "Arial",
+    fontFamily: object.fontFamily?.replace(/\s+/g, "-") || "Arial",
     textDecoration: object.underline ? "underline" : "none",
     textTransform: object.textTransform || "none",
     WebkitTextStroke:

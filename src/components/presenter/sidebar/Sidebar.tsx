@@ -6,6 +6,7 @@ import {
 import { LibraryPanel } from "./library-panel/LibraryPanel";
 import { ItemPanel } from "./item-panel/ItemPanel";
 import { useLocation } from "react-router";
+import { SidebarDndProvider } from "./SidebarDndProvider";
 
 export const Sidebar = () => {
   const isEditRoute = useLocation().pathname.startsWith("/presenter/edit");
@@ -17,19 +18,21 @@ export const Sidebar = () => {
       maxSize={50}
       hidden={isEditRoute}
     >
-      <ResizablePanelGroup id="sidebar-group" direction="vertical">
-        <ResizablePanel
-          id="library-panel"
-          minSize={10}
-          className="bg-shade-1 overflow-y-auto"
-        >
-          <LibraryPanel />
-        </ResizablePanel>
-        <ResizableHandle className="bg-black" />
-        <ResizablePanel id="item-panel" className="bg-shade-2 min-h-[100px]">
-          <ItemPanel />
-        </ResizablePanel>
-      </ResizablePanelGroup>
+      <SidebarDndProvider>
+        <ResizablePanelGroup id="sidebar-group" direction="vertical">
+          <ResizablePanel
+            id="library-panel"
+            minSize={10}
+            className="bg-shade-1 overflow-y-auto"
+          >
+            <LibraryPanel />
+          </ResizablePanel>
+          <ResizableHandle className="bg-black" />
+          <ResizablePanel id="item-panel" className="bg-shade-2 min-h-[100px]">
+            <ItemPanel />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </SidebarDndProvider>
     </ResizablePanel>
   );
 };

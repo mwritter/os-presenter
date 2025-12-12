@@ -46,6 +46,7 @@
   --color-shade-2: var(--shade-2);
   --color-shade-3: var(--shade-3);
   --color-shade-4: var(--shade-4);
+  --color-selected: var(--selected);
 }
 
 :root {
@@ -67,7 +68,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.923 0.003 48.717);
   --input: oklch(0.923 0.003 48.717);
-  --ring: oklch(0.709 0.01 56.259);
+  --ring: oklch(1 0 0); /* white */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -88,6 +89,7 @@
   --shade-2: #2F2F2F;
   --shade-3: #1E1E1E;
   --shade-4: #121212;
+  --selected: oklch(0.623 0.214 259.815); /* blue-500 */
 }
 
 .dark {
@@ -108,7 +110,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.553 0.013 58.071);
+  --ring: oklch(1 0 0); /* white */
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);

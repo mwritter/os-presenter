@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useSystemFonts } from "@/hooks/useSystemFonts";
+import { useSystemFonts } from "@/hooks/use-system-fonts";
 
 export function TextFontFamilyCombobox({
   value: externalValue,

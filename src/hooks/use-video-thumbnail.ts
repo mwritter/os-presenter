@@ -1,5 +1,4 @@
 import { useMediaLibraryStore } from "@/stores/mediaLibraryStore";
-import { useMemo } from "react";
 
 /**
  * Hook to get the thumbnail for a video object by looking up the media library
@@ -15,21 +14,19 @@ export const useVideoThumbnail = (
 ): string | undefined => {
   const mediaItems = useMediaLibraryStore((state) => state.mediaItems);
 
-  return useMemo(() => {
-    // If thumbnail is already set, use it
-    if (existingThumbnail) {
-      return existingThumbnail;
-    }
+  // If thumbnail is already set, use it
+  if (existingThumbnail) {
+    return existingThumbnail;
+  }
 
-    // Extract the media ID from the video source filename
-    // Format is typically "uuid.ext" or just "uuid.mp4"
-    const filename = videoSrc.split("/").pop() || videoSrc;
-    const mediaId = filename.split(".")[0]; // Get the part before the extension
+  // Extract the media ID from the video source filename
+  // Format is typically "uuid.ext" or just "uuid.mp4"
+  const filename = videoSrc.split("/").pop() || videoSrc;
+  const mediaId = filename.split(".")[0]; // Get the part before the extension
 
-    // Look up the media item in the library
-    const mediaItem = mediaItems.find((item) => item.id === mediaId);
+  // Look up the media item in the library
+  const mediaItem = mediaItems.find((item) => item.id === mediaId);
 
-    // Return the thumbnail if found
-    return mediaItem?.thumbnail;
-  }, [videoSrc, existingThumbnail, mediaItems]);
+  // Return the thumbnail if found
+  return mediaItem?.thumbnail;
 };

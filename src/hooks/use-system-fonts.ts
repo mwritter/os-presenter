@@ -63,7 +63,7 @@ export function useSystemFonts(): SystemFontsData {
 
         // Cache the results
         cachedFontNames = families;
-
+        console.log("cachedFontNames", cachedFontNames);
         setFontNames(families);
 
         console.log("Font families loaded and cached");
@@ -88,7 +88,7 @@ export function useSystemFonts(): SystemFontsData {
 export interface FontVariantOption {
   label: string; // Display name (e.g., "Bold", "Condensed Bold")
   value: string; // Style name (same as label, used for selection)
-  fullName: string; // Full font name to use in CSS
+  fullName: string; // PostScript name (or full name fallback) to use in CSS
 }
 
 export async function loadFontVariants(
@@ -105,6 +105,7 @@ export async function loadFontVariants(
       familyName: fontFamily,
     });
     variantsCache.set(fontFamily, variants);
+    console.log("variantsCache", variantsCache);
     return variants;
   } catch (err) {
     console.error(`Failed to load variants for ${fontFamily}:`, err);
@@ -122,10 +123,11 @@ export function getAvailableVariants(fontFamily: string): FontVariantOption[] {
   }
 
   // Convert FontVariantInfo to FontVariantOption
+  // Use postscript_name for CSS (more reliable) with fallback to full_name
   return cachedVariants.map((variant) => ({
     label: variant.style,
     value: variant.style,
-    fullName: variant.full_name,
+    fullName: variant.postscript_name || variant.full_name,
   }));
 }
 

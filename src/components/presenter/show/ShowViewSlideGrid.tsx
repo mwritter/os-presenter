@@ -1,4 +1,9 @@
 import { useRef } from "react";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
 import { Slide } from "@/components/feature/slide/Slide";
 import { SlideData } from "@/components/feature/slide/types";
 import { CanvasSize } from "@/components/presenter/types";
@@ -10,34 +15,24 @@ import {
   useSlideSelectionStore,
 } from "@/stores/presenterStore";
 import { cn } from "@/lib/utils";
-import {
-  createSlideDragGhost,
-  createMultiSlideDragGhost,
-} from "@/lib/drag-utils";
 import { MAX_GRID_COLUMNS, useShowViewContext } from "./context";
-import { useShowViewDrag } from "./hooks/use-show-view-drag";
 import { useSlideMultiSelect } from "@/hooks/use-slide-multi-select";
 import { useLassoSelect } from "@/hooks/use-lasso-select";
 import { useSlideClipboard } from "@/hooks/use-slide-clipboard";
 import { useSlideContextMenu } from "./hooks/use-slide-context-menu";
+import { useShowViewDnd, ShowViewDragData } from "./ShowViewDndProvider";
+import { SlideGridEndZone } from "./SlideGridEndZone";
 
 type ShowViewSlideGridProps = {
   slides: SlideData[];
   title: string;
   canvasSize: CanvasSize;
   onReorder?: (slides: SlideData[]) => void;
-  // Cross-group drag and drop
   slideGroupId?: string;
   libraryId?: string;
   playlistItemId?: string;
   playlistId?: string;
-  // Skip scroll when selecting from within this component
   skipScrollRef?: React.RefObject<boolean>;
-  onReceiveSlides?: (
-    slideIds: string[],
-    sourceGroupId: string,
-    insertAfterSlideId?: string
-  ) => void;
 };
 
 export const ShowViewSlideGrid = ({
@@ -50,7 +45,6 @@ export const ShowViewSlideGrid = ({
   playlistItemId,
   playlistId,
   skipScrollRef,
-  onReceiveSlides,
 }: ShowViewSlideGridProps) => {
   const activeSlideId = useSelectionStore((s) => s.activeSlide?.id ?? null);
   const isMultiSelectMode = useSlideSelectionStore((s) => s.isMultiSelectMode);
@@ -60,9 +54,11 @@ export const ShowViewSlideGrid = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const slideRefsMap = useRef<Map<string, HTMLElement>>(new Map());
 
+  // Get drag state from shared context
+  const { activeId, activeData, overId, dropPosition } = useShowViewDnd();
+
   // Select this slide group when clicking the container
   const handleContainerClick = () => {
-    // Skip scroll when selecting from within the show view
     if (skipScrollRef) {
       skipScrollRef.current = true;
     }
@@ -74,27 +70,8 @@ export const ShowViewSlideGrid = ({
   };
 
   // Multi-select functionality
-  const {
-    selectedSlideIds,
-    handleSlideClick,
-    isSlideSelected,
-    getSelectedSlidesInOrder,
-  } = useSlideMultiSelect({ slides, canvasSize });
-
-  const {
-    draggedSlideId,
-    dropTarget,
-    handleDragStart,
-    handleDragOver,
-    handleDrop,
-    handleContainerDragOver,
-    handleContainerDrop,
-  } = useShowViewDrag({
-    slides,
-    onReorder,
-    slideGroupId,
-    onReceiveSlides,
-  });
+  const { selectedSlideIds, handleSlideClick, isSlideSelected } =
+    useSlideMultiSelect({ slides, canvasSize });
 
   // Lasso/marquee selection
   const { isSelecting, lassoStyle } = useLassoSelect({
@@ -131,136 +108,197 @@ export const ShowViewSlideGrid = ({
     }
   };
 
+  const isDragging = (id: string) => {
+    if (!activeId) return false;
+    if (activeData?.selectedIds) {
+      return activeData.selectedIds.includes(id);
+    }
+    return activeId === id;
+  };
+
+  const getDropPosition = (id: string) => {
+    if (overId === id && !isDragging(id)) {
+      return dropPosition;
+    }
+    return null;
+  };
+
   if (!title && (!slides || slides.length === 0)) {
     return <ShowViewEmptyState />;
   }
 
+  // Calculate grid columns for end zone
+  const totalColumns = Math.max(MAX_GRID_COLUMNS - gridColumns, 1);
+
+  return (
+    <SortableContext
+      items={slides.map((s) => s.id)}
+      strategy={rectSortingStrategy}
+      disabled={!onReorder}
+    >
+      <div
+        ref={containerRef}
+        className="flex flex-col gap-4 text-white/70 relative select-none"
+        onClick={handleContainerClick}
+      >
+        <ShowViewSlideGridHeader title={title} />
+        <div
+          className={cn("grid gap-4 p-5", {
+            "min-h-[100px]": slides.length === 0,
+          })}
+          style={{
+            gridTemplateColumns: `repeat(${totalColumns}, 1fr)`,
+          }}
+        >
+          {slides.map((slide, index) => {
+            const isSelected = isSlideSelected(slide.id);
+            const isActive = activeSlideId === slide.id;
+            const slideIsDragging = isDragging(slide.id);
+            const showSelectionUI = isSelected && isMultiSelectMode;
+
+            return (
+              <SortableSlideItem
+                key={slide.id}
+                slide={slide}
+                index={index}
+                canvasSize={canvasSize}
+                playlistId={playlistId ?? ""}
+                playlistItemId={playlistItemId ?? ""}
+                selectedSlideIds={selectedSlideIds}
+                isActive={isActive}
+                isDragging={slideIsDragging}
+                showSelectionUI={showSelectionUI}
+                dropPosition={getDropPosition(slide.id)}
+                disabled={!onReorder}
+                onContextMenu={(e) => openContextMenu(e, slide.id)}
+                onClick={(e) => handleSlideClick(slide.id, slide, e)}
+                registerRef={registerSlideRef}
+              />
+            );
+          })}
+
+          {/* End drop zone - fills remaining cells in last row */}
+          {onReorder && playlistId && playlistItemId && (
+            <SlideGridEndZone
+              playlistId={playlistId}
+              playlistItemId={playlistItemId}
+              totalColumns={totalColumns}
+              slideCount={slides.length}
+            />
+          )}
+        </div>
+
+        {/* Lasso selection overlay */}
+        {isSelecting && lassoStyle && (
+          <div
+            className="absolute border-2 border-selected bg-selected/20 pointer-events-none z-50"
+            style={{
+              left: lassoStyle.left,
+              top: lassoStyle.top,
+              width: lassoStyle.width,
+              height: lassoStyle.height,
+            }}
+          />
+        )}
+      </div>
+    </SortableContext>
+  );
+};
+
+interface SortableSlideItemProps {
+  slide: SlideData;
+  index: number;
+  canvasSize: CanvasSize;
+  playlistId: string;
+  playlistItemId: string;
+  selectedSlideIds: string[];
+  isActive: boolean;
+  isDragging: boolean;
+  showSelectionUI: boolean;
+  dropPosition: "before" | "after" | null;
+  disabled: boolean;
+  onContextMenu: (e: React.MouseEvent) => void;
+  onClick: (e: React.MouseEvent) => void;
+  registerRef: (slideId: string, element: HTMLElement | null) => void;
+}
+
+const SortableSlideItem = ({
+  slide,
+  index,
+  canvasSize,
+  playlistId,
+  playlistItemId,
+  selectedSlideIds,
+  isActive,
+  isDragging,
+  showSelectionUI,
+  dropPosition,
+  disabled,
+  onContextMenu,
+  onClick,
+  registerRef,
+}: SortableSlideItemProps) => {
+  const dragData: ShowViewDragData = {
+    type: "slide",
+    playlistId,
+    playlistItemId,
+    slide,
+    canvasSize,
+    selectedIds: selectedSlideIds.includes(slide.id)
+      ? selectedSlideIds
+      : undefined,
+  };
+
+  const { attributes, listeners, setNodeRef } = useSortable({
+    id: slide.id,
+    data: dragData,
+    disabled,
+  });
+
+  // Combined ref handler
+  const handleRef = (el: HTMLDivElement | null) => {
+    setNodeRef(el);
+    registerRef(slide.id, el);
+  };
+
   return (
     <div
-      ref={containerRef}
-      className="flex flex-col gap-4 text-white/70 relative select-none"
-      onClick={handleContainerClick}
+      ref={handleRef}
+      data-slide-item
+      className="relative"
+      onContextMenu={onContextMenu}
+      {...attributes}
+      {...listeners}
     >
-      <ShowViewSlideGridHeader title={title} />
+      {/* Drop indicator line - before (in gap to the left) */}
+      {dropPosition === "before" && (
+        <div className="absolute -left-[10px] top-0 bottom-0 w-1 bg-selected z-10 rounded-full" />
+      )}
+
       <div
-        className={cn("grid gap-4 p-5", {
-          "min-h-[100px]": slides.length === 0,
+        className={cn("overflow-hidden transition-all duration-75", {
+          "ring-2 ring-amber-400": isActive,
+          "ring-2 ring-blue-500": showSelectionUI && !isActive,
+          "hover:ring-2 hover:ring-white/30": !showSelectionUI && !isActive,
+          "opacity-50": isDragging,
         })}
-        style={{
-          gridTemplateColumns: `repeat(${Math.max(MAX_GRID_COLUMNS - gridColumns, 1)}, 1fr)`,
-        }}
-        onDragOver={handleContainerDragOver}
-        onDrop={handleContainerDrop}
       >
-        {slides.map((slide, index) => {
-          const isSelected = isSlideSelected(slide.id);
-          const isActive = activeSlideId === slide.id;
-          const isDragging = draggedSlideId === slide.id;
-          const isDraggedAsPartOfSelection =
-            draggedSlideId !== null &&
-            selectedSlideIds.includes(slide.id) &&
-            selectedSlideIds.includes(draggedSlideId);
-          // Show selection UI when in multi-select mode (Shift/Cmd/lasso)
-          const showSelectionUI = isSelected && isMultiSelectMode;
-
-          return (
-            <div
-              key={slide.id}
-              ref={(el) => registerSlideRef(slide.id, el)}
-              data-slide-item
-              className="relative"
-              draggable={!!onReorder}
-              onContextMenu={(e) => openContextMenu(e, slide.id)}
-              onDragStart={(e) => {
-                // If dragging a selected slide, drag all selected slides
-                const isPartOfSelection = selectedSlideIds.includes(slide.id);
-                const slidesToDrag = isPartOfSelection
-                  ? getSelectedSlidesInOrder()
-                  : [slide];
-
-                handleDragStart(
-                  slide.id,
-                  slidesToDrag.map((s) => s.id)
-                );
-
-                // Create appropriate ghost based on selection count
-                if (slidesToDrag.length > 1) {
-                  createMultiSlideDragGhost(
-                    e,
-                    e.currentTarget,
-                    slidesToDrag.length
-                  );
-                } else {
-                  createSlideDragGhost(e, e.currentTarget);
-                }
-
-                e.dataTransfer.setData("slideId", slide.id);
-                e.dataTransfer.setData(
-                  "slideIds",
-                  JSON.stringify(slidesToDrag.map((s) => s.id))
-                );
-                // Include source group ID for cross-group drops
-                if (slideGroupId) {
-                  e.dataTransfer.setData("sourceGroupId", slideGroupId);
-                }
-                e.dataTransfer.effectAllowed = "move";
-              }}
-              onDragOver={(e) => handleDragOver(e, slide.id)}
-              onDrop={(e) => handleDrop(e, slide.id)}
-            >
-              {/* Drop indicator line - before (in gap to the left) */}
-              {dropTarget?.id === slide.id &&
-                dropTarget.position === "before" && (
-                  <div className="absolute -left-[10px] top-0 bottom-0 w-1 bg-blue-500 z-10 rounded-full" />
-                )}
-
-              <div
-                className={cn("overflow-hidden transition-all duration-75", {
-                  // Active slide (being broadcast) - amber ring
-                  "ring-2 ring-amber-400": isActive,
-                  // Selected (multiple) but not active - blue ring (only when 2+ slides selected)
-                  "ring-2 ring-blue-500": showSelectionUI && !isActive,
-                  // Hover state when not showing selection UI or active
-                  "hover:ring-2 hover:ring-white/30":
-                    !showSelectionUI && !isActive,
-                  // Dragging state
-                  "opacity-50": isDragging || isDraggedAsPartOfSelection,
-                })}
-              >
-                <Slide
-                  id={slide.id}
-                  data={slide}
-                  canvasSize={canvasSize}
-                  onClick={(e) => handleSlideClick(slide.id, slide, e)}
-                />
-                <SlideTag
-                  index={index}
-                  slide={slide}
-                  showSelectionUI={showSelectionUI}
-                />
-              </div>
-
-              {/* Drop indicator line - after (in gap to the right) */}
-              {dropTarget?.id === slide.id &&
-                dropTarget.position === "after" && (
-                  <div className="absolute -right-[10px] top-0 bottom-0 w-1 bg-blue-500 z-10 rounded-full" />
-                )}
-            </div>
-          );
-        })}
+        <Slide
+          id={slide.id}
+          data={slide}
+          canvasSize={canvasSize}
+          onClick={onClick}
+        />
+        <SlideTag
+          index={index}
+          slide={slide}
+          showSelectionUI={showSelectionUI}
+        />
       </div>
 
-      {/* Lasso selection overlay */}
-      {isSelecting && lassoStyle && (
-        <div
-          className="absolute border-2 border-blue-500 bg-blue-500/20 pointer-events-none z-50"
-          style={{
-            left: lassoStyle.left,
-            top: lassoStyle.top,
-            width: lassoStyle.width,
-            height: lassoStyle.height,
-          }}
-        />
+      {/* Drop indicator line - after (in gap to the right) */}
+      {dropPosition === "after" && (
+        <div className="absolute -right-[10px] top-0 bottom-0 w-1 bg-selected z-10 rounded-full" />
       )}
     </div>
   );
@@ -295,7 +333,7 @@ const SlideTag = ({
     <div
       className={cn(
         "flex items-center justify-between px-1 w-full transition-colors",
-        showSelectionUI ? "bg-blue-500/30" : "bg-shade-lighter"
+        showSelectionUI ? "bg-selected/30" : "bg-shade-lighter"
       )}
     >
       <p className="text-white text-xs">{index + 1}</p>

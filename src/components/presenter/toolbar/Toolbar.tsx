@@ -1,9 +1,10 @@
-import { Image, LetterText, Monitor, Paintbrush, Search } from "lucide-react";
+import { Image, Monitor } from "lucide-react";
 import { useMediaLibraryContext } from "../media-library/context";
 import { IconButton } from "@/components/feature/icon-button/IconButton";
 import { NavigationControls } from "./NavigationControls";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useAudienceWindowState } from "./hooks/use-audience-window-state";
+import { Search } from "./search/Search";
 
 export const Toolbar = () => {
   const { toggle: toggleMediaLibrary } = useMediaLibraryContext();
@@ -24,9 +25,7 @@ export const Toolbar = () => {
       className="flex gap-10 items-center p-2 pt-8 bg-shade-1 border-b border-black/50 w-full overflow-x-auto [scrollbar-width:none] select-none"
     >
       <div className="flex items-center gap-2">
-        <IconButton Icon={Search} label="Search" />
-        <IconButton Icon={LetterText} label="Text" />
-        <IconButton Icon={Paintbrush} label="Theme" />
+        <Search />
       </div>
       <NavigationControls />
       <div className="flex items-center gap-2">

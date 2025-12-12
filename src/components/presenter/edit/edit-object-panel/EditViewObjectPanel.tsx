@@ -1,25 +1,41 @@
 import { useEditContext } from "@/presenter/edit/context";
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragStartEvent,
+  DragEndEvent,
+  DragOverEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { createPortal } from "react-dom";
 import { EditViewObjectPanelItem } from "./EditViewObjectPanelItem";
 import { cn } from "@/lib/utils";
-import { createDragGhost } from "@/lib/drag-utils";
+import { ItemDragOverlay } from "@/components/dnd";
+import { getObjectLabel } from "../utils/getObjectLabel";
+import { getObjectIcon } from "../utils/getObjectIcon";
+import { SlideObject } from "@/components/feature/slide/types";
 
 export const EditSlideObjectPanel = () => {
   const { selectedSlide } = useEditContext();
   const objects = selectedSlide?.objects || [];
 
   // Filter out background videos for display
-  const editableObjects = useMemo(
-    () =>
-      objects.filter((obj) => {
-        // Hide background video objects from the panel
-        if (obj.type === "video" && obj.videoType === "background") {
-          return false;
-        }
-        return true;
-      }),
-    [objects]
-  );
+  const editableObjects = objects.filter((obj) => {
+    // Hide background video objects from the panel
+    if (obj.type === "video" && obj.videoType === "background") {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="flex flex-col h-full">
@@ -43,93 +59,84 @@ const DraggableObjectsList = () => {
   const { selectedSlide, reorderObjects } = useEditContext();
   const objects = selectedSlide?.objects || [];
 
-  const [draggedObjectId, setDraggedObjectId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<{
-    id: string;
-    position: "before" | "after";
-  } | null>(null);
-
-  // Create a stable sorted array, filtering out background videos
-  const sortedObjects = useMemo(
-    () =>
-      [...objects]
-        .filter((obj) => {
-          // Hide background video objects from the panel
-          if (obj.type === "video" && obj.videoType === "background") {
-            return false;
-          }
-          return true;
-        })
-        .sort((a, b) => b.zIndex - a.zIndex),
-    [objects]
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+  const [dropPosition, setDropPosition] = useState<"before" | "after" | null>(
+    null
   );
 
-  // Reset drag state when drag ends globally
-  useEffect(() => {
-    const handleDragEnd = () => {
-      setDraggedObjectId(null);
-      setDropTarget(null);
-    };
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
 
-    document.addEventListener("dragend", handleDragEnd);
-    document.addEventListener("drop", handleDragEnd);
-    return () => {
-      document.removeEventListener("dragend", handleDragEnd);
-      document.removeEventListener("drop", handleDragEnd);
-    };
-  }, []);
+  // Create a stable sorted array, filtering out background videos
+  const sortedObjects = [...objects]
+    .filter((obj) => {
+      // Hide background video objects from the panel
+      if (obj.type === "video" && obj.videoType === "background") {
+        return false;
+      }
+      return true;
+    })
+    .sort((a, b) => b.zIndex - a.zIndex);
 
-  const handleDragStart = (
-    e: React.DragEvent<HTMLDivElement>,
-    objectId: string
-  ) => {
-    setDraggedObjectId(objectId);
-    createDragGhost(e, e.currentTarget);
-    e.dataTransfer.setData("objectId", objectId);
-    e.dataTransfer.effectAllowed = "move";
+  const activeObject = sortedObjects.find((obj) => obj.id === activeId);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
   };
 
-  const handleDragOver = (e: React.DragEvent, targetObjectId: string) => {
-    e.preventDefault();
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over, active } = event;
 
-    if (!draggedObjectId) return;
-    if (draggedObjectId === targetObjectId) {
-      setDropTarget(null);
+    if (!over) {
+      setOverId(null);
+      setDropPosition(null);
       return;
     }
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const midpoint = rect.top + rect.height / 2;
-    const position = e.clientY < midpoint ? "before" : "after";
+    setOverId(over.id as string);
 
-    setDropTarget({ id: targetObjectId, position });
+    // Calculate drop position
+    const activeIndex = sortedObjects.findIndex((obj) => obj.id === active.id);
+    const overIndex = sortedObjects.findIndex((obj) => obj.id === over.id);
+
+    if (activeIndex !== -1 && overIndex !== -1) {
+      setDropPosition(activeIndex < overIndex ? "after" : "before");
+    }
   };
 
-  const handleDrop = (e: React.DragEvent, targetObjectId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    if (!dropTarget || !draggedObjectId) return;
+    setActiveId(null);
+    setOverId(null);
+    setDropPosition(null);
 
-    const draggedObject = sortedObjects.find(
-      (obj) => obj.id === draggedObjectId
-    );
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const draggedObject = sortedObjects.find((obj) => obj.id === active.id);
     if (!draggedObject) return;
 
     // Remove the dragged object from the list
     const remainingObjects = sortedObjects.filter(
-      (obj) => obj.id !== draggedObjectId
+      (obj) => obj.id !== active.id
     );
 
     // Find the target index
-    const targetIndex = remainingObjects.findIndex(
-      (obj) => obj.id === targetObjectId
-    );
+    const targetIndex = remainingObjects.findIndex((obj) => obj.id === over.id);
     if (targetIndex === -1) return;
 
-    // Calculate insert position
-    const insertIndex =
-      dropTarget.position === "after" ? targetIndex + 1 : targetIndex;
+    // Calculate insert position based on original indices
+    const activeIndex = sortedObjects.findIndex((obj) => obj.id === active.id);
+    const overIndex = sortedObjects.findIndex((obj) => obj.id === over.id);
+    const insertIndex = activeIndex < overIndex ? targetIndex + 1 : targetIndex;
 
     // Insert the dragged object at the new position
     const newOrder = [
@@ -139,42 +146,91 @@ const DraggableObjectsList = () => {
     ];
 
     reorderObjects(newOrder);
-    setDropTarget(null);
-    setDraggedObjectId(null);
   };
 
   return (
-    <div>
-      {sortedObjects.map((object) => {
-        const isDragging = draggedObjectId === object.id;
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={sortedObjects.map((obj) => obj.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div>
+          {sortedObjects.map((object) => {
+            const isDragging = activeId === object.id;
+            const isDropTarget = overId === object.id && activeId !== object.id;
+            const itemDropPosition = isDropTarget ? dropPosition : null;
 
-        return (
-          <div
-            key={object.id}
-            className={cn("relative", {
-              "opacity-50": isDragging,
-            })}
-            draggable
-            onDragStart={(e) => handleDragStart(e, object.id)}
-            onDragOver={(e) => handleDragOver(e, object.id)}
-            onDrop={(e) => handleDrop(e, object.id)}
-          >
-            {/* Drop indicator - before */}
-            {dropTarget?.id === object.id &&
-              dropTarget.position === "before" && (
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 -translate-y-px z-10" />
-              )}
+            return (
+              <SortableObjectItem
+                key={object.id}
+                object={object}
+                isDragging={isDragging}
+                dropPosition={itemDropPosition}
+              />
+            );
+          })}
+        </div>
+      </SortableContext>
 
-            <EditViewObjectPanelItem object={object} />
+      {createPortal(
+        <DragOverlay dropAnimation={null}>
+          {activeId && activeObject && (
+            <ItemDragOverlay>
+              <div className="flex items-center gap-2 text-white text-xs">
+                {getObjectIcon(activeObject.type)}
+                <span>{getObjectLabel(activeObject)}</span>
+              </div>
+            </ItemDragOverlay>
+          )}
+        </DragOverlay>,
+        document.body
+      )}
+    </DndContext>
+  );
+};
 
-            {/* Drop indicator - after */}
-            {dropTarget?.id === object.id &&
-              dropTarget.position === "after" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 translate-y-px z-10" />
-              )}
-          </div>
-        );
+interface SortableObjectItemProps {
+  object: SlideObject;
+  isDragging: boolean;
+  dropPosition: "before" | "after" | null;
+}
+
+const SortableObjectItem = ({
+  object,
+  isDragging,
+  dropPosition,
+}: SortableObjectItemProps) => {
+  const { attributes, listeners, setNodeRef } = useSortable({
+    id: object.id,
+  });
+
+  // Don't apply transform - we only want indicators, not shifting items
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn("relative", {
+        "opacity-50": isDragging,
       })}
+      {...attributes}
+      {...listeners}
+    >
+      {/* Drop indicator - before */}
+      {dropPosition === "before" && (
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-selected -translate-y-px z-10" />
+      )}
+
+      <EditViewObjectPanelItem object={object} />
+
+      {/* Drop indicator - after */}
+      {dropPosition === "after" && (
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-selected translate-y-px z-10" />
+      )}
     </div>
   );
 };

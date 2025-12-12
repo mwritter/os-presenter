@@ -7,7 +7,7 @@ import {
   useSelectionStore,
   useSidebarSelectionStore,
 } from "@/stores/presenterStore";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useRef } from "react";
 import { useItemPanelContext } from "../context";
 
 interface ItemPanelPlaylistContextType {
@@ -16,16 +16,14 @@ interface ItemPanelPlaylistContextType {
   selectedIds: string[];
   selectedItem: PlaylistItem | undefined;
   isMultiSelectMode: boolean;
-  draggedItemId: string | null;
   handleDelete: () => void;
   handleReorder: (
     draggedItemIds: string | string[],
-    targetItemId: string,
-    position: "before" | "after"
+    targetItemId: string | null,
+    position: "before" | "after" | "end"
   ) => void;
   handleClick: (itemId: string, e: React.MouseEvent) => void;
   isSelected: (id: string) => boolean;
-  setDraggedItemId: (id: string | null) => void;
 }
 
 const ItemPanelPlaylistContext = createContext<
@@ -49,7 +47,6 @@ export const ItemPanelPlaylistProvider = ({
   const clearPlaylistItemSelection = useSelectionStore(
     (s) => s.clearPlaylistItemSelection
   );
-  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const clearSidebarSelection = useSidebarSelectionStore(
     (s) => s.sidebarClearSelection
   );
@@ -86,7 +83,6 @@ export const ItemPanelPlaylistProvider = ({
     if (isMultiSelectMode) {
       return isSidebarSelected(id);
     }
-    // When not in multi-select mode, show the active playlist item as selected
     return id === selectedPlaylistItemId;
   };
 
@@ -95,7 +91,6 @@ export const ItemPanelPlaylistProvider = ({
     if (!selectedPlaylist) return;
 
     selectedIds.forEach((id) => {
-      // Clear selection if this item is currently selected
       if (selectedPlaylistItemId === id) {
         clearPlaylistItemSelection();
       }
@@ -110,7 +105,6 @@ export const ItemPanelPlaylistProvider = ({
     if (e.shiftKey || e.metaKey || e.ctrlKey) {
       handleItemClick(itemId, e);
     } else {
-      // Clear multi-selection and do normal select
       handleItemClick(itemId, e);
       selectPlaylistItem(itemId, selectedPlaylist!.id);
     }
@@ -129,14 +123,14 @@ export const ItemPanelPlaylistProvider = ({
         selectedIds,
         selectedItem,
         isMultiSelectMode,
-        draggedItemId,
         isSelected,
         handleDelete,
         handleClick,
-        setDraggedItemId,
       }}
     >
-      <div ref={containerRef}>{children}</div>
+      <div ref={containerRef} className="flex flex-col flex-1">
+        {children}
+      </div>
     </ItemPanelPlaylistContext>
   );
 };

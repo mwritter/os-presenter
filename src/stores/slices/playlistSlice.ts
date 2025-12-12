@@ -54,7 +54,7 @@ export interface PlaylistSlice {
     sourceItemId: string,
     targetItemId: string,
     slideIds: string[],
-    insertAfterSlideId?: string
+    insertAtIndex?: number // Index to insert at (0 = beginning, undefined = end)
   ) => void;
 
   // Persistence
@@ -366,7 +366,7 @@ export const createPlaylistSlice: StateCreator<
     sourceItemId,
     targetItemId,
     slideIds,
-    insertAfterSlideId
+    insertAtIndex
   ) => {
     const playlist = get().playlists.find((pl) => pl.id === playlistId);
     if (!playlist) return;
@@ -387,15 +387,11 @@ export const createPlaylistSlice: StateCreator<
     );
 
     // Calculate insert position in target
-    let insertIndex = targetItem.slideGroup.slides.length;
-    if (insertAfterSlideId) {
-      const afterIndex = targetItem.slideGroup.slides.findIndex(
-        (s) => s.id === insertAfterSlideId
-      );
-      if (afterIndex !== -1) {
-        insertIndex = afterIndex + 1;
-      }
-    }
+    // If insertAtIndex is provided, use it; otherwise append to end
+    const insertIndex =
+      insertAtIndex !== undefined
+        ? insertAtIndex
+        : targetItem.slideGroup.slides.length;
 
     // Insert slides into target
     const targetSlides = [

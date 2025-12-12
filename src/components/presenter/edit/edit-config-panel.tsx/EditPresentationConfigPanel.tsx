@@ -3,7 +3,6 @@ import { PresentationSizeSelect } from "./common/presentation/PresentationSizeSe
 import { PresentationTransitionSelect } from "./common/presentation/PresentationTransitionSelect";
 import { PresentationCopyright } from "./common/presentation/PresentationCopyright";
 import { useEditContext } from "@/presenter/edit/context";
-import { useMemo } from "react";
 
 export const EditPresentationConfigPanel = () => {
   const {
@@ -15,7 +14,7 @@ export const EditPresentationConfigPanel = () => {
 
   // Calculate the presentation background value
   // Only show a value if ALL slides have the SAME background color
-  const presentationBackgroundValue = useMemo(() => {
+  const presentationBackgroundValue = (() => {
     if (allSlides.length === 0) return undefined;
 
     // Get all unique background colors (excluding undefined)
@@ -29,7 +28,7 @@ export const EditPresentationConfigPanel = () => {
 
     // If slides have different backgrounds or mix of defined/undefined
     return undefined;
-  }, [allSlides]);
+  })();
 
   return (
     <div className="flex flex-col gap-3">

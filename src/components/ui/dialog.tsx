@@ -30,8 +30,15 @@ function DialogClose({
 
 function DialogOverlay({
   className,
+  onMouseDown,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+  // Prevent window drag when clicking on the overlay (for Tauri drag regions)
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation()
+    onMouseDown?.(e)
+  }
+
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
@@ -39,6 +46,7 @@ function DialogOverlay({
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
         className
       )}
+      onMouseDown={handleMouseDown}
       {...props}
     />
   )

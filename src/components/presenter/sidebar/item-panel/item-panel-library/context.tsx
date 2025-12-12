@@ -1,5 +1,3 @@
-// TODO: move all state up
-
 import { SlideGroup } from "@/components/presenter/types";
 import { useItemReorder } from "@/hooks/use-item-reorder";
 import { useSidebarMultiSelect } from "@/hooks/use-sidebar-multi-select";
@@ -18,16 +16,14 @@ interface ItemPanelLibraryContextType {
   selectedIds: string[];
   selectedSlideGroup: SlideGroup | undefined;
   isMultiSelectMode: boolean;
-  draggedItemId: string | null;
   handleDelete: () => void;
   handleReorder: (
     draggedItemIds: string | string[],
-    targetItemId: string,
-    position: "before" | "after"
+    targetItemId: string | null,
+    position: "before" | "after" | "end"
   ) => void;
   handleClick: (slideGroupId: string, e: React.MouseEvent) => void;
   isSelected: (id: string) => boolean;
-  setDraggedItemId: (id: string | null) => void;
 }
 
 const ItemPanelLibraryContext = createContext<
@@ -56,13 +52,11 @@ export const ItemPanelLibraryProvider = ({
   const [slideGroups, setSlideGroups] = useState<SlideGroup[]>(
     selectedLibrary?.slideGroups ?? []
   );
-  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const clearSidebarSelection = useSidebarSelectionStore(
     (s) => s.sidebarClearSelection
   );
   const { filter } = useItemPanelContext();
 
-  //   TODO: reorder is not working yet
   const { orderedItems, handleReorder } = useItemReorder<SlideGroup>({
     items: selectedLibrary?.slideGroups ?? [],
     onReorder: (slideGroups) => {
@@ -86,7 +80,7 @@ export const ItemPanelLibraryProvider = ({
   } = useSidebarMultiSelect({
     type: "libraryItem",
     items: filteredSlideGroups,
-    containerRef, // Clear selection when clicking outside this container
+    containerRef,
   });
 
   // Combined selection check: sidebar multi-select OR active slide group
@@ -94,7 +88,6 @@ export const ItemPanelLibraryProvider = ({
     if (isMultiSelectMode) {
       return isSidebarSelected(id);
     }
-    // When not in multi-select mode, show the active slide group as selected
     return id === selectedSlideGroupId;
   };
 
@@ -103,7 +96,6 @@ export const ItemPanelLibraryProvider = ({
     if (!selectedLibrary) return;
 
     selectedIds.forEach((id) => {
-      // Clear selection if this slide group is currently selected
       if (selectedSlideGroupId === id) {
         clearSlideGroupSelection();
       }
@@ -118,11 +110,11 @@ export const ItemPanelLibraryProvider = ({
     if (e.shiftKey || e.metaKey || e.ctrlKey) {
       handleItemClick(slideGroupId, e);
     } else {
-      // Clear multi-selection and do normal select
       handleItemClick(slideGroupId, e);
       selectSlideGroup(slideGroupId, selectedLibrary!.id);
     }
   };
+
   const selectedSlideGroup = slideGroups.find(
     (sg) => sg.id === selectedSlideGroupId
   );
@@ -141,13 +133,13 @@ export const ItemPanelLibraryProvider = ({
         selectedIds,
         selectedSlideGroup,
         isMultiSelectMode,
-        draggedItemId,
         handleDelete,
         handleClick,
-        setDraggedItemId,
       }}
     >
-      <div ref={containerRef}>{children}</div>
+      <div ref={containerRef} className="flex flex-col flex-1">
+        {children}
+      </div>
     </ItemPanelLibraryContext>
   );
 };

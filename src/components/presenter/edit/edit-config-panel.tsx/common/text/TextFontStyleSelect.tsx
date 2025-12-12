@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FontVariantOption } from "@/hooks/useSystemFonts";
+import { FontVariantOption } from "@/hooks/use-system-fonts";
 
 export const TextFontStyle = ({
   fontFamily,
