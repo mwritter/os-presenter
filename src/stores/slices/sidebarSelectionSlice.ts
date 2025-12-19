@@ -7,7 +7,8 @@ export type SidebarSelectionType =
   | "library"
   | "playlist"
   | "libraryItem" // SlideGroups in a library
-  | "playlistItem"; // Items in a playlist
+  | "playlistItem" // Items in a playlist
+  | "mediaPlaylist"; // Media playlists in media library
 
 export interface SidebarSelectionSlice {
   // Selection state - keyed by selection type to allow independent selections
@@ -44,6 +45,7 @@ const initialSelectionState = (): Record<SidebarSelectionType, string[]> => ({
   playlist: [],
   libraryItem: [],
   playlistItem: [],
+  mediaPlaylist: [],
 });
 
 const initialAnchorState = (): Record<SidebarSelectionType, string | null> => ({
@@ -51,6 +53,7 @@ const initialAnchorState = (): Record<SidebarSelectionType, string | null> => ({
   playlist: null,
   libraryItem: null,
   playlistItem: null,
+  mediaPlaylist: null,
 });
 
 const initialMultiSelectState = (): Record<SidebarSelectionType, boolean> => ({
@@ -58,6 +61,7 @@ const initialMultiSelectState = (): Record<SidebarSelectionType, boolean> => ({
   playlist: false,
   libraryItem: false,
   playlistItem: false,
+  mediaPlaylist: false,
 });
 
 export const createSidebarSelectionSlice: StateCreator<

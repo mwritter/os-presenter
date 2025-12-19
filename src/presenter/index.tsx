@@ -1,4 +1,3 @@
-import { useSystemFonts } from "@/hooks/useSystemFonts";
 import Show from "./show";
 
 const Presenter = () => {

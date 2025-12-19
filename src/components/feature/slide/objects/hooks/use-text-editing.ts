@@ -68,8 +68,6 @@ export const useTextEditing = ({
       selection?.removeAllRanges();
       selection?.addRange(range);
     }
-    console.log("Loading font variants for Inter");
-    loadFontVariants("Inter");
   }, [isEditing]);
 
   // Exit editing mode when object is deselected

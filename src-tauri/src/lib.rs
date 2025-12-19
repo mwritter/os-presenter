@@ -490,6 +490,19 @@ pub struct MediaItem {
     pub hash: Option<String>, // SHA256 hash for deduplication
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MediaPlaylist {
+    pub id: String,
+    pub name: String,
+    #[serde(rename = "mediaItems")]
+    pub media_items: Vec<MediaItem>,
+    pub order: i32,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: String,
+}
+
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -702,6 +715,27 @@ fn update_media_thumbnail(
     Ok(media_item)
 }
 
+// Media Playlist commands
+#[tauri::command]
+fn load_media_playlists(app: AppHandle) -> Result<Vec<MediaPlaylist>, String> {
+    let playlists_dir = storage::get_media_playlists_dir(&app).map_err(|e| e.message)?;
+    storage::read_all_json_files(&playlists_dir).map_err(|e| e.message)
+}
+
+#[tauri::command]
+fn save_media_playlist(app: AppHandle, playlist: MediaPlaylist) -> Result<(), String> {
+    let playlists_dir = storage::get_media_playlists_dir(&app).map_err(|e| e.message)?;
+    let file_path = playlists_dir.join(format!("{}.json", playlist.id));
+    storage::write_json_file(&file_path, &playlist).map_err(|e| e.message)
+}
+
+#[tauri::command]
+fn delete_media_playlist(app: AppHandle, id: String) -> Result<(), String> {
+    let playlists_dir = storage::get_media_playlists_dir(&app).map_err(|e| e.message)?;
+    let file_path = playlists_dir.join(format!("{}.json", id));
+    storage::delete_file(&file_path).map_err(|e| e.message)
+}
+
 // Audience window commands
 // The audience window is created at app startup (configured in tauri.conf.json)
 // These commands show/hide it rather than creating/destroying it
@@ -839,7 +873,6 @@ fn clear_video_state(app: AppHandle, app_state: State<'_, AppState>) -> Result<(
     // Emit cleared event to presenter so it can clear its local state
     let _ = app.emit_to("main", "video:state-cleared", ());
 
-    println!("Cleared video state");
     Ok(())
 }
 
@@ -928,6 +961,9 @@ pub fn run() {
             get_media_file_path,
             save_video_thumbnail,
             update_media_thumbnail,
+            load_media_playlists,
+            save_media_playlist,
+            delete_media_playlist,
             show_audience_window,
             hide_audience_window,
             is_audience_window_visible,

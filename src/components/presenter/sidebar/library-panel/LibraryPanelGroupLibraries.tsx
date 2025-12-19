@@ -189,7 +189,11 @@ const SortableLibraryItem = ({
           value={renameState.text}
           onChange={onChange}
           onBlur={onBlur}
-          onKeyDown={onKeyDown}
+          onKeyDown={(e) => {
+            // Stop propagation to prevent dnd-kit from capturing space/enter keys
+            e.stopPropagation();
+            onKeyDown(e);
+          }}
         />
       ) : (
         <span className="whitespace-nowrap text-ellipsis overflow-hidden">

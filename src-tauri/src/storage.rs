@@ -72,6 +72,12 @@ pub fn get_media_metadata_dir(app: &AppHandle) -> StorageResult<PathBuf> {
     Ok(app_data.join("media").join("metadata"))
 }
 
+/// Get the media playlists directory path
+pub fn get_media_playlists_dir(app: &AppHandle) -> StorageResult<PathBuf> {
+    let app_data = get_app_data_dir(app)?;
+    Ok(app_data.join("media").join("playlists"))
+}
+
 /// Ensure all required directories exist
 pub fn ensure_directories(app: &AppHandle) -> StorageResult<()> {
     let dirs = vec![
@@ -79,6 +85,7 @@ pub fn ensure_directories(app: &AppHandle) -> StorageResult<()> {
         get_playlists_dir(app)?,
         get_media_files_dir(app)?,
         get_media_metadata_dir(app)?,
+        get_media_playlists_dir(app)?,
     ];
 
     for dir in dirs {

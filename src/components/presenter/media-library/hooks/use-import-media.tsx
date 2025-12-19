@@ -3,7 +3,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { useState } from "react";
 
 export const useImportMedia = () => {
-    const [isImporting, setIsImporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const importMedia = useMediaLibraryStore((state) => state.importMedia);
 
   const handleImport = async () => {
@@ -14,7 +14,19 @@ export const useImportMedia = () => {
         filters: [
           {
             name: "Media Files",
-            extensions: ["jpg", "jpeg", "png", "gif", "webp", "bmp", "mp4", "webm", "mov", "avi", "mkv"],
+            extensions: [
+              "jpg",
+              "jpeg",
+              "png",
+              "gif",
+              "webp",
+              "bmp",
+              "mp4",
+              "webm",
+              "mov",
+              "avi",
+              "mkv",
+            ],
           },
         ],
       });

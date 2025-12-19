@@ -8,6 +8,7 @@ const ALL_SIDEBAR_TYPES: SidebarSelectionType[] = [
   "playlist",
   "libraryItem",
   "playlistItem",
+  "mediaPlaylist",
 ];
 
 interface UseSidebarMultiSelectOptions<T extends { id: string }> {

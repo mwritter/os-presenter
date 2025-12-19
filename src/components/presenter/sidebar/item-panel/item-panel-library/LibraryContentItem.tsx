@@ -39,7 +39,7 @@ export const LibraryContentItem = ({
       onContextMenu={(e) => openContextMenu(e)}
     >
       <div className="flex items-center gap-2">
-        <File className="size-3.5" color="white" />
+        <File className="size-3.5 shrink-0" color="white" />
         <span className="text-white text-xs whitespace-nowrap text-ellipsis overflow-hidden">
           {slideGroup.title}
         </span>

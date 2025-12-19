@@ -5,10 +5,8 @@ import { SidebarProvider } from "@/components/presenter/sidebar/context";
 import { Toolbar } from "@/components/presenter/toolbar/Toolbar";
 import { ContentLayout } from "@/components/presenter/ContentLayout";
 import { ShowViewProvider } from "@/components/presenter/show/context";
-import { useSystemFonts } from "@/hooks/use-system-fonts";
 
 const RootLayout = () => {
-  useSystemFonts();
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
       <PresenterProvider>

@@ -47,6 +47,19 @@
   --color-shade-3: var(--shade-3);
   --color-shade-4: var(--shade-4);
   --color-selected: var(--selected);
+
+  /* Collapsible animations */
+  --animate-collapsible-open: collapsible-open 200ms ease-out;
+  --animate-collapsible-close: collapsible-close 200ms ease-out;
+
+  @keyframes collapsible-open {
+    from { height: 0; }
+    to { height: var(--radix-collapsible-content-height); }
+  }
+  @keyframes collapsible-close {
+    from { height: var(--radix-collapsible-content-height); }
+    to { height: 0; }
+  }
 }
 
 :root {

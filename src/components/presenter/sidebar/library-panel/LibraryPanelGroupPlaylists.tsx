@@ -54,7 +54,7 @@ export const LibraryPanelGroupPlaylists = () => {
       strategy={verticalListSortingStrategy}
     >
       <div ref={containerRef} className="flex flex-col flex-1 relative">
-        <ul className="flex flex-col relative">
+        <ul className="flex flex-col relative mt-2">
           {sortedPlaylists.map((playlist) => {
             const isDragging =
               activeId === playlist.id ||
@@ -190,7 +190,11 @@ const SortablePlaylistItem = ({
           value={renameState.text}
           onChange={onChange}
           onBlur={onBlur}
-          onKeyDown={onKeyDown}
+          onKeyDown={(e) => {
+            // Stop propagation to prevent dnd-kit from capturing space/enter keys
+            e.stopPropagation();
+            onKeyDown(e);
+          }}
         />
       ) : (
         <span className="whitespace-nowrap text-ellipsis overflow-hidden">

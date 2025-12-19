@@ -13,7 +13,7 @@ export const ItemPanel = () => {
     <ItemPanelProvider>
       <div className="flex flex-col h-full">
         <ItemPanelHeader />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 overflow-y-auto">
           <ItemPanelContent />
         </div>
         <ItemPanelFooter />

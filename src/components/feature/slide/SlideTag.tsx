@@ -4,9 +4,11 @@ import { SlideData } from "./types";
 export const SlideTag = ({
   index,
   slide,
+  name,
 }: {
   index: number;
   slide: SlideData;
+  name?: string;
 }) => {
   const videoBackgroundObject = slide.objects?.find(
     (obj) => obj.type === "video" && obj.videoType === "background"
@@ -15,20 +17,23 @@ export const SlideTag = ({
   return videoBackgroundObject ? (
     <SlideTagWithVideoBackground index={index} slide={slide} />
   ) : (
-    <SlideTagBase index={index} />
+    <SlideTagBase index={index} name={name} />
   );
 };
 
 const SlideTagBase = ({
   index,
   children,
+  name,
 }: {
   index: number;
   children?: React.ReactNode;
+  name?: string;
 }) => {
   return (
-    <div className="flex items-center justify-between bg-shade-lighter px-1 w-full h-6">
+    <div className="flex items-center justify-between bg-shade-lighter px-1 w-full h-6 select-none">
       <p className="text-white text-xs">{index + 1}</p>
+      {name && <p className="text-white text-xs">{name}</p>}
       {children}
     </div>
   );

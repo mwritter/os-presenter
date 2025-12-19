@@ -8,7 +8,6 @@ import {
   DragStartEvent,
   DragEndEvent,
   DragOverEvent,
-  DragMoveEvent,
   UniqueIdentifier,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -82,9 +81,8 @@ export const SidebarDndProvider = ({
     null
   );
 
-  // Store refs for multi-select handling and pointer position
+  // Store refs for multi-select handling
   const draggedIdsRef = useRef<string[]>([]);
-  const pointerPositionRef = useRef<{ x: number; y: number } | null>(null);
 
   // Store actions
   const libraries = useLibraryStore((s) => s.libraries);
@@ -124,19 +122,9 @@ export const SidebarDndProvider = ({
     }
   };
 
-  const handleDragMove = (event: DragMoveEvent) => {
-    // Track pointer position for drop position calculation
-    const { activatorEvent } = event;
-    if (activatorEvent instanceof PointerEvent) {
-      pointerPositionRef.current = {
-        x: activatorEvent.clientX,
-        y: activatorEvent.clientY,
-      };
-    }
-  };
-
   const handleDragOver = (event: DragOverEvent) => {
-    const { over } = event;
+    const { over, active } = event;
+    const activeDataCurrent = active.data.current as SidebarDragData | undefined;
 
     if (over) {
       const overDataCurrent = over.data.current as SidebarDragData | undefined;
@@ -152,12 +140,47 @@ export const SidebarDndProvider = ({
       setOverId(over.id);
       setOverData(overDataCurrent ?? null);
 
-      // Calculate drop position based on pointer position relative to element
-      if (over.rect && pointerPositionRef.current) {
-        const midpoint = over.rect.left + over.rect.height / 2;
-        const position: "before" | "after" =
-          pointerPositionRef.current.y < midpoint ? "before" : "after";
-        setDropPosition(position);
+      // Calculate drop position based on relative indices (more reliable than pointer tracking)
+      // If dragging DOWN (activeIndex < overIndex) -> show "after" indicator
+      // If dragging UP (activeIndex > overIndex) -> show "before" indicator
+      const activeType = activeDataCurrent?.type;
+      const overType = overDataCurrent?.type;
+
+      // Only calculate position for same-type reordering
+      if (activeType === overType && activeType) {
+        let items: { id: string }[] = [];
+
+        if (activeType === "playlist") {
+          items = [...playlists].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        } else if (activeType === "libraryItem") {
+          items = [...libraries].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        } else if (activeType === "playlistItem") {
+          // For playlist items, get items from the source playlist
+          const sourcePlaylist = playlists.find(
+            (p) => p.id === activeDataCurrent?.sourceId
+          );
+          if (sourcePlaylist) {
+            items = [...sourcePlaylist.items].sort(
+              (a, b) => (a.order ?? 0) - (b.order ?? 0)
+            );
+          }
+        }
+
+        const activeIndex = items.findIndex((item) => item.id === active.id);
+        const overIndex = items.findIndex((item) => item.id === over.id);
+
+        if (
+          activeIndex !== -1 &&
+          overIndex !== -1 &&
+          activeIndex !== overIndex
+        ) {
+          setDropPosition(activeIndex < overIndex ? "after" : "before");
+        } else {
+          setDropPosition(null);
+        }
+      } else {
+        // Cross-type drops (e.g., library item to playlist)
+        setDropPosition(null);
       }
     } else {
       setOverId(null);
@@ -182,7 +205,6 @@ export const SidebarDndProvider = ({
     setOverData(null);
     setDropPosition(null);
     draggedIdsRef.current = [];
-    pointerPositionRef.current = null;
 
     if (!over || !activeDataCurrent || !overDataCurrent) {
       return;
@@ -786,7 +808,6 @@ export const SidebarDndProvider = ({
         sensors={sensors}
         collisionDetection={pointerWithin}
         onDragStart={handleDragStart}
-        onDragMove={handleDragMove}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
