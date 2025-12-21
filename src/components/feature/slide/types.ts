@@ -104,6 +104,7 @@ export type ShapeObject = BaseSlideObject & {
 export type ImageObject = BaseSlideObject & {
   type: "image";
   src: string;
+  imageType?: "background" | "object"; // 'background' = media library image (non-editable), 'object' = regular editable image
   objectFit?: "cover" | "contain" | "fill";
   // Border around the image bounds
   borderColor?: string;
@@ -135,6 +136,7 @@ export type VideoObject = BaseSlideObject & {
   src: string;
   videoType?: "background" | "object"; // 'background' = controllable media library video, 'object' = auto-play edit view video
   thumbnail?: string; // Thumbnail image for displaying on non-audience surfaces
+  objectFit?: "cover" | "contain" | "fill";
   autoPlay?: boolean;
   loop?: boolean;
   muted?: boolean;

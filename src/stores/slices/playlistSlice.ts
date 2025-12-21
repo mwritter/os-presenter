@@ -56,6 +56,12 @@ export interface PlaylistSlice {
     slideIds: string[],
     insertAtIndex?: number // Index to insert at (0 = beginning, undefined = end)
   ) => void;
+  addSlidesToPlaylistItem: (
+    playlistId: string,
+    itemId: string,
+    slides: SlideData[],
+    insertAtIndex?: number // Index to insert at (undefined = end)
+  ) => void;
 
   // Persistence
   loadPlaylists: () => Promise<void>;
@@ -418,6 +424,43 @@ export const createPlaylistSlice: StateCreator<
           slideGroup: {
             ...i.slideGroup,
             slides: targetSlides,
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      }
+      return i;
+    });
+
+    get().updatePlaylist(playlistId, { items: updatedItems });
+  },
+
+  addSlidesToPlaylistItem: (playlistId, itemId, slides, insertAtIndex) => {
+    const playlist = get().playlists.find((pl) => pl.id === playlistId);
+    if (!playlist) return;
+
+    const item = playlist.items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    // Calculate insert position
+    const insertIndex =
+      insertAtIndex !== undefined
+        ? insertAtIndex
+        : item.slideGroup.slides.length;
+
+    // Insert slides at the specified position
+    const newSlides = [
+      ...item.slideGroup.slides.slice(0, insertIndex),
+      ...slides,
+      ...item.slideGroup.slides.slice(insertIndex),
+    ];
+
+    const updatedItems = playlist.items.map((i) => {
+      if (i.id === itemId) {
+        return {
+          ...i,
+          slideGroup: {
+            ...i.slideGroup,
+            slides: newSlides,
             updatedAt: new Date().toISOString(),
           },
         };

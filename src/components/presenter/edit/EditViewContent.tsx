@@ -4,6 +4,7 @@ import { EditViewObjectActionbar } from "./edit-object-action-bar/EditViewObject
 import { useRef, useState } from "react";
 import { EditConfigPanel } from "./edit-config-panel.tsx/EditConfigPanel";
 import { AnimatePresence, motion } from "framer-motion";
+import { ImageObject, VideoObject } from "@/components/feature/slide/types";
 export const EditViewContent = () => {
   const {
     selectedSlide,
@@ -28,15 +29,22 @@ export const EditViewContent = () => {
 
     console.log("objectId", objectId);
     if (objectId) {
-      // Check if the object is a background video (which should not be selectable)
+      // Check if the object is a background media (which should not be selectable)
       const clickedObject = selectedSlide?.objects?.find(
         (obj) => obj.id === objectId
       );
+      // Don't select background videos
       if (
         clickedObject?.type === "video" &&
-        clickedObject.videoType === "background"
+        (clickedObject as VideoObject).videoType === "background"
       ) {
-        // Don't select background videos
+        return;
+      }
+      // Don't select background images
+      if (
+        clickedObject?.type === "image" &&
+        (clickedObject as ImageObject).imageType === "background"
+      ) {
         return;
       }
       selectObject(objectId);

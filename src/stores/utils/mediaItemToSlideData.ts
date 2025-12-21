@@ -14,11 +14,13 @@ export const mediaItemToSlideData = (mediaItem: MediaItem): SlideData => {
     id: mediaItem.id,
     type: "image",
     src: mediaItem.source,
+    imageType: "background", // Media library images are non-editable backgrounds
     position: { x: 0, y: 0 },
     size: DEFAULT_CANVAS_PRESET.value,
     zIndex: 0,
     rotation: 0,
     objectFit: "contain",
+    isLocked: true, // Background images are locked (not editable in edit view)
   } satisfies ImageObject;
 
   const videoProps = {
@@ -31,6 +33,7 @@ export const mediaItemToSlideData = (mediaItem: MediaItem): SlideData => {
     size: DEFAULT_CANVAS_PRESET.value,
     zIndex: 0,
     rotation: 0,
+    objectFit: "contain", // Preserve aspect ratio without cropping
     autoPlay: true, // All videos auto-play by default
     loop: true, // All videos loop by default
     muted: false, // Background videos should have audio

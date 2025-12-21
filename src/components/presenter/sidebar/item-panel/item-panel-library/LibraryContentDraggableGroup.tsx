@@ -8,14 +8,14 @@ import { useItemPanelLibraryContext } from "./context";
 import { useItemPanelContext } from "../context";
 import { cn } from "@/lib/utils";
 import { SlideGroup } from "@/components/presenter/types";
-import { useSidebarDnd, SidebarDragData } from "../../SidebarDndProvider";
+import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { EndDropZone } from "../../EndDropZone";
 
 export const LibraryContentDraggableGroup = () => {
   const { slideGroups, libraryId, selectedIds, isSelected, isMultiSelectMode } =
     useItemPanelLibraryContext();
   const { filter } = useItemPanelContext();
-  const { activeId, activeData, overId, dropPosition } = useSidebarDnd();
+  const { activeId, activeData, overId, dropPosition } = useAppDnd();
 
   // Disable sorting when filtering
   const isSortingDisabled = !!filter;
@@ -90,7 +90,7 @@ const SortableLibraryItem = ({
   isDragging,
   dropPosition,
 }: SortableLibraryItemProps) => {
-  const dragData: SidebarDragData = {
+  const dragData: AppDragData = {
     type: "libraryItem",
     sourceId: libraryId,
     item: slideGroup,

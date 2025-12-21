@@ -1,5 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
-import { useShowViewDnd, ShowViewDragData } from "./ShowViewDndProvider";
+import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { cn } from "@/lib/utils";
 
 interface SlideGridEndZoneProps {
@@ -17,7 +17,7 @@ export const SlideGridEndZone = ({
   slideCount,
   className,
 }: SlideGridEndZoneProps) => {
-  const { activeData } = useShowViewDnd();
+  const { activeData } = useAppDnd();
 
   // Calculate how many columns to span (remaining cells in the last row)
   // If slides fill the row exactly, span all columns (new row)
@@ -25,7 +25,7 @@ export const SlideGridEndZone = ({
   const columnsToSpan =
     slidesInLastRow === 0 ? totalColumns : totalColumns - slidesInLastRow;
 
-  const dragData: ShowViewDragData = {
+  const dragData: AppDragData = {
     type: "slideGridEndZone",
     playlistId,
     playlistItemId,
@@ -37,11 +37,17 @@ export const SlideGridEndZone = ({
   });
 
   // Accept slides from same playlist (for reorder within same group or move from different group)
-  const isValidDrop =
+  // Also accept media items for cross-component drops
+  const isValidSlideDrop =
     activeData &&
     activeData.type === "slide" &&
     activeData.playlistId === playlistId;
 
+  const isValidMediaDrop =
+    activeData &&
+    activeData.type === "mediaItem";
+
+  const isValidDrop = isValidSlideDrop || isValidMediaDrop;
   const showIndicator = isOver && isValidDrop;
 
   // When empty, span all columns and show a centered indicator

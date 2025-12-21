@@ -63,7 +63,7 @@ export const VideoObject = ({
     isEditable,
   });
 
-  const videoStyle = getVideoStyles({ isEditable });
+  const videoStyle = getVideoStyles({ object: videoObject, isEditable });
   const autoPlay =
     (isAudienceRoute || forceShowVideo) && videoType === "object";
 
@@ -89,10 +89,7 @@ export const VideoObject = ({
         <img
           src={thumbnailSrc}
           alt="Video thumbnail"
-          style={{
-            ...videoStyle,
-            objectFit: "cover",
-          }}
+          style={videoStyle}
         />
       ) : (
         <div

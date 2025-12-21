@@ -22,16 +22,30 @@ import { cn } from "@/lib/utils";
 import { ItemDragOverlay } from "@/components/dnd";
 import { getObjectLabel } from "../utils/getObjectLabel";
 import { getObjectIcon } from "../utils/getObjectIcon";
-import { SlideObject } from "@/components/feature/slide/types";
+import {
+  SlideObject,
+  ImageObject,
+  VideoObject,
+} from "@/components/feature/slide/types";
 
 export const EditSlideObjectPanel = () => {
   const { selectedSlide } = useEditContext();
   const objects = selectedSlide?.objects || [];
 
-  // Filter out background videos for display
+  // Filter out background media (videos and images from media library) for display
   const editableObjects = objects.filter((obj) => {
     // Hide background video objects from the panel
-    if (obj.type === "video" && obj.videoType === "background") {
+    if (
+      obj.type === "video" &&
+      (obj as VideoObject).videoType === "background"
+    ) {
+      return false;
+    }
+    // Hide background image objects from the panel
+    if (
+      obj.type === "image" &&
+      (obj as ImageObject).imageType === "background"
+    ) {
       return false;
     }
     return true;
@@ -73,11 +87,21 @@ const DraggableObjectsList = () => {
     })
   );
 
-  // Create a stable sorted array, filtering out background videos
+  // Create a stable sorted array, filtering out background media
   const sortedObjects = [...objects]
     .filter((obj) => {
       // Hide background video objects from the panel
-      if (obj.type === "video" && obj.videoType === "background") {
+      if (
+        obj.type === "video" &&
+        (obj as VideoObject).videoType === "background"
+      ) {
+        return false;
+      }
+      // Hide background image objects from the panel
+      if (
+        obj.type === "image" &&
+        (obj as ImageObject).imageType === "background"
+      ) {
         return false;
       }
       return true;

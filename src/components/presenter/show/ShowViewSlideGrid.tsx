@@ -4,12 +4,12 @@ import {
   rectSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
 import { Slide } from "@/components/feature/slide/Slide";
 import { SlideData } from "@/components/feature/slide/types";
 import { CanvasSize } from "@/components/presenter/types";
 import { ShowViewEmptyState } from "./ShowViewEmpty";
 import { ShowViewSlideGridHeader } from "./ShowViewSlideGridHeader";
-import { useMediaLibraryStore } from "@/stores/mediaLibraryStore";
 import {
   useSelectionStore,
   useSlideSelectionStore,
@@ -20,8 +20,9 @@ import { useSlideMultiSelect } from "@/hooks/use-slide-multi-select";
 import { useLassoSelect } from "@/hooks/use-lasso-select";
 import { useSlideClipboard } from "@/hooks/use-slide-clipboard";
 import { useSlideContextMenu } from "./hooks/use-slide-context-menu";
-import { useShowViewDnd, ShowViewDragData } from "./ShowViewDndProvider";
+import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { SlideGridEndZone } from "./SlideGridEndZone";
+import { SlideTag } from "@/components/feature/slide/SlideTag";
 
 type ShowViewSlideGridProps = {
   slides: SlideData[];
@@ -54,8 +55,8 @@ export const ShowViewSlideGrid = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const slideRefsMap = useRef<Map<string, HTMLElement>>(new Map());
 
-  // Get drag state from shared context
-  const { activeId, activeData, overId, dropPosition } = useShowViewDnd();
+  // Get drag state from shared context (use app-level for cross-component drops)
+  const { activeId, activeData, overId, dropPosition } = useAppDnd();
 
   // Select this slide group when clicking the container
   const handleContainerClick = () => {
@@ -118,7 +119,14 @@ export const ShowViewSlideGrid = ({
 
   const getDropPosition = (id: string) => {
     if (overId === id && !isDragging(id)) {
-      return dropPosition;
+      // Show drop indicator for slides from same playlist or media items
+      const isValidSlideDrop =
+        activeData?.type === "slide" && activeData?.playlistId === playlistId;
+      const isValidMediaDrop = activeData?.type === "mediaItem";
+
+      if (isValidSlideDrop || isValidMediaDrop) {
+        return dropPosition;
+      }
     }
     return null;
   };
@@ -238,7 +246,7 @@ const SortableSlideItem = ({
   onClick,
   registerRef,
 }: SortableSlideItemProps) => {
-  const dragData: ShowViewDragData = {
+  const dragData: AppDragData = {
     type: "slide",
     playlistId,
     playlistItemId,
@@ -249,15 +257,26 @@ const SortableSlideItem = ({
       : undefined,
   };
 
-  const { attributes, listeners, setNodeRef } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setSortableRef,
+  } = useSortable({
     id: slide.id,
     data: dragData,
     disabled,
   });
 
-  // Combined ref handler
+  // Make this item a droppable for media items
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id: slide.id,
+    data: dragData,
+  });
+
+  // Combined ref handler for sortable, droppable, and lasso selection
   const handleRef = (el: HTMLDivElement | null) => {
-    setNodeRef(el);
+    setSortableRef(el);
+    setDroppableRef(el);
     registerRef(slide.id, el);
   };
 
@@ -300,44 +319,6 @@ const SortableSlideItem = ({
       {dropPosition === "after" && (
         <div className="absolute -right-[10px] top-0 bottom-0 w-1 bg-selected z-10 rounded-full" />
       )}
-    </div>
-  );
-};
-
-const SlideTag = ({
-  index,
-  slide,
-  showSelectionUI,
-}: {
-  index: number;
-  slide: SlideData;
-  showSelectionUI: boolean;
-}) => {
-  const getMediaById = useMediaLibraryStore((s) => s.getMediaById);
-  const videoBackgroundObject = slide.objects?.find(
-    (obj) => obj.type === "video" && obj.videoType === "background"
-  );
-
-  let mediaName = null;
-
-  if (videoBackgroundObject) {
-    const mediaItem = getMediaById(videoBackgroundObject.id);
-    mediaName = mediaItem?.name;
-    const extension = mediaItem?.source.split(".").pop();
-    if (extension) {
-      mediaName = mediaName + "." + extension;
-    }
-  }
-
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-between px-1 w-full transition-colors",
-        showSelectionUI ? "bg-selected/30" : "bg-shade-lighter"
-      )}
-    >
-      <p className="text-white text-xs">{index + 1}</p>
-      {mediaName && <p className="text-white text-xs">{mediaName}</p>}
     </div>
   );
 };

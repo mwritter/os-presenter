@@ -3,6 +3,7 @@ import {
   verticalListSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
 import {
   useSelectionStore,
   usePlaylistStore,
@@ -11,7 +12,7 @@ import {
 import { useRef } from "react";
 import { PlaylistIcon } from "../../../icons/PlaylistIcon";
 import { useSidebarMultiSelect } from "@/hooks/use-sidebar-multi-select";
-import { useSidebarDnd, SidebarDragData } from "../SidebarDndProvider";
+import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { EndDropZone } from "../EndDropZone";
 import { Playlist } from "@/components/presenter/types";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,7 @@ export const LibraryPanelGroupPlaylists = () => {
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const { activeId, activeData, overId, dropPosition } = useSidebarDnd();
+  const { activeId, activeData, overId, dropPosition } = useAppDnd();
 
   const sortedPlaylists = [...playlists].sort(
     (a, b) => (a.order ?? 0) - (b.order ?? 0)
@@ -68,10 +69,11 @@ export const LibraryPanelGroupPlaylists = () => {
                 ? dropPosition
                 : null;
 
-            // Show external drop highlight when library items or playlist items are dragged over
+            // Show external drop highlight when library items, playlist items, or media items are dragged over
             const showExternalDropHighlight =
               overId === playlist.id &&
               (activeData?.type === "libraryItem" ||
+                activeData?.type === "mediaItem" ||
                 (activeData?.type === "playlistItem" &&
                   activeData?.sourceId !== playlist.id));
 
@@ -135,17 +137,29 @@ const SortablePlaylistItem = ({
 }: SortablePlaylistItemProps) => {
   const itemInputRef = useRef<HTMLInputElement>(null);
 
-  const dragData: SidebarDragData = {
+  const dragData: AppDragData = {
     type: "playlist",
     sourceId: playlist.id,
     item: playlist,
     selectedIds: selectedIds.includes(playlist.id) ? selectedIds : undefined,
   };
 
-  const { attributes, listeners, setNodeRef } = useSortable({
+  const { attributes, listeners, setNodeRef: setSortableRef } = useSortable({
     id: playlist.id,
     data: dragData,
   });
+
+  // Make this item a droppable for media items
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id: playlist.id,
+    data: dragData,
+  });
+
+  // Combined ref handler
+  const handleRef = (el: HTMLLIElement | null) => {
+    setSortableRef(el);
+    setDroppableRef(el);
+  };
 
   const { renameState, onBlur, onKeyDown, onChange, setRenameState } =
     useRenameState({
@@ -164,7 +178,7 @@ const SortablePlaylistItem = ({
 
   return (
     <li
-      ref={setNodeRef}
+      ref={handleRef}
       className={cn(
         "flex items-center gap-2 pl-5 pr-1 py-1 text-white text-xs transition-colors ghost-no-bg ghost-no-ring relative",
         {

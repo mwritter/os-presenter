@@ -155,8 +155,6 @@ pub struct Effect {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TextObject {
     pub id: String,
-    #[serde(rename = "type")]
-    pub object_type: String, // "text"
     pub position: Position,
     pub size: Size,
     pub rotation: Option<f64>,
@@ -166,6 +164,8 @@ pub struct TextObject {
     pub scale_y: Option<f64>,
     #[serde(rename = "zIndex")]
     pub z_index: i32,
+    #[serde(rename = "isLocked", skip_serializing_if = "Option::is_none")]
+    pub is_locked: Option<bool>, // Hard lock - prevents all editing
     pub content: String,
     #[serde(rename = "fontSize")]
     pub font_size: f64,
@@ -207,8 +207,6 @@ pub struct TextObject {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ShapeObject {
     pub id: String,
-    #[serde(rename = "type")]
-    pub object_type: String, // "shape"
     pub position: Position,
     pub size: Size,
     pub rotation: Option<f64>,
@@ -218,6 +216,8 @@ pub struct ShapeObject {
     pub scale_y: Option<f64>,
     #[serde(rename = "zIndex")]
     pub z_index: i32,
+    #[serde(rename = "isLocked", skip_serializing_if = "Option::is_none")]
+    pub is_locked: Option<bool>, // Hard lock - prevents all editing
     #[serde(rename = "shapeType")]
     pub shape_type: String, // "rectangle" | "circle" | "triangle"
     #[serde(rename = "fillColor")]
@@ -263,8 +263,6 @@ pub struct ShapeObject {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImageObject {
     pub id: String,
-    #[serde(rename = "type")]
-    pub object_type: String, // "image"
     pub position: Position,
     pub size: Size,
     pub rotation: Option<f64>,
@@ -274,7 +272,11 @@ pub struct ImageObject {
     pub scale_y: Option<f64>,
     #[serde(rename = "zIndex")]
     pub z_index: i32,
+    #[serde(rename = "isLocked", skip_serializing_if = "Option::is_none")]
+    pub is_locked: Option<bool>, // Hard lock - prevents all editing
     pub src: String,
+    #[serde(rename = "imageType", skip_serializing_if = "Option::is_none")]
+    pub image_type: Option<String>, // "background" | "object"
     #[serde(rename = "objectFit", skip_serializing_if = "Option::is_none")]
     pub object_fit: Option<String>, // "cover" | "contain" | "fill"
     // Border around the image bounds
@@ -319,8 +321,6 @@ pub struct ImageObject {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct VideoObject {
     pub id: String,
-    #[serde(rename = "type")]
-    pub object_type: String, // "video"
     pub position: Position,
     pub size: Size,
     pub rotation: Option<f64>,
@@ -330,6 +330,8 @@ pub struct VideoObject {
     pub scale_y: Option<f64>,
     #[serde(rename = "zIndex")]
     pub z_index: i32,
+    #[serde(rename = "isLocked", skip_serializing_if = "Option::is_none")]
+    pub is_locked: Option<bool>, // Hard lock - prevents all editing
     pub src: String,
     #[serde(rename = "videoType")]
     pub video_type: Option<String>, // "background" | "object"
@@ -378,14 +380,18 @@ pub struct VideoObject {
     pub text_shadow: Option<ShadowEffect>,
 }
 
-// Union type for slide objects (using untagged enum)
-// Order matters: Video first to ensure proper deserialization
+// Union type for slide objects (using internally tagged enum)
+// The "type" field determines which variant to deserialize as
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(untagged)]
+#[serde(tag = "type")]
 pub enum SlideObject {
+    #[serde(rename = "video")]
     Video(VideoObject),
+    #[serde(rename = "image")]
     Image(ImageObject),
+    #[serde(rename = "text")]
     Text(TextObject),
+    #[serde(rename = "shape")]
     Shape(ShapeObject),
 }
 

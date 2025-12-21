@@ -31,7 +31,11 @@ export const Slide = ({
 }: SlideProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
-  const { scale, isReady } = useSlideScale({ canvasSize, containerRef });
+  const { scale, isReady } = useSlideScale({
+    canvasSize,
+    containerRef,
+    useCache: true,
+  });
   const [isMoveableInteracting, setIsMoveableInteracting] = useState(false);
 
   const handleMoveableInteractionChange = (isInteracting: boolean) => {

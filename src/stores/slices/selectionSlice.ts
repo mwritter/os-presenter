@@ -88,7 +88,7 @@ export const createSelectionSlice: StateCreator<
     slideData,
     canvasSize = { width: 1920, height: 1080 }
   ) => {
-    // Migration: Add videoType to video objects that don't have it (for backwards compatibility)
+    // Migration: Add videoType/imageType to objects that don't have it (for backwards compatibility)
     const migratedData = {
       ...slideData,
       objects: slideData.objects?.map((obj) => {
@@ -96,6 +96,8 @@ export const createSelectionSlice: StateCreator<
           // Default to 'background' for videos without videoType (from media library)
           return { ...obj, videoType: "background" as const };
         }
+        // Note: Images default to 'object' type (editable) unless explicitly set as 'background'
+        // so we don't need to migrate old images - they remain editable
         return obj;
       }),
     };

@@ -11,7 +11,7 @@ import {
 } from "@/stores/presenterStore";
 import { useRef } from "react";
 import { LibraryIcon } from "../../../icons/LibraryIcon";
-import { useSidebarDnd, SidebarDragData } from "../SidebarDndProvider";
+import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { EndDropZone } from "../EndDropZone";
 import { Library } from "@/components/presenter/types";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ export const LibraryPanelGroupLibraries = () => {
   );
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { activeId, activeData, overId, dropPosition } = useSidebarDnd();
+  const { activeId, activeData, overId, dropPosition } = useAppDnd();
 
   const sortedLibraries = [...libraries].sort(
     (a, b) => (a.order ?? 0) - (b.order ?? 0)
@@ -134,7 +134,7 @@ const SortableLibraryItem = ({
 }: SortableLibraryItemProps) => {
   const itemInputRef = useRef<HTMLInputElement>(null);
 
-  const dragData: SidebarDragData = {
+  const dragData: AppDragData = {
     type: "library",
     sourceId: library.id,
     item: library,

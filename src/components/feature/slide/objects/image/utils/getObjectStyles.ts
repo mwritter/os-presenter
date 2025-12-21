@@ -9,7 +9,7 @@ export const getObjectStyles = ({
   return {
     width: "100%",
     height: "100%",
-    objectFit: (object.objectFit as any) || "cover",
+    objectFit: object.objectFit ?? "contain",
     pointerEvents: "none",
   };
 };

@@ -11,7 +11,7 @@ import { confirm } from "@tauri-apps/plugin-dialog";
 import { useContextMenu } from "./hooks/use-content-item-context-menu";
 import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
-import { MediaLibraryDragData } from "./MediaLibraryDndProvider";
+import { AppDragData } from "@/components/dnd/AppDndProvider";
 import { SlideTag } from "@/components/feature/slide/SlideTag";
 
 export type MediaLibraryItemProps = {
@@ -52,9 +52,10 @@ export const MediaLibraryItem = ({
   // Show multi-select UI when in multi-select mode AND this item is selected
   const showMultiSelectUI = isMultiSelectMode && isSelected;
 
-  const dragData: MediaLibraryDragData = {
+  const dragData: AppDragData = {
     type: "mediaItem",
-    playlistId,
+    sourceId: playlistId,
+    mediaPlaylistId: playlistId,
     mediaItem,
     selectedIds: selectedIds.includes(mediaItem.id) ? selectedIds : undefined,
   };
@@ -100,7 +101,7 @@ export const MediaLibraryItem = ({
       data-media-item
       onClick={onClick}
       onContextMenu={(e) => openContextMenu(e)}
-      className={cn("flex flex-col cursor-pointer h-min shrink-0 relative", {
+      className={cn("cursor-pointer h-min shrink-0 relative", {
         "opacity-50": isDragging,
       })}
       style={{ flexBasis: "clamp(200px, calc((100% - 5rem) / 4), 300px)" }}
@@ -124,6 +125,7 @@ export const MediaLibraryItem = ({
           index={index}
           slide={mediaItemToSlideData(mediaItem)}
           name={mediaItem.name}
+          showSelectionUI={showMultiSelectUI}
         />
       </div>
       <div

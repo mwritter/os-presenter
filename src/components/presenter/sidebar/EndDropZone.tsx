@@ -1,16 +1,12 @@
 import { useDroppable } from "@dnd-kit/core";
-import {
-  useSidebarDnd,
-  SidebarDragData,
-  SidebarDragType,
-} from "./SidebarDndProvider";
+import { useAppDnd, AppDragData, AppDragType } from "@/components/dnd/AppDndProvider";
 import { cn } from "@/lib/utils";
 
 interface EndDropZoneProps {
   zoneId: string;
   zoneType: "library" | "playlist" | "libraryItem" | "playlistItem";
   sourceId: string; // The container ID for item types
-  acceptTypes: SidebarDragType[]; // Which drag types this zone accepts
+  acceptTypes: AppDragType[]; // Which drag types this zone accepts
   className?: string;
 }
 
@@ -21,12 +17,11 @@ export const EndDropZone = ({
   acceptTypes,
   className,
 }: EndDropZoneProps) => {
-  const { activeData } = useSidebarDnd();
+  const { activeData } = useAppDnd();
 
-  const dragData: SidebarDragData = {
+  const dragData: AppDragData = {
     type: "endZone",
     sourceId,
-    item: {} as any, // End zones don't represent an item
     zoneType,
   };
 

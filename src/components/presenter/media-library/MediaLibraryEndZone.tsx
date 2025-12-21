@@ -1,8 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
-import {
-  useMediaLibraryDnd,
-  MediaLibraryDragData,
-} from "./MediaLibraryDndProvider";
+import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { cn } from "@/lib/utils";
 
 interface MediaLibraryEndZoneProps {
@@ -14,11 +11,12 @@ export const MediaLibraryEndZone = ({
   playlistId,
   className,
 }: MediaLibraryEndZoneProps) => {
-  const { activeData } = useMediaLibraryDnd();
+  const { activeData } = useAppDnd();
 
-  const dragData: MediaLibraryDragData = {
+  const dragData: AppDragData = {
     type: "mediaEndZone",
-    playlistId,
+    sourceId: playlistId,
+    mediaPlaylistId: playlistId,
   };
 
   const { setNodeRef, isOver } = useDroppable({
@@ -30,7 +28,8 @@ export const MediaLibraryEndZone = ({
   const isValidDrop =
     activeData &&
     activeData.type === "mediaItem" &&
-    activeData.playlistId === playlistId;
+    (activeData.mediaPlaylistId === playlistId ||
+      activeData.sourceId === playlistId);
 
   const showIndicator = isOver && isValidDrop;
 
