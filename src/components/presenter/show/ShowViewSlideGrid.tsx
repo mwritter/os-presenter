@@ -295,12 +295,15 @@ const SortableSlideItem = ({
       )}
 
       <div
-        className={cn("overflow-hidden transition-all duration-75", {
-          "ring-2 ring-amber-400": isActive,
-          "ring-2 ring-blue-500": showSelectionUI && !isActive,
-          "hover:ring-2 hover:ring-white/30": !showSelectionUI && !isActive,
-          "opacity-50": isDragging,
-        })}
+        className={cn(
+          "overflow-hidden transition-all duration-75 relative pb-5",
+          {
+            "ring-2 ring-amber-400": isActive,
+            "ring-2 ring-blue-500": showSelectionUI && !isActive,
+            "hover:ring-2 hover:ring-white/30": !showSelectionUI && !isActive,
+            "opacity-50": isDragging,
+          }
+        )}
       >
         <Slide
           id={slide.id}

@@ -37,13 +37,15 @@ export const SlideTag = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-1 w-full transition-colors",
+        "absolute bottom-0 left-0 right-0 flex items-center px-1 transition-colors gap-2",
         showSelectionUI ? "bg-selected/30" : "bg-shade-lighter"
       )}
     >
-      <p className="text-white text-xs">{index + 1}</p>
+      <p className="text-white text-xs shrink-0">{index + 1}</p>
       {mediaName && (
-        <span className="text-white text-xs truncate ">{mediaName}</span>
+        <span className="text-white text-xs truncate min-w-0 text-right flex-1">
+          {mediaName}
+        </span>
       )}
     </div>
   );

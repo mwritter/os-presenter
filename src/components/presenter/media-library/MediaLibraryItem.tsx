@@ -114,7 +114,7 @@ export const MediaLibraryItem = ({
       )}
 
       <div
-        className={cn("overflow-hidden transition-all duration-75", {
+        className={cn("overflow-hidden transition-all duration-75 relative pb-5", {
           "ring-2 ring-amber-400": isActive && !showMultiSelectUI,
           "ring-2 ring-blue-500": showMultiSelectUI,
           "hover:ring-2 hover:ring-white/30": !isSelected && !isActive,
