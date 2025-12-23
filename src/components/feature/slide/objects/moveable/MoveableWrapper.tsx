@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import Moveable, {
   OnDrag,
   OnDragEnd,
@@ -32,8 +32,26 @@ export const MoveableWrapper = ({
   const moveableRef = useRef<Moveable>(null);
   const targetElementRef = useRef<HTMLElement | null>(null);
   const isInteractingRef = useRef(false);
+  const [isShiftHeld, setIsShiftHeld] = useState(false);
   // Scale the snap threshold to maintain consistent behavior at different zoom levels
   const scaledSnapThreshold = 50 * scale;
+
+  // Track shift key for aspect ratio lock during resize
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setIsShiftHeld(true);
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setIsShiftHeld(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
 
   // Update moveable when object changes
   useEffect(() => {
@@ -187,8 +205,9 @@ export const MoveableWrapper = ({
     });
   };
 
-  // Image and video objects should maintain aspect ratio when resizing
-  const shouldKeepRatio = object.type === "image" || object.type === "video";
+  // Keep aspect ratio for images/videos, or when shift is held
+  const shouldKeepRatio =
+    object.type === "image" || object.type === "video" || isShiftHeld;
 
   return (
     <Moveable
@@ -228,7 +247,7 @@ export const MoveableWrapper = ({
       edge={false}
       throttleDrag={0}
       throttleResize={0}
-      throttleRotate={0}
+      throttleRotate={isShiftHeld ? 15 : 0}
       keepRatio={shouldKeepRatio}
       renderDirections={["nw", "n", "ne", "w", "e", "sw", "s", "se"]}
       rotationPosition="top"

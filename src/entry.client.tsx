@@ -11,6 +11,22 @@ import "./styles/index.css";
 
 console.log("Entry client loaded");
 
+// Prevent backspace from navigating back (desktop app behavior)
+// Allow backspace in editable elements (inputs, textareas, contenteditable)
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Backspace") {
+    const target = e.target as HTMLElement;
+    const isEditable =
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.isContentEditable;
+
+    if (!isEditable) {
+      e.preventDefault();
+    }
+  }
+});
+
 function StorageGuard({ children }: { children: React.ReactNode }) {
   const { isInitialized, isLoading, error } = useStorageInit();
 

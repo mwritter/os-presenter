@@ -1,7 +1,7 @@
 import { useEditContext } from "@/presenter/edit/context";
 import { Slide } from "@/components/feature/slide/Slide";
 import { EditViewObjectActionbar } from "./edit-object-action-bar/EditViewObjectActionbar";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EditConfigPanel } from "./edit-config-panel.tsx/EditConfigPanel";
 import { AnimatePresence, motion } from "framer-motion";
 import { ImageObject, VideoObject } from "@/components/feature/slide/types";
@@ -13,6 +13,7 @@ export const EditViewContent = () => {
     selectObject,
     updateObject,
     canvasSize,
+    deleteObject,
   } = useEditContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isMoveableInteracting, setIsMoveableInteracting] = useState(false);
@@ -67,6 +68,20 @@ export const EditViewContent = () => {
       selectObject(null);
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        selectObject(null);
+      } else if (e.key === "Delete" || e.key === "Backspace") {
+        if (selectedObjectId) {
+          deleteObject(selectedObjectId);
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [selectedObjectId]);
 
   return (
     <div className="grid grid-cols-[1fr_300px] h-full w-full bg-shade-lighter">
