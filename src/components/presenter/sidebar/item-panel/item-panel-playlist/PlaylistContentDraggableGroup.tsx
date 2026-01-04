@@ -4,13 +4,15 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
-import { PlaylistContentItem } from "./PlaylistContentItem";
 import { useItemPanelPlaylistContext } from "./context";
 import { useItemPanelContext } from "../context";
 import { cn } from "@/lib/utils";
 import { PlaylistItem } from "@/components/presenter/types";
 import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { MediaItemDropZone } from "./MediaItemDropZone";
+import { File } from "lucide-react";
+import { usePlaylistItemContextMenu } from "../hooks/use-playlist-item-context-menu";
+import { SidebarItem } from "../../common/SidebarItem";
 
 export const PlaylistContentDraggableGroup = () => {
   const {
@@ -116,7 +118,11 @@ const SortablePlaylistItem = ({
       : undefined,
   };
 
-  const { attributes, listeners, setNodeRef: setSortableRef } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setSortableRef,
+  } = useSortable({
     id: playlistItem.id,
     data: dragData,
   });
@@ -125,6 +131,12 @@ const SortablePlaylistItem = ({
   const { setNodeRef: setDroppableRef } = useDroppable({
     id: playlistItem.id,
     data: dragData,
+  });
+
+  const { openContextMenu } = usePlaylistItemContextMenu({
+    onRemove: onDelete,
+    id: playlistItem.id,
+    selectedCount: selectedIds.length,
   });
 
   // Combined ref handler
@@ -144,17 +156,14 @@ const SortablePlaylistItem = ({
       })}
       {...attributes}
       {...listeners}
+      onClick={(e) => onClick(playlistItem.id, e)}
+      onContextMenu={openContextMenu}
     >
       {/* Drop indicator line - before */}
       {dropPosition === "before" && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-selected -translate-y-px z-10" />
       )}
-
-      <PlaylistContentItem
-        item={playlistItem}
-        onClick={onClick}
-        onDelete={onDelete}
-      />
+      <SidebarItem icon={<File />}>{playlistItem.slideGroup.title}</SidebarItem>
 
       {/* Drop indicator line - after */}
       {dropPosition === "after" && (

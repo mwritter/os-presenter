@@ -3,13 +3,16 @@ import {
   verticalListSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
-import { LibraryContentItem } from "./LibraryContentItem";
 import { useItemPanelLibraryContext } from "./context";
 import { useItemPanelContext } from "../context";
 import { cn } from "@/lib/utils";
 import { SlideGroup } from "@/components/presenter/types";
 import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { EndDropZone } from "../../EndDropZone";
+import { usePlaylistStore, useSelectedLibrary } from "@/stores/presenterStore";
+import { useContextMenu } from "../hooks/use-context-menu";
+import { File } from "lucide-react";
+import { SidebarItem } from "../../common/SidebarItem";
 
 export const LibraryContentDraggableGroup = () => {
   const { slideGroups, libraryId, selectedIds, isSelected, isMultiSelectMode } =
@@ -102,6 +105,27 @@ const SortableLibraryItem = ({
     data: dragData,
   });
 
+  const { handleDelete, handleClick } = useItemPanelLibraryContext();
+  const selectedLibrary = useSelectedLibrary();
+  const playlists = usePlaylistStore((s) => s.playlists);
+
+  const addSlideGroupToPlaylist = usePlaylistStore(
+    (s) => s.addSlideGroupToPlaylist
+  );
+
+  const handleAddToPlaylist = (playlistId: string) => {
+    if (!selectedLibrary || !slideGroup) return;
+    addSlideGroupToPlaylist(playlistId, selectedLibrary.id, slideGroup.id);
+  };
+
+  const { openContextMenu } = useContextMenu({
+    onDelete: handleDelete,
+    onAddToPlaylist: handleAddToPlaylist,
+    id: slideGroup.id,
+    playlists: playlists,
+    selectedCount: selectedIds.length,
+  });
+
   return (
     <li
       ref={setNodeRef}
@@ -113,13 +137,15 @@ const SortableLibraryItem = ({
       })}
       {...attributes}
       {...listeners}
+      onClick={(e) => handleClick(slideGroup.id, e)}
+      onContextMenu={openContextMenu}
     >
       {/* Drop indicator line - before */}
       {dropPosition === "before" && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-selected -translate-y-px z-10" />
       )}
 
-      <LibraryContentItem slideGroup={slideGroup} />
+      <SidebarItem icon={<File />}>{slideGroup.title}</SidebarItem>
 
       {/* Drop indicator line - after */}
       {dropPosition === "after" && (

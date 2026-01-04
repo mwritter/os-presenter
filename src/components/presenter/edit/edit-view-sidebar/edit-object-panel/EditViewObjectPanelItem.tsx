@@ -2,8 +2,8 @@ import { SlideObject } from "@/components/feature/slide/types";
 import { cn } from "@/lib/utils";
 import { useEditContext } from "@/presenter/edit/context";
 import { Trash2, Lock, Unlock } from "lucide-react";
-import { getObjectIcon } from "../utils/getObjectIcon";
-import { getObjectLabel } from "../utils/getObjectLabel";
+import { getObjectIcon } from "@/components/presenter/edit/utils/getObjectIcon";
+import { getObjectLabel } from "@/components/presenter/edit/utils/getObjectLabel";
 
 export const EditViewObjectPanelItem = ({
   object,

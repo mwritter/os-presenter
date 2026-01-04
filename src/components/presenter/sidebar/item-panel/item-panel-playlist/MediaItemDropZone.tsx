@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 interface MediaItemDropZoneProps {
   playlistId: string;
-  isMediaItemDrag: boolean;
   className?: string;
 }
 
@@ -50,4 +49,3 @@ export const MediaItemDropZone = ({
     />
   );
 };
-

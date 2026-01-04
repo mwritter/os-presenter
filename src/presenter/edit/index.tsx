@@ -1,4 +1,4 @@
-import { EditViewSidebar } from "@/components/presenter/edit/EditViewSidebar";
+import { EditViewSidebar } from "@/components/presenter/edit/edit-view-sidebar/EditViewSidebar";
 import {
   ResizableHandle,
   ResizablePanel,

@@ -17,6 +17,7 @@ import { Library } from "@/components/presenter/types";
 import { cn } from "@/lib/utils";
 import { useRenameState } from "./hooks/use-rename-state";
 import { useContextMenu } from "./hooks/use-context-menu";
+import { SidebarItem } from "../common/SidebarItem";
 
 export const LibraryPanelGroupLibraries = () => {
   const libraries = useLibraryStore((s) => s.libraries);
@@ -165,7 +166,7 @@ const SortableLibraryItem = ({
     <li
       ref={setNodeRef}
       className={cn(
-        "flex items-center gap-2 pl-5 pr-1 py-1 text-white text-xs transition-colors ghost-no-bg ghost-no-ring relative",
+        "flex items-center gap-1.5 pl-5 pr-1 text-white text-xs transition-colors ghost-no-bg ghost-no-ring relative",
         {
           "bg-white/20 ring-1 ring-white/40": isSelected && !isMultiSelected,
           "bg-blue-600": isMultiSelected || showExternalDropHighlight,
@@ -180,26 +181,25 @@ const SortableLibraryItem = ({
       {dropPosition === "before" && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-selected -translate-y-px z-10" />
       )}
-      <LibraryIcon />
-      {renameState.mode === "edit" ? (
-        <input
-          ref={itemInputRef}
-          className="border w-full bg-black"
-          type="text"
-          value={renameState.text}
-          onChange={onChange}
-          onBlur={onBlur}
-          onKeyDown={(e) => {
-            // Stop propagation to prevent dnd-kit from capturing space/enter keys
-            e.stopPropagation();
-            onKeyDown(e);
-          }}
-        />
-      ) : (
-        <span className="whitespace-nowrap text-ellipsis overflow-hidden">
-          {library.name}
-        </span>
-      )}
+      <SidebarItem icon={<LibraryIcon />}>
+        {renameState.mode === "edit" ? (
+          <input
+            ref={itemInputRef}
+            className="border w-full bg-black"
+            type="text"
+            value={renameState.text}
+            onChange={onChange}
+            onBlur={onBlur}
+            onKeyDown={(e) => {
+              // Stop propagation to prevent dnd-kit from capturing space/enter keys
+              e.stopPropagation();
+              onKeyDown(e);
+            }}
+          />
+        ) : (
+          library.name
+        )}
+      </SidebarItem>
       {dropPosition === "after" && (
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-selected translate-y-px z-10" />
       )}

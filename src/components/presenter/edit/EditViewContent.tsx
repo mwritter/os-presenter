@@ -2,7 +2,7 @@ import { useEditContext } from "@/presenter/edit/context";
 import { Slide } from "@/components/feature/slide/Slide";
 import { EditViewObjectActionbar } from "./edit-object-action-bar/EditViewObjectActionbar";
 import { useEffect, useRef, useState } from "react";
-import { EditConfigPanel } from "./edit-config-panel.tsx/EditConfigPanel";
+import { EditConfigPanel } from "./edit-config-panel/EditConfigPanel";
 import { AnimatePresence, motion } from "framer-motion";
 import { ImageObject, VideoObject } from "@/components/feature/slide/types";
 export const EditViewContent = () => {

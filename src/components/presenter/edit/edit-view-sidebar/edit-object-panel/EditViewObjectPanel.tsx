@@ -20,8 +20,8 @@ import { createPortal } from "react-dom";
 import { EditViewObjectPanelItem } from "./EditViewObjectPanelItem";
 import { cn } from "@/lib/utils";
 import { ItemDragOverlay } from "@/components/dnd";
-import { getObjectLabel } from "../utils/getObjectLabel";
-import { getObjectIcon } from "../utils/getObjectIcon";
+import { getObjectLabel } from "@/components/presenter/edit/utils/getObjectLabel";
+import { getObjectIcon } from "@/components/presenter/edit/utils/getObjectIcon";
 import {
   SlideObject,
   ImageObject,

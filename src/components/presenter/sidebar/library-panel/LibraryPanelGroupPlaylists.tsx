@@ -18,6 +18,7 @@ import { Playlist } from "@/components/presenter/types";
 import { cn } from "@/lib/utils";
 import { useRenameState } from "./hooks/use-rename-state";
 import { useContextMenu } from "./hooks/use-context-menu";
+import { SidebarItem } from "../common/SidebarItem";
 
 export const LibraryPanelGroupPlaylists = () => {
   const playlists = usePlaylistStore((s) => s.playlists);
@@ -144,7 +145,11 @@ const SortablePlaylistItem = ({
     selectedIds: selectedIds.includes(playlist.id) ? selectedIds : undefined,
   };
 
-  const { attributes, listeners, setNodeRef: setSortableRef } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setSortableRef,
+  } = useSortable({
     id: playlist.id,
     data: dragData,
   });
@@ -180,7 +185,7 @@ const SortablePlaylistItem = ({
     <li
       ref={handleRef}
       className={cn(
-        "flex items-center gap-2 pl-5 pr-1 py-1 text-white text-xs transition-colors ghost-no-bg ghost-no-ring relative",
+        "flex items-center gap-1.5 pl-5 pr-1 text-white text-xs transition-colors ghost-no-bg ghost-no-ring relative",
         {
           "bg-white/20 ring-1 ring-white/40": isSelected && !isMultiSelected,
           "bg-blue-600": isMultiSelected || showExternalDropHighlight,
@@ -195,26 +200,26 @@ const SortablePlaylistItem = ({
       {dropPosition === "before" && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-selected -translate-y-px z-10" />
       )}
-      <PlaylistIcon />
-      {renameState.mode === "edit" ? (
-        <input
-          ref={itemInputRef}
-          className="border w-full bg-black"
-          type="text"
-          value={renameState.text}
-          onChange={onChange}
-          onBlur={onBlur}
-          onKeyDown={(e) => {
-            // Stop propagation to prevent dnd-kit from capturing space/enter keys
-            e.stopPropagation();
-            onKeyDown(e);
-          }}
-        />
-      ) : (
-        <span className="whitespace-nowrap text-ellipsis overflow-hidden">
-          {playlist.name}
-        </span>
-      )}
+      <SidebarItem icon={<PlaylistIcon />}>
+        {renameState.mode === "edit" ? (
+          <input
+            ref={itemInputRef}
+            className="border w-full bg-black"
+            type="text"
+            value={renameState.text}
+            onChange={onChange}
+            onBlur={onBlur}
+            onKeyDown={(e) => {
+              // Stop propagation to prevent dnd-kit from capturing space/enter keys
+              e.stopPropagation();
+              onKeyDown(e);
+            }}
+          />
+        ) : (
+          playlist.name
+        )}
+      </SidebarItem>
+
       {dropPosition === "after" && (
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-selected translate-y-px z-10" />
       )}
