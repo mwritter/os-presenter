@@ -21,7 +21,10 @@ A powerful, cross-platform presentation software designed for live events, churc
 
 ## Overview
 
-Presenter is a desktop application that enables you to create, manage, and display professional presentations with rich multimedia content. With an intuitive interface and robust feature set, it's designed to handle the demands of live production environments.
+OS Presenter is a desktop application that enables you to create, manage, and display professional presentations with rich multimedia content. With an intuitive interface and robust feature set, it's designed to handle the demands of live production environments.
+
+<img width="2047" height="1262" alt="IMG_20260119_131319" src="https://github.com/user-attachments/assets/0cfaa6c0-f7cb-4ee7-848a-e461e0959d67" />
+
 
 ### Key Features
 
