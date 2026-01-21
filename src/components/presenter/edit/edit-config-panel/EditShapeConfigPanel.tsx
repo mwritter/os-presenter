@@ -5,7 +5,7 @@ import { ShapeSizeInputs } from "./common/shape/ShapeSizeInputs";
 import { ShapeTransformInputs } from "./common/shape/ShapeTransformInputs";
 import { ShapeFill } from "./common/shape/ShapeFill";
 import { ShapeStroke } from "./common/shape/ShapeStroke";
-import { useEditContext } from "@/presenter/edit/context";
+import { useEditContext } from "@/pages/presenter/edit/context";
 import { SlideObject, ShapeObject } from "@/components/feature/slide/types";
 import { Effect as ShapeEffect } from "./common/effects/Effect";
 

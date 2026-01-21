@@ -3,7 +3,7 @@ import { createContext, useContext } from "react";
 import {
   useLibraryStore,
   usePlaylistStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import {
   Library,
   Playlist,

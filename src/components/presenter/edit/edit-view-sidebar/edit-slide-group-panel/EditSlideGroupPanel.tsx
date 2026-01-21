@@ -1,5 +1,5 @@
 import { SlideGroup } from "../../../types";
-import { useEditContext } from "@/presenter/edit/context";
+import { useEditContext } from "@/pages/presenter/edit/context";
 import { EditSideGroupPanelHeader } from "./EditSideGroupPanelHeader";
 import { EditSlideGroupPanelItem } from "./EditSlideGroupPanelItem";
 import {

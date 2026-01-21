@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Box, Minus, Plus } from "lucide-react";
-import { useState, useEffect } from "react";
 import { ColorPicker } from "@/components/feature/color-picker/ColorPicker";
 import { Input } from "@/components/ui/input";
 import { ShadowEffectType } from "./types";
@@ -66,13 +65,6 @@ const ShapeShadowItem = ({
   value: ShadowEffectType;
   onChange: (effect: ShadowEffectType) => void;
 }) => {
-  const [state, setState] = useState<ShadowEffectType>(value);
-
-  // Sync internal state when external value changes (e.g., when selecting a different object)
-  useEffect(() => {
-    setState(value);
-  }, [value]);
-
   return (
     <div className="flex flex-col gap-3 pl-2">
       <div className="flex items-center justify-between gap-2">
@@ -80,11 +72,9 @@ const ShapeShadowItem = ({
           Color
         </Label>
         <ColorPicker
-          value={state.color}
+          value={value.color}
           onChange={(color) => {
-            const newState = { ...state, color };
-            setState(newState);
-            onChange(newState);
+            onChange({ ...value, color });
           }}
         />
       </div>
@@ -99,15 +89,13 @@ const ShapeShadowItem = ({
             step="1"
             min={-100}
             max={100}
-            value={state.offsetX}
+            value={value.offsetX}
             onChange={(e) => {
-              const value = Math.max(
+              const offsetX = Math.max(
                 -100,
                 Math.min(100, Number(e.target.value))
               );
-              const newState = { ...state, offsetX: value };
-              setState(newState);
-              onChange(newState);
+              onChange({ ...value, offsetX });
             }}
           />
         </div>
@@ -121,15 +109,13 @@ const ShapeShadowItem = ({
             step="1"
             min={-100}
             max={100}
-            value={state.offsetY}
+            value={value.offsetY}
             onChange={(e) => {
-              const value = Math.max(
+              const offsetY = Math.max(
                 -100,
                 Math.min(100, Number(e.target.value))
               );
-              const newState = { ...state, offsetY: value };
-              setState(newState);
-              onChange(newState);
+              onChange({ ...value, offsetY });
             }}
           />
         </div>
@@ -144,11 +130,10 @@ const ShapeShadowItem = ({
             type="number"
             step="1"
             min={0}
-            value={state.blurRadius}
+            value={value.blurRadius}
             onChange={(e) => {
-              const newState = { ...state, blurRadius: Number(e.target.value) };
-              setState(newState);
-              onChange(newState);
+              const blurRadius = Number(e.target.value);
+              onChange({ ...value, blurRadius });
             }}
           />
         </div>

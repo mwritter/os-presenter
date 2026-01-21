@@ -6,6 +6,8 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use tauri::menu::{Menu, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder};
+use tauri::webview::WebviewWindowBuilder;
 use tauri::{AppHandle, Emitter, Manager, State};
 use uuid::Uuid;
 
@@ -395,6 +397,14 @@ pub enum SlideObject {
     Shape(ShapeObject),
 }
 
+// Slide tag group for categorizing slides
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SlideTagGroup {
+    pub id: String,
+    pub name: String,
+    pub color: String,
+}
+
 // New SlideData structure
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlideData {
@@ -403,6 +413,8 @@ pub struct SlideData {
     pub objects: Option<Vec<SlideObject>>,
     #[serde(rename = "backgroundColor", skip_serializing_if = "Option::is_none")]
     pub background_color: Option<String>,
+    #[serde(rename = "tagGroup", skip_serializing_if = "Option::is_none")]
+    pub tag_group: Option<SlideTagGroup>,
     // Legacy support (optional, for migration)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<SlideText>,
@@ -507,12 +519,6 @@ pub struct MediaPlaylist {
     pub created_at: String,
     #[serde(rename = "updatedAt")]
     pub updated_at: String,
-}
-
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
 // Initialize storage directories
@@ -742,6 +748,25 @@ fn delete_media_playlist(app: AppHandle, id: String) -> Result<(), String> {
     storage::delete_file(&file_path).map_err(|e| e.message)
 }
 
+// Tag Group commands
+#[tauri::command]
+fn load_tag_groups(app: AppHandle) -> Result<Vec<SlideTagGroup>, String> {
+    let file_path = storage::get_tag_groups_file(&app).map_err(|e| e.message)?;
+
+    // Return empty array if file doesn't exist
+    if !file_path.exists() {
+        return Ok(Vec::new());
+    }
+
+    storage::read_json_file(&file_path).map_err(|e| e.message)
+}
+
+#[tauri::command]
+fn save_tag_groups(app: AppHandle, tag_groups: Vec<SlideTagGroup>) -> Result<(), String> {
+    let file_path = storage::get_tag_groups_file(&app).map_err(|e| e.message)?;
+    storage::write_json_file(&file_path, &tag_groups).map_err(|e| e.message)
+}
+
 // Audience window commands
 // The audience window is created at app startup (configured in tauri.conf.json)
 // These commands show/hide it rather than creating/destroying it
@@ -794,6 +819,39 @@ fn is_audience_window_visible(app: AppHandle) -> Result<bool, String> {
     window
         .is_visible()
         .map_err(|e| format!("Failed to check window visibility: {}", e))
+}
+
+// Settings window commands
+#[tauri::command]
+fn show_settings_window(app: AppHandle) -> Result<(), String> {
+    // Check if window already exists
+    if let Some(window) = app.get_webview_window("settings") {
+        // Window exists, just show and focus it
+        window
+            .show()
+            .map_err(|e| format!("Failed to show settings window: {}", e))?;
+        window
+            .set_focus()
+            .map_err(|e| format!("Failed to focus window: {}", e))?;
+        return Ok(());
+    }
+
+    // Create the window dynamically
+    let window =
+        WebviewWindowBuilder::new(&app, "settings", tauri::WebviewUrl::App("/settings".into()))
+            .title("Settings")
+            .inner_size(700.0, 500.0)
+            .min_inner_size(500.0, 400.0)
+            .resizable(true)
+            .build()
+            .map_err(|e| format!("Failed to create settings window: {}", e))?;
+
+    // Focus the new window
+    window
+        .set_focus()
+        .map_err(|e| format!("Failed to focus window: {}", e))?;
+
+    Ok(())
 }
 
 // ===== Video Sync Commands =====
@@ -951,9 +1009,83 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_font_variants::init())
+        .plugin(tauri_plugin_process::init())
+        .setup(|app| {
+            // Create Settings menu item
+            let settings_item = MenuItemBuilder::with_id("settings", "Settings...")
+                .accelerator("CmdOrCtrl+,")
+                .build(app)?;
+
+            // Create app submenu (macOS application menu)
+            let app_submenu = SubmenuBuilder::new(app, "OS Presenter")
+                .item(&PredefinedMenuItem::about(
+                    app,
+                    Some("About OS Presenter"),
+                    None,
+                )?)
+                .separator()
+                .item(&settings_item)
+                .separator()
+                .item(&PredefinedMenuItem::services(app, None)?)
+                .separator()
+                .item(&PredefinedMenuItem::hide(app, Some("Hide OS Presenter"))?)
+                .item(&PredefinedMenuItem::hide_others(app, Some("Hide Others"))?)
+                .item(&PredefinedMenuItem::show_all(app, Some("Show All"))?)
+                .separator()
+                .item(&PredefinedMenuItem::quit(app, Some("Quit OS Presenter"))?)
+                .build()?;
+
+            // Create Edit submenu
+            let edit_submenu = SubmenuBuilder::new(app, "Edit")
+                .item(&PredefinedMenuItem::undo(app, None)?)
+                .item(&PredefinedMenuItem::redo(app, None)?)
+                .separator()
+                .item(&PredefinedMenuItem::cut(app, None)?)
+                .item(&PredefinedMenuItem::copy(app, None)?)
+                .item(&PredefinedMenuItem::paste(app, None)?)
+                .item(&PredefinedMenuItem::select_all(app, None)?)
+                .build()?;
+
+            // Create Window submenu
+            let window_submenu = SubmenuBuilder::new(app, "Window")
+                .item(&PredefinedMenuItem::minimize(app, None)?)
+                .item(&PredefinedMenuItem::maximize(app, None)?)
+                .separator()
+                .item(&PredefinedMenuItem::close_window(app, None)?)
+                .build()?;
+
+            // Build the menu
+            let menu = Menu::with_items(app, &[&app_submenu, &edit_submenu, &window_submenu])?;
+            app.set_menu(menu)?;
+
+            Ok(())
+        })
+        .on_menu_event(|app, event| {
+            if event.id().as_ref() == "settings" {
+                // Check if window already exists
+                if let Some(window) = app.get_webview_window("settings") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                } else {
+                    // Create the window dynamically
+                    if let Ok(window) = WebviewWindowBuilder::new(
+                        app,
+                        "settings",
+                        tauri::WebviewUrl::App("/settings".into()),
+                    )
+                    .title("Settings")
+                    .inner_size(700.0, 500.0)
+                    .min_inner_size(500.0, 400.0)
+                    .resizable(true)
+                    .build()
+                    {
+                        let _ = window.set_focus();
+                    }
+                }
+            }
+        })
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
-            greet,
             initialize_storage,
             load_libraries,
             save_library,
@@ -970,21 +1102,35 @@ pub fn run() {
             load_media_playlists,
             save_media_playlist,
             delete_media_playlist,
+            load_tag_groups,
+            save_tag_groups,
             show_audience_window,
             hide_audience_window,
             is_audience_window_visible,
             update_video_state,
             clear_video_state,
+            show_settings_window,
             tauri_plugin_font_variants::get_font_families,
             tauri_plugin_font_variants::get_font_variants,
         ])
         .on_window_event(|window, event| {
-            // When the main window is closed, exit the entire application
-            if window.label() == "main" {
-                if let tauri::WindowEvent::CloseRequested { .. } = event {
-                    // Exit the application when main window is closed
-                    std::process::exit(0);
+            match event {
+                tauri::WindowEvent::CloseRequested { api, .. } => {
+                    let label = window.label();
+
+                    // When the main window is closed, exit the entire application
+                    if label == "main" {
+                        std::process::exit(0);
+                    }
+
+                    // For audience window, hide instead of close (it's pre-created)
+                    if label == "audience" {
+                        api.prevent_close();
+                        let _ = window.hide();
+                    }
+                    // Settings window can close normally - it will be recreated when needed
                 }
+                _ => {}
             }
         })
         .run(tauri::generate_context!())

@@ -25,7 +25,7 @@
       },
       {
         "label": "audience",
-        "url": "/audience",
+        "url": "/pages/audience",
         "titleBarStyle": "Overlay",
         "title": "Audience View",
         "visible": false,

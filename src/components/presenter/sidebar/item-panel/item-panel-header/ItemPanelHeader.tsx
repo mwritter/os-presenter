@@ -1,7 +1,7 @@
 import {
   useSelectedPlaylist,
   useSelectedLibrary,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 
 import { ItemPanelPlaylistHeader } from "./ItemPanelPlaylistHeader";
 import { ItemPanelLibraryHeader } from "./ItemPanelLibraryHeader";

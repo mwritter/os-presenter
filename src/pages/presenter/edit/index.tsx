@@ -7,7 +7,7 @@ import {
 import {
   useSelectedPlaylistItemData,
   useSelectedSlideGroupData,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { EditProvider } from "./context";
 import { EditViewContent } from "@/components/presenter/edit/EditViewContent";
 

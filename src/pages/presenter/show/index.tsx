@@ -4,7 +4,7 @@ import { ShowViewEmptyState } from "@/components/presenter/show/ShowViewEmpty";
 import {
   useSelectedPlaylistItemData,
   useSelectedSlideGroupData,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { ShowViewLibraryContent } from "@/components/presenter/show/ShowViewLibraryContent";
 import { ShowViewPlaylistContent } from "@/components/presenter/show/ShowViewPlaylistContent";
 

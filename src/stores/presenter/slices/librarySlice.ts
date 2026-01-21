@@ -2,7 +2,7 @@ import { StateCreator } from "zustand";
 import { Library, SlideGroup } from "@/components/presenter/types";
 import { SlideData } from "@/components/feature/slide/types";
 import * as storage from "@/services/storage";
-import { createDefaultTextObject } from "../utils/createDefaultTextObject";
+import { createDefaultTextObject } from "../../utils/createDefaultTextObject";
 
 export interface LibrarySlice {
   libraries: Library[];

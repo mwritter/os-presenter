@@ -6,7 +6,7 @@ import {
   useSelectedLibrary,
   useSelectionStore,
   useSidebarSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useItemPanelContext } from "../context";
 

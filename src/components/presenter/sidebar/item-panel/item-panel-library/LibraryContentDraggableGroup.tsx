@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { SlideGroup } from "@/components/presenter/types";
 import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { EndDropZone } from "../../EndDropZone";
-import { usePlaylistStore, useSelectedLibrary } from "@/stores/presenterStore";
+import { usePlaylistStore, useSelectedLibrary } from "@/stores/presenter/presenterStore";
 import { useContextMenu } from "../hooks/use-context-menu";
 import { File } from "lucide-react";
 import { SidebarItem } from "../../common/SidebarItem";

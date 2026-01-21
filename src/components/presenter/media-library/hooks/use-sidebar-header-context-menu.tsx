@@ -1,5 +1,5 @@
 import { Menu } from "@tauri-apps/api/menu";
-import { useMediaLibraryStore } from "@/stores/mediaLibraryStore";
+import { useMediaLibraryStore } from "@/stores/presenter/mediaLibraryStore";
 
 export const useSidebarHeaderContextMenu = () => {
   const createPlaylist = useMediaLibraryStore((state) => state.createPlaylist);

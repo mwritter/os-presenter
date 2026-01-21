@@ -2,7 +2,7 @@ import { SlideData } from "@/components/feature/slide/types";
 import {
   useSlideSelectionStore,
   useSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { CanvasSize } from "@/components/presenter/types";
 
 interface UseSlideMultiSelectOptions {

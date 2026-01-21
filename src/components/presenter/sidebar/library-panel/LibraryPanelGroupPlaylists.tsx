@@ -8,7 +8,7 @@ import {
   useSelectionStore,
   usePlaylistStore,
   useSidebarSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { useRef } from "react";
 import { PlaylistIcon } from "../../../icons/PlaylistIcon";
 import { useSidebarMultiSelect } from "@/hooks/use-sidebar-multi-select";

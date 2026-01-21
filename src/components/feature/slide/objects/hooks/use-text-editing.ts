@@ -1,7 +1,6 @@
 import { CSSProperties, useEffect, useRef, useState } from "react";
-import { useEditContextSafe } from "@/presenter/edit/context";
+import { useEditContextSafe } from "@/pages/presenter/edit/context";
 import { TextAlignment, ShadowEffect } from "@/components/feature/slide/types";
-import { loadFontVariants } from "@/hooks/use-system-fonts";
 
 // Helper function to convert ShadowEffect to CSS text-shadow
 const getTextShadowStyle = (shadow?: ShadowEffect): string => {

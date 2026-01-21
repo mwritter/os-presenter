@@ -1,9 +1,9 @@
 import { useAudienceSync } from "@/hooks/use-audience-sync";
-import { AudienceSlide } from "../components/audiance/slide/AudienceSlide";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FadeAnimationDuration, useHideShow } from "./hooks/use-hide-show";
+import { AudienceSlide } from "@/components/audiance/slide/AudienceSlide";
 
 const AudienceView = () => {
   const { activeSlide } = useAudienceSync();

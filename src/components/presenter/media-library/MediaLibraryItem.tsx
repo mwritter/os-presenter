@@ -4,15 +4,15 @@ import {
   selectSelectedMediaId,
   selectSelectedPlaylistId,
   useMediaLibraryStore,
-} from "@/stores/mediaLibraryStore";
+} from "@/stores/presenter/mediaLibraryStore";
 import { mediaItemToSlideData } from "@/stores/utils/mediaItemToSlideData";
-import { usePlaylistStore } from "@/stores/presenterStore";
+import { usePlaylistStore } from "@/stores/presenter/presenterStore";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { useContextMenu } from "./hooks/use-content-item-context-menu";
 import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { AppDragData } from "@/components/dnd/AppDndProvider";
-import { SlideTag } from "@/components/feature/slide/SlideTag";
+import { SlideTag } from "@/components/feature/slide/slide-tag/SlideTag";
 
 export type MediaLibraryItemProps = {
   index: number;
@@ -114,18 +114,21 @@ export const MediaLibraryItem = ({
       )}
 
       <div
-        className={cn("overflow-hidden transition-all duration-75 relative pb-5", {
-          "ring-2 ring-amber-400": isActive && !showMultiSelectUI,
-          "ring-2 ring-blue-500": showMultiSelectUI,
-          "hover:ring-2 hover:ring-white/30": !isSelected && !isActive,
-        })}
+        className={cn(
+          "overflow-hidden transition-all duration-75 relative pb-5",
+          {
+            "ring-2 ring-amber-400": isActive && !showMultiSelectUI,
+            "ring-2 ring-blue-500": showMultiSelectUI,
+            "hover:ring-2 hover:ring-white/30": !isSelected && !isActive,
+          }
+        )}
       >
         <Slide id={mediaItem.id} data={mediaItemToSlideData(mediaItem)} />
         <SlideTag
           index={index}
           slide={mediaItemToSlideData(mediaItem)}
           name={mediaItem.name}
-          showSelectionUI={showMultiSelectUI}
+          showTagGroupName={false}
         />
       </div>
       <div

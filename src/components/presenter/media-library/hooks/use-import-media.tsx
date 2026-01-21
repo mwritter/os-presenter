@@ -1,4 +1,4 @@
-import { useMediaLibraryStore } from "@/stores/mediaLibraryStore";
+import { useMediaLibraryStore } from "@/stores/presenter/mediaLibraryStore";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useState } from "react";
 

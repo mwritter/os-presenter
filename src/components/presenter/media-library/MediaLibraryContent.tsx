@@ -3,7 +3,7 @@ import {
   selectSelectedPlaylist,
   selectSelectedPlaylistId,
   useMediaLibraryStore,
-} from "@/stores/mediaLibraryStore";
+} from "@/stores/presenter/mediaLibraryStore";
 import { MediaLibraryItem } from "./MediaLibraryItem";
 import { MediaLibraryEmpty } from "./MediaLibraryEmpty";
 import { MediaLibraryEndZone } from "./MediaLibraryEndZone";

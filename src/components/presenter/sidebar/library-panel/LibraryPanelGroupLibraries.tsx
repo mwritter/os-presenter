@@ -8,7 +8,7 @@ import {
   useSelectionStore,
   useLibraryStore,
   useSidebarSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { useRef } from "react";
 import { LibraryIcon } from "../../../icons/LibraryIcon";
 import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";

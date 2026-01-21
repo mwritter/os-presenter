@@ -2,10 +2,10 @@ import { StateCreator } from "zustand";
 import { Playlist, SlideGroup } from "@/components/presenter/types";
 import { SlideData } from "@/components/feature/slide/types";
 import * as storage from "@/services/storage";
-import { createDefaultTextObject } from "../utils/createDefaultTextObject";
+import { createDefaultTextObject } from "@/stores/utils/createDefaultTextObject";
 import { LibrarySlice } from "./librarySlice";
-import { MediaItem } from "../mediaLibraryStore";
-import { mediaItemToSlideGroup } from "../utils/mediaItemToSlideGroup";
+import { MediaItem } from "@/stores/presenter/mediaLibraryStore";
+import { mediaItemToSlideGroup } from "@/stores/utils/mediaItemToSlideGroup";
 
 export interface PlaylistSlice {
   playlists: Playlist[];

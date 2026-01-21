@@ -13,7 +13,7 @@ import {
   usePlaylistStore,
   usePresenterStore,
   useSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { SearchIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SlideGroup } from "../../types";

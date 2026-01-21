@@ -1,4 +1,4 @@
-import { useEditContext } from "@/presenter/edit/context";
+import { useEditContext } from "@/pages/presenter/edit/context";
 import { EditConfigPanelSlideTabs } from "./common/tabs/EditConfigPanelSlideTabs";
 import { EditConfigPanelPresentationTabs } from "./common/tabs/EditConfigPanelPresentationTabs";
 

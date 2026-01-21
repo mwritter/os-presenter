@@ -31,9 +31,10 @@ export const BackgroundColorPicker = ({
   };
 
   const handleColorChange = (newColor: string) => {
-    setColor(newColor);
     if (hasBackground) {
       onChange(newColor);
+    } else {
+      setColor(newColor);
     }
   };
 

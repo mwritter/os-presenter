@@ -2,7 +2,7 @@ import {
   type MediaPlaylist,
   selectSelectedPlaylist,
   useMediaLibraryStore,
-} from "@/stores/mediaLibraryStore";
+} from "@/stores/presenter/mediaLibraryStore";
 import { createContext, ReactNode, useContext } from "react";
 
 interface MediaLibrarySidebarContextType {

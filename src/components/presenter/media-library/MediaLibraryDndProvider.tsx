@@ -4,7 +4,7 @@ import {
   MediaItem,
   selectSelectedPlaylist,
   useMediaLibraryStore,
-} from "@/stores/mediaLibraryStore";
+} from "@/stores/presenter/mediaLibraryStore";
 import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 
 export type MediaLibraryDragType = "mediaItem" | "mediaEndZone";

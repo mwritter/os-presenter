@@ -71,17 +71,15 @@ const ShapeStrokeItem = ({
           step="1"
           value={strokeWidth}
           onChange={(e) => {
-            const number = Number(e.target.value);
-            if (number < 1) return;
-            onChange({ strokeColor: strokeColor, strokeWidth: number });
+            const width = Number(e.target.value);
+            if (width < 1) return;
+            onChange({ strokeColor, strokeWidth: width });
           }}
         />
       </div>
       <ColorPicker
         value={strokeColor}
-        onChange={(color) =>
-          onChange({ strokeColor: color, strokeWidth: strokeWidth })
-        }
+        onChange={(color) => onChange({ strokeColor: color, strokeWidth })}
       />
     </div>
   );

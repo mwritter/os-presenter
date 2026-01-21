@@ -187,18 +187,21 @@ export const usePresenterStore = create<PresenterStore>()((set, get, api) => {
           playlist: [],
           libraryItem: [],
           playlistItem: [],
+          mediaPlaylist: [],
         },
         sidebarAnchorId: {
           library: null,
           playlist: null,
           libraryItem: null,
           playlistItem: null,
+          mediaPlaylist: null,
         },
         sidebarIsMultiSelectMode: {
           library: false,
           playlist: false,
           libraryItem: false,
           playlistItem: false,
+          mediaPlaylist: false,
         },
       });
     },

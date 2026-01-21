@@ -1,4 +1,4 @@
-import { useMediaLibraryStore } from "@/stores/mediaLibraryStore";
+import { useMediaLibraryStore } from "@/stores/presenter/mediaLibraryStore";
 
 /**
  * Hook to get the thumbnail for a video object by looking up the media library
@@ -12,7 +12,7 @@ export const useVideoThumbnail = (
   videoSrc: string,
   existingThumbnail?: string
 ): string | undefined => {
-  const mediaItems = useMediaLibraryStore((state) => state.mediaItems);
+  const getMediaById = useMediaLibraryStore((state) => state.getMediaById);
 
   // If thumbnail is already set, use it
   if (existingThumbnail) {
@@ -25,7 +25,7 @@ export const useVideoThumbnail = (
   const mediaId = filename.split(".")[0]; // Get the part before the extension
 
   // Look up the media item in the library
-  const mediaItem = mediaItems.find((item) => item.id === mediaId);
+  const mediaItem = getMediaById(mediaId);
 
   // Return the thumbnail if found
   return mediaItem?.thumbnail;

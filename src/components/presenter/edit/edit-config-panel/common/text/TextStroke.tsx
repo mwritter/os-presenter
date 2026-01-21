@@ -65,9 +65,7 @@ const TextStrokeItem = ({
         </Label>
         <ColorPicker
           value={strokeColor}
-          onChange={(color) =>
-            onChange({ strokeColor: color, strokeWidth: strokeWidth })
-          }
+          onChange={(color) => onChange({ strokeColor: color, strokeWidth })}
         />
       </div>
       <div className="flex items-center justify-between gap-2">
@@ -82,7 +80,7 @@ const TextStrokeItem = ({
           value={strokeWidth}
           onChange={(e) =>
             onChange({
-              strokeColor: strokeColor,
+              strokeColor,
               strokeWidth: Number(e.target.value),
             })
           }

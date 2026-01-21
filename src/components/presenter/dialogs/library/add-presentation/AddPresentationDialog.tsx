@@ -10,7 +10,7 @@ import {
 import {
   useSelectedLibrary,
   useLibraryStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { useEffect, useState } from "react";
 import { CanvasSize } from "../../../types";
 import { AddPresentationForm } from "./AddPresentationForm";

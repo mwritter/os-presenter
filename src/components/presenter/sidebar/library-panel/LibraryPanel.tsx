@@ -1,4 +1,4 @@
-import { useLibraryStore, usePlaylistStore } from "@/stores/presenterStore";
+import { useLibraryStore, usePlaylistStore } from "@/stores/presenter/presenterStore";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePresenterContext } from "@/context/presenter";

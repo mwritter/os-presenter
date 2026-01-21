@@ -1,4 +1,4 @@
-import { useSelectedPlaylist } from "@/stores/presenterStore";
+import { useSelectedPlaylist } from "@/stores/presenter/presenterStore";
 import { usePlaylistHeaderContextMenu } from "../hooks/use-playlist-header-context-menu";
 import { ItemPanelHeaderBase } from "./ItemPanelHeaderBase";
 

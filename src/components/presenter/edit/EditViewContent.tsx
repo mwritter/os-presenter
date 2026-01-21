@@ -1,4 +1,4 @@
-import { useEditContext } from "@/presenter/edit/context";
+import { useEditContext } from "@/pages/presenter/edit/context";
 import { Slide } from "@/components/feature/slide/Slide";
 import { EditViewObjectActionbar } from "./edit-object-action-bar/EditViewObjectActionbar";
 import { useEffect, useRef, useState } from "react";

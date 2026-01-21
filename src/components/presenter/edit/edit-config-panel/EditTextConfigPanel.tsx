@@ -6,7 +6,7 @@ import { TextCapitalizationSelect } from "./common/text/TextCapitalizationSelect
 import { TextColorPicker } from "./common/text/TextColorPicker";
 import { TextAlignment } from "./common/text/TextAlignment";
 import { TextStroke } from "./common/text/TextStroke";
-import { useEditContext } from "@/presenter/edit/context";
+import { useEditContext } from "@/pages/presenter/edit/context";
 import {
   TextObject,
   TextAlignment as TextAlignmentType,

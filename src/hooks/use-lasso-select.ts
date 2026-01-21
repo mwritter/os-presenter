@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useSlideSelectionStore } from "@/stores/presenterStore";
+import { useSlideSelectionStore } from "@/stores/presenter/presenterStore";
 
 interface LassoRect {
   startX: number;

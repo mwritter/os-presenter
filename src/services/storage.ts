@@ -1,7 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { Library, Playlist } from "@/components/presenter/types";
-import { MediaItem, MediaPlaylist } from "@/stores/mediaLibraryStore";
+import { MediaItem, MediaPlaylist } from "@/stores/presenter/mediaLibraryStore";
+import { SlideTagGroup } from "@/components/feature/slide/slide-tag/types";
 
 /**
  * Initialize storage directories
@@ -358,5 +359,32 @@ export async function deleteMediaPlaylist(id: string): Promise<void> {
   } catch (error) {
     console.error("Failed to delete media playlist:", error);
     throw new Error(`Failed to delete media playlist: ${error}`);
+  }
+}
+
+// Tag Group operations
+
+/**
+ * Load all tag groups from disk
+ */
+export async function loadTagGroups(): Promise<SlideTagGroup[]> {
+  try {
+    const tagGroups = await invoke<SlideTagGroup[]>("load_tag_groups");
+    return tagGroups;
+  } catch (error) {
+    console.error("Failed to load tag groups:", error);
+    throw new Error(`Failed to load tag groups: ${error}`);
+  }
+}
+
+/**
+ * Save all tag groups to disk
+ */
+export async function saveTagGroups(tagGroups: SlideTagGroup[]): Promise<void> {
+  try {
+    await invoke("save_tag_groups", { tagGroups });
+  } catch (error) {
+    console.error("Failed to save tag groups:", error);
+    throw new Error(`Failed to save tag groups: ${error}`);
   }
 }

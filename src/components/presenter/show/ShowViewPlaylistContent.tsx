@@ -7,7 +7,7 @@ import {
   usePlaylistStore,
   useSelectionStore,
   useSelectedPlaylistItemPlaylist,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { useShowViewSpacer } from "./hooks/use-show-view-spacer";
 import { useSmartScroll } from "./hooks/use-smart-scroll";
 

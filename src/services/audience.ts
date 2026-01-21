@@ -1,6 +1,6 @@
 import { emit, listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import { Events } from "@/audience/consts";
+import { Events } from "@/pages/audience/consts";
 
 /**
  * Shows the audience window by emitting a show event

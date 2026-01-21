@@ -3,7 +3,7 @@ import { useMediaLibrarySidebarContext } from "./context";
 import {
   MediaLibrarySidebarPlaylistItem,
   useMediaLibraryStore,
-} from "@/stores/mediaLibraryStore";
+} from "@/stores/presenter/mediaLibraryStore";
 import { File } from "lucide-react";
 import { useSidebarPlaylistContextMenu } from "../hooks/use-sidebar-playlist-context-menu";
 import { useRef } from "react";

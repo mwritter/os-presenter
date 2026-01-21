@@ -3,7 +3,7 @@ import { ItemPanelFooter } from "./ItemPanelFooter";
 import {
   useSelectedPlaylist,
   useSelectedLibrary,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { ItemPanelProvider } from "./context";
 import { ItemPanelLibraryContent } from "./item-panel-library/ItemPanelLibraryContent";
 import { ItemPanelPlaylistContent } from "./item-panel-playlist/ItemPanelPlaylistContent";

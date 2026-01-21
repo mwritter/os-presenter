@@ -1,5 +1,5 @@
 import { Circle, Shapes, Square, Triangle } from "lucide-react";
-import { useEditContext } from "@/presenter/edit/context";
+import { useEditContext } from "@/pages/presenter/edit/context";
 import { EditViewObjectActionbarButton } from "./EditViewObjectActionbarButton";
 import {
   Popover,

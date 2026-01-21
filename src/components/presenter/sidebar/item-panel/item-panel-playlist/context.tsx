@@ -6,7 +6,7 @@ import {
   useSelectedPlaylist,
   useSelectionStore,
   useSidebarSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { createContext, useContext, useRef } from "react";
 import { useItemPanelContext } from "../context";
 

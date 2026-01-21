@@ -2,15 +2,11 @@ import { BackgroundColorPicker } from "./common/BackgroundColorPicker";
 import { PresentationSizeSelect } from "./common/presentation/PresentationSizeSelect";
 import { PresentationTransitionSelect } from "./common/presentation/PresentationTransitionSelect";
 import { PresentationCopyright } from "./common/presentation/PresentationCopyright";
-import { useEditContext } from "@/presenter/edit/context";
+import { useEditContext } from "@/pages/presenter/edit/context";
 
 export const EditPresentationConfigPanel = () => {
-  const {
-    allSlides,
-    updateAllSlidesBackground,
-    canvasSize,
-    updateCanvasSize,
-  } = useEditContext();
+  const { allSlides, updateAllSlidesBackground, canvasSize, updateCanvasSize } =
+    useEditContext();
 
   // Calculate the presentation background value
   // Only show a value if ALL slides have the SAME background color

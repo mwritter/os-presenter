@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { MediaItem, useMediaLibraryStore } from "@/stores/mediaLibraryStore";
+import { MediaItem, useMediaLibraryStore } from "@/stores/presenter/mediaLibraryStore";
 
 interface UseMediaMultiSelectOptions {
   mediaItems: MediaItem[];

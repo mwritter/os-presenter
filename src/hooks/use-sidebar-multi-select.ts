@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useSidebarSelectionStore } from "@/stores/presenterStore";
-import { SidebarSelectionType } from "@/stores/slices/sidebarSelectionSlice";
+import { useSidebarSelectionStore } from "@/stores/presenter/presenterStore";
+import { SidebarSelectionType } from "@/stores/presenter/slices/sidebarSelectionSlice";
 
 // All sidebar selection types for clearing other types
 const ALL_SIDEBAR_TYPES: SidebarSelectionType[] = [

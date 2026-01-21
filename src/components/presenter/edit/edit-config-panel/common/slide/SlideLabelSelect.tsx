@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// TODO: every slide can have a 'label' to indicate the type of slide it is - this is not implemented yet
+// Label (not implemented yet) is not the same as slide tag group
 export const SlideLabelSelect = () => {
   return (
     <div className="flex gap-2 items-end justify-between">

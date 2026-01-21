@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CANVAS_PRESETS, DEFAULT_CANVAS_PRESET} from "@/consts/canvas";
-import { useLibraryStore, useSelectedLibrary } from "@/stores/presenterStore";
+import { useLibraryStore, useSelectedLibrary } from "@/stores/presenter/presenterStore";
 import { useState } from "react";
 
 interface AddPresentationFormProps {

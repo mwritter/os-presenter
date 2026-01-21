@@ -6,8 +6,8 @@ import {
   useSelectionStore,
   useLibraryStore,
   usePlaylistStore,
-} from "@/stores/presenterStore";
-import { useEditContext } from "@/presenter/edit/context";
+} from "@/stores/presenter/presenterStore";
+import { useEditContext } from "@/pages/presenter/edit/context";
 
 interface EditSlideGroupPanelContextType {
   // Data

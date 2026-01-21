@@ -13,7 +13,7 @@ import {
   useSelectionStore,
   useLibraryStore,
   usePlaylistStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { CanvasSize } from "@/components/presenter/types";
 import { createDefaultTextObject } from "@/stores/utils/createDefaultTextObject";
 

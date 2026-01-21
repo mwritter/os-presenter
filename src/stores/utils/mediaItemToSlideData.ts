@@ -6,7 +6,7 @@ import {
   VideoObject,
 } from "@/components/feature/slide/types";
 import { DEFAULT_CANVAS_PRESET } from "@/consts/canvas";
-import { MediaItem } from "../mediaLibraryStore";
+import { MediaItem } from "../presenter/mediaLibraryStore";
 
 // Currently always show the image or video as Full HD (1920x1080)
 export const mediaItemToSlideData = (mediaItem: MediaItem): SlideData => {

@@ -5,7 +5,7 @@ import {
   MediaPlaylist,
   selectPlaylists,
   useMediaLibraryStore,
-} from "@/stores/mediaLibraryStore";
+} from "@/stores/presenter/mediaLibraryStore";
 import { useSidebarHeaderContextMenu } from "../hooks/use-sidebar-header-context-menu";
 import {
   DndContext,
@@ -28,7 +28,7 @@ import { useItemReorder } from "@/hooks/use-item-reorder";
 import { useSidebarMultiSelect } from "@/hooks/use-sidebar-multi-select";
 import { useRef, useState } from "react";
 import { useMediaLibrarySidebarContext } from "./context";
-import { useSidebarSelectionStore } from "@/stores/presenterStore";
+import { useSidebarSelectionStore } from "@/stores/presenter/presenterStore";
 
 export const MediaLibrarySidebar = () => {
   const mediaPlaylists = useMediaLibraryStore(selectPlaylists);

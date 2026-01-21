@@ -18,13 +18,13 @@ import {
   useLibraryStore,
   usePlaylistStore,
   useSidebarSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import {
   MediaItem,
   selectSelectedPlaylistId,
   selectSelectedPlaylist,
   useMediaLibraryStore,
-} from "@/stores/mediaLibraryStore";
+} from "@/stores/presenter/mediaLibraryStore";
 import {
   Library,
   Playlist,

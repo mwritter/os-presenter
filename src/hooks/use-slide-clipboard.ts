@@ -4,8 +4,8 @@ import {
   useSlideSelectionStore,
   usePresenterStore,
   useSelectionStore,
-} from "@/stores/presenterStore";
-import { SlideClipboard } from "@/stores/slices/slideSelectionSlice";
+} from "@/stores/presenter/presenterStore";
+import { SlideClipboard } from "@/stores/presenter/slices/slideSelectionSlice";
 
 interface UseSlideClipboardOptions {
   slides: SlideData[];

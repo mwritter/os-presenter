@@ -2,7 +2,7 @@
 
 import { SlideGroup } from "@/components/presenter/types";
 import { DEFAULT_CANVAS_PRESET } from "@/consts/canvas";
-import { MediaItem } from "../mediaLibraryStore";
+import { MediaItem } from "../presenter/mediaLibraryStore";
 import { mediaItemToSlideData } from "./mediaItemToSlideData";
 
 export const mediaItemToSlideGroup = (mediaItem: MediaItem): SlideGroup => {

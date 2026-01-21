@@ -1,4 +1,4 @@
-import { useSelectedLibrary } from "@/stores/presenterStore";
+import { useSelectedLibrary } from "@/stores/presenter/presenterStore";
 import { useLibraryHeaderContextMenu } from "../hooks/use-library-header-context-menu";
 import { ItemPanelHeaderBase } from "./ItemPanelHeaderBase";
 import { usePresenterContext } from "@/context/presenter";

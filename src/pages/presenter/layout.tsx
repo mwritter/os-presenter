@@ -5,8 +5,12 @@ import { SidebarProvider } from "@/components/presenter/sidebar/context";
 import { Toolbar } from "@/components/presenter/toolbar/Toolbar";
 import { ContentLayout } from "@/components/presenter/ContentLayout";
 import { ShowViewProvider } from "@/components/presenter/show/context";
+import { useSettingsSync } from "@/hooks/use-settings-sync";
 
 const RootLayout = () => {
+  // Listen for settings changes from other windows (e.g., settings window)
+  useSettingsSync();
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
       <PresenterProvider>

@@ -1,7 +1,7 @@
 import {
   useSelectedPlaylistItemPlaylist,
   useSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { useEffect } from "react";
 
 export const useSmartScroll = ({

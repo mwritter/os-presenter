@@ -1,9 +1,9 @@
 import { Image as ImageIcon, Video as VideoIcon } from "lucide-react";
-import { useEditContext } from "@/presenter/edit/context";
+import { useEditContext } from "@/pages/presenter/edit/context";
 import { AddShapeActionbarButton } from "./AddShapeActionbarButton";
 import { EditViewObjectActionbarButton } from "./EditViewObjectActionbarButton";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useMediaLibraryStore } from "@/stores/mediaLibraryStore";
+import { useMediaLibraryStore } from "@/stores/presenter/mediaLibraryStore";
 import { useState } from "react";
 
 export const EditViewObjectActionbar = () => {

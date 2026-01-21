@@ -3,8 +3,7 @@ import { useColorPicker } from "../../context";
 import { hsvaToRgba } from "../../utils/colorConversions";
 
 export const ColorWheelBrightnessSlider = () => {
-  const { baseColor, brightness, opacity, setBrightness, setHsva } =
-    useColorPicker();
+  const { baseColor, brightness, setBrightness } = useColorPicker();
 
   return (
     <div className="flex flex-col gap-2">
@@ -21,11 +20,7 @@ export const ColorWheelBrightnessSlider = () => {
         />
         <Slider
           value={[brightness]}
-          onValueChange={(values) => {
-            const newBrightness = values[0];
-            setBrightness(newBrightness);
-            setHsva({ ...baseColor, v: newBrightness, a: opacity });
-          }}
+          onValueChange={(values) => setBrightness(values[0])}
           min={0}
           max={100}
           step={1}

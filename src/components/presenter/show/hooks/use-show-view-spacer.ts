@@ -1,4 +1,4 @@
-import { useSelectedPlaylistItemPlaylist } from "@/stores/presenterStore";
+import { useSelectedPlaylistItemPlaylist } from "@/stores/presenter/presenterStore";
 import { useEffect, useState } from "react";
 
 export const useShowViewSpacer = ({

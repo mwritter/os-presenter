@@ -33,7 +33,7 @@ export const MediaLibrarySidebarGroup = ({
           {hasItems && (
             <>
               <Spacer />
-              {items.map((item) => ({
+              {items.map((_item) => ({
                 /* TODO: Groups can hold items or other groups */
               }))}
             </>

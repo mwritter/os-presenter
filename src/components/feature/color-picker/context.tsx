@@ -4,24 +4,27 @@ import {
   useState,
   useEffect,
   useRef,
+  useMemo,
   ReactNode,
 } from "react";
 import { HsvaColor } from "@uiw/react-color";
 import { hsvaToRgba, rgbaToHsva } from "./utils/colorConversions";
 
 interface ColorPickerContextValue {
-  // Main color state
+  // Computed color (derived from baseColor + brightness + opacity)
   hsva: HsvaColor;
   rgbaColor: string;
-  setHsva: (hsva: HsvaColor) => void;
 
-  // Internal color wheel state (for independent brightness/opacity control)
+  // Source of truth - these are what actually get modified
   baseColor: { h: number; s: number };
   brightness: number;
   opacity: number;
   setBaseColor: (baseColor: { h: number; s: number }) => void;
   setBrightness: (brightness: number) => void;
   setOpacity: (opacity: number) => void;
+
+  // Helper to set full color at once (for swatches)
+  setFullColor: (hsva: HsvaColor) => void;
 }
 
 const ColorPickerContext = createContext<ColorPickerContextValue | undefined>(
@@ -38,7 +41,7 @@ export const useColorPicker = () => {
 
 interface ColorPickerProviderProps {
   children: ReactNode;
-  value?: string; // rgba color value from parent (also supports hex for backward compatibility)
+  value?: string; // rgba color value from parent
   onChange?: (color: string) => void; // returns rgba format
 }
 
@@ -47,70 +50,80 @@ export const ColorPickerProvider = ({
   value: externalValue,
   onChange,
 }: ColorPickerProviderProps) => {
-  // Initialize from external value or default
-  const initialHsva = externalValue
-    ? rgbaToHsva(externalValue)
-    : { h: 0, s: 0, v: 0, a: 1 };
+  // Parse initial value once - this is our starting point
+  const [initialValue] = useState(() =>
+    externalValue ? rgbaToHsva(externalValue) : { h: 0, s: 0, v: 100, a: 1 }
+  );
 
-  const [hsva, setHsva] = useState<HsvaColor>(initialHsva);
-
-  // Track if the change is from external source to prevent infinite loops
-  const isExternalChange = useRef(false);
-
-  // Internal state for color wheel
+  // SOURCE OF TRUTH: These three pieces compose the full color
+  // No syncing from external - we own this state after mount
   const [baseColor, setBaseColor] = useState({
-    h: initialHsva.h,
-    s: initialHsva.s,
+    h: initialValue.h,
+    s: initialValue.s,
   });
-  const [brightness, setBrightness] = useState(initialHsva.v);
-  const [opacity, setOpacity] = useState(initialHsva.a);
+  const [brightness, setBrightness] = useState(initialValue.v);
+  const [opacity, setOpacity] = useState(initialValue.a);
 
-  // Sync with external value changes
-  useEffect(() => {
-    if (externalValue) {
-      const newHsva = rgbaToHsva(externalValue);
-      isExternalChange.current = true;
-      setHsva(newHsva);
-    }
-  }, [externalValue]);
+  // Track if this is the initial mount
+  const isInitialMount = useRef(true);
 
-  // Sync internal state when hsva changes
+  // Store onChange in ref to avoid stale closures in debounce
+  // const onChangeRef = useRef(onChange);
+  // onChangeRef.current = onChange;
+
+  // Debounce timer ref
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // DERIVED: hsva is computed from the source of truth
+  const hsva = useMemo<HsvaColor>(
+    () => ({ h: baseColor.h, s: baseColor.s, v: brightness, a: opacity }),
+    [baseColor.h, baseColor.s, brightness, opacity]
+  );
+
+  // DERIVED: rgba string for display/output
+  const rgbaColor = useMemo(() => hsvaToRgba(hsva), [hsva]);
+
+  // Notify parent of changes (skip initial mount, debounced)
   useEffect(() => {
-    // Only update base color if brightness is > 0 (to preserve color when dark)
-    if (hsva.v > 0) {
-      setBaseColor({ h: hsva.h, s: hsva.s });
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
     }
+
+    // Clear previous timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Debounce onChange calls (16ms ≈ 1 frame)
+    debounceTimer.current = setTimeout(() => {
+      onChange?.(rgbaColor);
+    }, 16);
+
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [rgbaColor]);
+
+  // Helper to set full color at once (for swatches)
+  const setFullColor = (hsva: HsvaColor) => {
+    setBaseColor({ h: hsva.h, s: hsva.s });
     setBrightness(hsva.v);
     setOpacity(hsva.a);
-
-    // Reset the external change flag after syncing internal state
-    if (isExternalChange.current) {
-      isExternalChange.current = false;
-    }
-  }, [hsva]);
-
-  // Notify parent of changes (only for internal changes)
-  useEffect(() => {
-    if (onChange && !isExternalChange.current) {
-      const newRgbaColor = hsvaToRgba(hsva);
-      onChange(newRgbaColor);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hsva]);
-
-  // Convert to rgba for display
-  const rgbaColor = hsvaToRgba(hsva);
+  };
 
   const contextValue: ColorPickerContextValue = {
     hsva,
     rgbaColor,
-    setHsva,
     baseColor,
     brightness,
     opacity,
     setBaseColor,
     setBrightness,
     setOpacity,
+    setFullColor,
   };
 
   return (

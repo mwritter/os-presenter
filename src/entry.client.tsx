@@ -2,12 +2,17 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { useStorageInit } from "@/hooks/use-storage-init";
-import PresenterLayout from "./presenter/layout";
-import Presenter from "./presenter/index";
-import EditView from "./presenter/edit/index";
-import AudienceLayout from "./audience/layout";
-import AudienceView from "./audience/index";
+import PresenterLayout from "./pages/presenter/layout";
+import Presenter from "./pages/presenter/index";
+import EditView from "./pages/presenter/edit/index";
 import "./styles/index.css";
+import AudienceLayout from "./pages/audience/layout";
+import AudienceView from "./pages/audience";
+import SettingsLayout from "./pages/settings/layout";
+import Settings from "./pages/settings";
+import TagGroupsPage from "./pages/settings/tag-groups";
+import GeneralPage from "./pages/settings/general";
+import UpdatesPage from "./pages/settings/updates";
 
 console.log("Entry client loaded");
 
@@ -78,8 +83,23 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Audience route - no storage initialization required */}
-        <Route path="/audience" element={<AudienceLayout />}>
+        <Route path="/pages/audience" element={<AudienceLayout />}>
           <Route index element={<AudienceView />} />
+        </Route>
+
+        {/* Settings route - standalone window */}
+        <Route
+          path="/settings"
+          element={
+            <StorageGuard>
+              <SettingsLayout />
+            </StorageGuard>
+          }
+        >
+          <Route index element={<Settings />} />
+          <Route path="/settings/tag-groups" element={<TagGroupsPage />} />
+          <Route path="/settings/general" element={<GeneralPage />} />
+          <Route path="/settings/updates" element={<UpdatesPage />} />
         </Route>
 
         {/* Presenter routes - require storage initialization */}

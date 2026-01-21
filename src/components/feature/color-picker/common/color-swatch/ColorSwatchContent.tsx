@@ -13,7 +13,7 @@ import { useColorPicker } from "../../context";
 import { rgbaToHsva } from "../../utils/colorConversions";
 
 export const ColorSwatchContent = () => {
-  const { rgbaColor, setHsva } = useColorPicker();
+  const { rgbaColor, setFullColor } = useColorPicker();
   const [openSwatch, setOpenSwatch] = useState(false);
 
   useEffect(() => {
@@ -35,11 +35,11 @@ export const ColorSwatchContent = () => {
           rectRender={(props) => (
             <ColorSwatchButton
               {...props}
-              onClick={() => setHsva(rgbaToHsva(props.color))}
+              onClick={() => setFullColor(rgbaToHsva(props.color))}
             />
           )}
           onChange={(hsvColor) => {
-            setHsva(hsvColor);
+            setFullColor(hsvColor);
           }}
         />
         <PopoverArrow fill="#464646" />

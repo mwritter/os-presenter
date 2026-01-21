@@ -2,7 +2,7 @@ import { BackgroundColorPicker } from "./common/BackgroundColorPicker";
 import { SlideEnabled } from "./common/slide/SlideEnabled";
 import { SlideHotKey } from "./common/slide/SlideHotKey";
 import { SlideLabelSelect } from "./common/slide/SlideLabelSelect";
-import { useEditContext } from "@/presenter/edit/context";
+import { useEditContext } from "@/pages/presenter/edit/context";
 
 export const EditSlideConfigPanel = () => {
   const { selectedSlide, updateSlideBackground } = useEditContext();

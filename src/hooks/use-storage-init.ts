@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { usePresenterStore } from '@/stores/presenterStore';
-import { useMediaLibraryStore } from '@/stores/mediaLibraryStore';
+import { usePresenterStore } from '@/stores/presenter/presenterStore';
+import { useMediaLibraryStore } from '@/stores/presenter/mediaLibraryStore';
+import { useSettingsStore } from '@/stores/settings/settingsStore';
 import { initializeStorage } from '@/services/storage';
 
 export interface StorageInitState {
@@ -25,6 +26,7 @@ export function useStorageInit(): StorageInitState {
 
   const loadPresenterData = usePresenterStore((state) => state.loadData);
   const loadMediaData = useMediaLibraryStore((state) => state.loadData);
+  const loadSettings = useSettingsStore((state) => state.loadSettings);
 
   useEffect(() => {
     let isMounted = true;
@@ -37,8 +39,8 @@ export function useStorageInit(): StorageInitState {
         console.log('Storage directories initialized successfully');
 
         console.log('Loading data from disk...');
-        // Load all data in parallel
-        await Promise.all([loadPresenterData(), loadMediaData()]);
+        // Load all data in parallel (presenter, media, and settings)
+        await Promise.all([loadPresenterData(), loadMediaData(), loadSettings()]);
         console.log('Data loaded successfully');
 
         if (isMounted) {
@@ -65,7 +67,7 @@ export function useStorageInit(): StorageInitState {
     return () => {
       isMounted = false;
     };
-  }, [loadPresenterData, loadMediaData]);
+  }, [loadPresenterData, loadMediaData, loadSettings]);
 
   return state;
 }

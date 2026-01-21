@@ -12,17 +12,12 @@ import { ColorWheelOpacitySlider } from "./ColorWheelOpacitySlider";
 import { useColorPicker } from "../../context";
 
 export const ColorWheelContent = () => {
-  const { baseColor, brightness, opacity, setBaseColor, setHsva } =
-    useColorPicker();
+  const { baseColor, brightness, setBaseColor } = useColorPicker();
 
   const handleWheelChange = (colorResult: ColorResult) => {
-    const newHsva = colorResult.hsva;
-    // Only update the base color (hue and saturation) from the wheel
-    // DO NOT update brightness - keep it independent
-    setBaseColor({ h: newHsva.h, s: newHsva.s });
-
-    // Use our current brightness and opacity, not the wheel's values
-    setHsva({ h: newHsva.h, s: newHsva.s, v: brightness, a: opacity });
+    // Only update hue and saturation from the wheel
+    // Brightness and opacity are controlled by their own sliders
+    setBaseColor({ h: colorResult.hsva.h, s: colorResult.hsva.s });
   };
 
   return (

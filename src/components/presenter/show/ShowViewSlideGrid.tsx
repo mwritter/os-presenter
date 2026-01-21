@@ -13,7 +13,7 @@ import { ShowViewSlideGridHeader } from "./ShowViewSlideGridHeader";
 import {
   useSelectionStore,
   useSlideSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 import { cn } from "@/lib/utils";
 import { MAX_GRID_COLUMNS, useShowViewContext } from "./context";
 import { useSlideMultiSelect } from "@/hooks/use-slide-multi-select";
@@ -22,7 +22,7 @@ import { useSlideClipboard } from "@/hooks/use-slide-clipboard";
 import { useSlideContextMenu } from "./hooks/use-slide-context-menu";
 import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";
 import { SlideGridEndZone } from "./SlideGridEndZone";
-import { SlideTag } from "@/components/feature/slide/SlideTag";
+import { SlideTag } from "@/components/feature/slide/slide-tag/SlideTag";
 
 type ShowViewSlideGridProps = {
   slides: SlideData[];
@@ -97,6 +97,9 @@ export const ShowViewSlideGrid = ({
     onCopy: handleCopy,
     onPaste: handlePaste,
     onDelete: handleDelete,
+    slides,
+    playlistId,
+    playlistItemId,
     hasClipboard,
   });
 
@@ -163,11 +166,13 @@ export const ShowViewSlideGrid = ({
             const isActive = activeSlideId === slide.id;
             const slideIsDragging = isDragging(slide.id);
             const showSelectionUI = isSelected && isMultiSelectMode;
+            const previousSlide = slides[index - 1] ?? null;
 
             return (
               <SortableSlideItem
                 key={slide.id}
                 slide={slide}
+                previousSlide={previousSlide}
                 index={index}
                 canvasSize={canvasSize}
                 playlistId={playlistId ?? ""}
@@ -215,6 +220,7 @@ export const ShowViewSlideGrid = ({
 
 interface SortableSlideItemProps {
   slide: SlideData;
+  previousSlide: SlideData | null;
   index: number;
   canvasSize: CanvasSize;
   playlistId: string;
@@ -232,6 +238,7 @@ interface SortableSlideItemProps {
 
 const SortableSlideItem = ({
   slide,
+  previousSlide,
   index,
   canvasSize,
   playlistId,
@@ -314,7 +321,10 @@ const SortableSlideItem = ({
         <SlideTag
           index={index}
           slide={slide}
-          showSelectionUI={showSelectionUI}
+          showTagGroupName={
+            !previousSlide ||
+            previousSlide?.tagGroup?.name !== slide.tagGroup?.name
+          }
         />
       </div>
 

@@ -1,7 +1,7 @@
 "use client";
 import { AudienceSlide } from "@/components/audiance/slide/AudienceSlide";
 import { Button } from "@/components/ui/button";
-import { useSelectionStore } from "@/stores/presenterStore";
+import { useSelectionStore } from "@/stores/presenter/presenterStore";
 import {} from "lucide-react";
 import { DEFAULT_CANVAS_PRESET } from "@/consts/canvas";
 import { CanvasSize } from "@/components/presenter/types";

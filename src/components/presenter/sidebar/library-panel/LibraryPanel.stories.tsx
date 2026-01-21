@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react";
 import { LibraryPanel } from "./LibraryPanel";
-import { usePresenterStore } from "@/stores/presenterStore";
+import { usePresenterStore } from "@/stores/presenter/presenterStore";
 
 export default {
   title: 'Presenter/Sidebar/LibraryPanel',

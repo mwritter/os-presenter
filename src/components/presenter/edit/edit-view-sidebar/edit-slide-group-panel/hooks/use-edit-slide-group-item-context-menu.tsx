@@ -3,9 +3,9 @@ import { useEditSlideGroupPanelContext } from "../context";
 import {
   useSlideSelectionStore,
   useSelectionStore,
-} from "@/stores/presenterStore";
-import { SlideClipboard } from "@/stores/slices/slideSelectionSlice";
-import { useEditContext } from "@/presenter/edit/context";
+} from "@/stores/presenter/presenterStore";
+import { SlideClipboard } from "@/stores/presenter/slices/slideSelectionSlice";
+import { useEditContext } from "@/pages/presenter/edit/context";
 
 interface UseEditSlideGroupItemContextMenuOptions {
   id: string;

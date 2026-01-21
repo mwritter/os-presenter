@@ -7,7 +7,7 @@ import {
   useLibraryStore,
   useSelectedSlideGroupData,
   useSelectionStore,
-} from "@/stores/presenterStore";
+} from "@/stores/presenter/presenterStore";
 
 export const ShowViewLibraryContent = () => {
   const selectedSlideGroupData = useSelectedSlideGroupData();

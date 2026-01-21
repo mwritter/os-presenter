@@ -1,6 +1,6 @@
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { createContext, useContext } from "react";
-import { usePlaylistStore } from "@/stores/presenterStore";
+import { usePlaylistStore } from "@/stores/presenter/presenterStore";
 import { SlideData } from "@/components/feature/slide/types";
 import { CanvasSize } from "@/components/presenter/types";
 import { useAppDnd, AppDragData } from "@/components/dnd/AppDndProvider";

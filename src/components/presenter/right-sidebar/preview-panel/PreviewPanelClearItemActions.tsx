@@ -1,6 +1,6 @@
 import { Button, ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useSelectionStore } from "@/stores/presenterStore";
+import { useSelectionStore } from "@/stores/presenter/presenterStore";
 import {
   File,
   Image,
