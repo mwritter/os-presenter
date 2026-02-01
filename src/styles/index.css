@@ -102,7 +102,7 @@
   --shade-2: #2F2F2F;
   --shade-3: #1E1E1E;
   --shade-4: #121212;
-  --selected: oklch(0.576 0.205 257.015); /* blue-600 */
+  --selected: oklch(0.522 0.192 255.842); /* blue-900 */
 }
 
 .dark {

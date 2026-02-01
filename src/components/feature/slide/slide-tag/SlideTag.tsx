@@ -19,10 +19,10 @@ export const SlideTag = ({
   showTagGroupName: boolean;
 }) => {
   const getMediaById = useMediaLibraryStore((s) => s.getMediaById);
-  const tagGroup = useSettingsStore(selectTagGroupById(slide.tagGroup?.id));
+  const tagGroup = useSettingsStore(selectTagGroupById(slide.tagGroupId));
   
   // Debug: Log when tagGroup changes
-  console.log("SlideTag render:", { slideTagGroupId: slide.tagGroup?.id, tagGroup });
+  console.log("SlideTag render:", { slideTagGroupId: slide.tagGroupId, tagGroup });
   // Find background media (video or image from media library)
   const backgroundMediaObject = slide.objects?.find(
     (obj) =>
@@ -46,7 +46,7 @@ export const SlideTag = ({
     <div
       className={cn(
         "absolute bottom-0 left-0 right-0 flex items-center px-1 bg-shade-lighter gap-2",
-        slide.tagGroup ? `` : "bg-shade-lighter"
+        tagGroup ? `` : "bg-shade-lighter"
       )}
       style={{
         backgroundColor: tagGroup?.color,
@@ -54,8 +54,8 @@ export const SlideTag = ({
     >
       <div className="flex items-center gap-1">
         <p className="text-white text-xs shrink-0">{index + 1}</p>
-        {showTagGroupName && (
-          <p className="text-white text-xs shrink-0">{slide.tagGroup?.name}</p>
+        {showTagGroupName && tagGroup?.name &&  (
+          <p className="text-white text-xs shrink-0">{tagGroup.name}</p>
         )}
       </div>
       {mediaName && (

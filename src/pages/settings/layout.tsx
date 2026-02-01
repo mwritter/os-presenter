@@ -1,7 +1,9 @@
-import { SettingsSidebar } from "@/components/settings/SettingsSidebar";
+import { SettingsSidebar } from "@/components/settings/sidebar/SettingsSidebar";
 import { Outlet, useNavigate } from "react-router";
 import { useEffect } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { SettingsToolbar } from "@/components/settings/SettingsToolbar";
+import { SettingsSidebarProvider } from "@/components/settings/sidebar/context";
 
 const RootLayout = () => {
   const navigate = useNavigate();
@@ -19,13 +21,16 @@ const RootLayout = () => {
   }, [navigate]);
 
   return (
-    <main className="bg-shade-3 w-screen h-screen">
-      <div className="flex h-full p-2 gap-2">
+    <main className="bg-shade-3 w-screen h-screen flex">
+      <SettingsSidebarProvider>
         <SettingsSidebar />
-        <div className="flex-1 overflow-auto">
-          <Outlet />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <SettingsToolbar />
+          <div className="flex-1 overflow-auto p-4 max-w-md">
+            <Outlet />
+          </div>
         </div>
-      </div>
+      </SettingsSidebarProvider>
     </main>
   );
 };

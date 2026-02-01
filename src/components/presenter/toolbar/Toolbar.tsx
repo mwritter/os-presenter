@@ -22,6 +22,7 @@ export const Toolbar = () => {
   return (
     <div
       onMouseDown={handleDrag}
+      data-tauri-drag-region
       className="flex gap-10 items-center p-2 pt-8 bg-shade-1 border-b border-black/50 w-full overflow-x-auto [scrollbar-width:none] select-none overflow-hidden"
     >
       <div className="flex items-center gap-2">

@@ -21,11 +21,7 @@ export const Default: Story = {
     slide: {
       id: "1",
       objects: [],
-      tagGroup: {
-        id: "1",
-        name: "Blank",
-        color: "#000000",
-      },
+      tagGroupId: '1',
     },
   },
 };

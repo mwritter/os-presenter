@@ -1,7 +1,7 @@
-export type SettingsSection = "tag-groups" | "general" | "updates";
+export type SettingsSection = "settings" | "tag-groups" | "general" | "updates";
 
 export const Settings = () => {
-  return <div className="text-black">Settings home page</div>;
+  return <div className="text-white text-xs">Settings account page</div>;
 };
 
 export default Settings;

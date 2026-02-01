@@ -97,7 +97,6 @@ export const ShowViewSlideGrid = ({
     onCopy: handleCopy,
     onPaste: handlePaste,
     onDelete: handleDelete,
-    slides,
     playlistId,
     playlistItemId,
     hasClipboard,
@@ -323,7 +322,7 @@ const SortableSlideItem = ({
           slide={slide}
           showTagGroupName={
             !previousSlide ||
-            previousSlide?.tagGroup?.name !== slide.tagGroup?.name
+            previousSlide?.tagGroupId !== slide.tagGroupId
           }
         />
       </div>

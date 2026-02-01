@@ -1,5 +1,3 @@
-import { SlideTagGroup } from "./slide-tag/types";
-
 // Legacy types for backwards compatibility
 export type SlideBackground =
   | { type: "color"; value: string }
@@ -173,5 +171,5 @@ export type SlideData = {
   id: string;
   objects?: SlideObject[];
   backgroundColor?: string; // Canvas background color
-  tagGroup?: SlideTagGroup;
+  tagGroupId?: string;
 };
