@@ -36,7 +36,8 @@
         "width": 1200,
         "height": 900,
         "minWidth": 900,
-        "minHeight": 720
+        "minHeight": 720,
+        "backgroundThrottling": "disabled"
       }
     ],
     "security": {

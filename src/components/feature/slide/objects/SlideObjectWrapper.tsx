@@ -8,6 +8,7 @@ type SlideObjectWrapperProps = {
   isEditable: boolean;
   hasSelection: boolean; // true if any object is selected
   forceShowVideo?: boolean; // Force showing actual video elements
+  slideId?: string; // For audience: so VideoObject can listen for video:control
 };
 
 export const SlideObjectWrapper: FC<SlideObjectWrapperProps> = ({
@@ -16,6 +17,7 @@ export const SlideObjectWrapper: FC<SlideObjectWrapperProps> = ({
   isSelected,
   hasSelection,
   forceShowVideo = false,
+  slideId,
 }) => {
   const SlideObjectComponent = getSlideObject(object);
 
@@ -42,6 +44,7 @@ export const SlideObjectWrapper: FC<SlideObjectWrapperProps> = ({
             isEditable={isEditable}
             isSelected={isSelected}
             forceShowVideo={forceShowVideo}
+            slideId={slideId}
           />
         )}
       </>
@@ -62,6 +65,7 @@ export const SlideObjectWrapper: FC<SlideObjectWrapperProps> = ({
             isEditable={isEditable}
             isSelected={isSelected}
             forceShowVideo={forceShowVideo}
+            slideId={slideId}
           />
         </div>
       )}

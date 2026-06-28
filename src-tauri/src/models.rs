@@ -3,27 +3,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 
-// ===== Video Sync Types =====
-
-/// Video playback state sent from audience view
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct VideoState {
-    pub slide_id: String,
-    pub current_time: f64,
-    pub duration: f64,
-    pub paused: bool,
-    pub volume: f64,
-    #[serde(rename = "loop")]
-    pub loop_video: bool,
-    pub playback_rate: f64,
-    pub buffered: f64,
-    pub ready_state: i32,
-    pub error: Option<String>,
-    pub seeking: bool,
-    pub updated_at: f64, // Unix timestamp in milliseconds
-}
-
 // ===== Slide Object Types =====
 
 // Legacy types for backwards compatibility

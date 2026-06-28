@@ -6,6 +6,7 @@ export type SlideObjectRendererProps = {
   isEditable?: boolean;
   selectedObjectId?: string | null;
   forceShowVideo?: boolean; // Force showing actual video elements (for AudienceSlide)
+  slideId?: string; // For audience slide: so video can listen for video:control
 };
 
 export const SlideObjectRenderer = ({
@@ -13,6 +14,7 @@ export const SlideObjectRenderer = ({
   isEditable = false,
   selectedObjectId = null,
   forceShowVideo = false,
+  slideId,
 }: SlideObjectRendererProps) => {
   const sortedObjects = [...objects].sort((a, b) => a.zIndex - b.zIndex);
   const hasSelection = selectedObjectId !== null;
@@ -30,6 +32,7 @@ export const SlideObjectRenderer = ({
             isEditable={isEditable}
             hasSelection={hasSelection}
             forceShowVideo={forceShowVideo}
+            slideId={slideId}
           />
         );
       })}

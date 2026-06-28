@@ -98,8 +98,9 @@ pub fn run() {
             commands::is_audience_window_visible,
             commands::show_settings_window,
             // Video sync commands
-            commands::update_video_state,
-            commands::clear_video_state,
+            commands::video_control_command,
+            commands::get_last_video_control,
+            commands::clear_video_session,
             // Font plugin commands
             tauri_plugin_font_variants::get_font_families,
             tauri_plugin_font_variants::get_font_variants,

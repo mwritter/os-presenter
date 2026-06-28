@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Download, Flag, Home, LucideIcon, PersonStanding, Rocket, Settings, Star, Tag, User, User2 } from "lucide-react";
+import { Download, LucideIcon, Rocket, Settings, Tag } from "lucide-react";
 import { Button } from "../../ui/button";
 import { SettingsSection } from "@/pages/settings";
 import { useEffect, useState } from "react";
@@ -74,14 +74,14 @@ export const SettingsSidebar = () => {
           return <Spacer key={item.key} />;
         }
         return (
-            <SettingsSidebarItem
-              key={item.key}
-              active={activeSection === item.key}
-              onClick={item.onClick}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </SettingsSidebarItem>
+          <SettingsSidebarItem
+            key={item.key}
+            active={activeSection === item.key}
+            onClick={item.onClick}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </SettingsSidebarItem>
         )
       })}
     </div>

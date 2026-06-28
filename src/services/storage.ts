@@ -149,12 +149,20 @@ export async function deleteMediaItem(id: string): Promise<void> {
   }
 }
 
+// Resolved media file paths are deterministic (mediaDir + fileName) and never change at runtime,
+// so cache them to avoid one IPC round-trip per media object on every render.
+const mediaFilePathCache = new Map<string, string>();
+
 /**
- * Get the absolute file path for a media file
+ * Get the absolute file path for a media file (cached).
  */
 export async function getMediaFilePath(fileName: string): Promise<string> {
+  const cached = mediaFilePathCache.get(fileName);
+  if (cached !== undefined) return cached;
+
   try {
     const path = await invoke<string>("get_media_file_path", { fileName });
+    mediaFilePathCache.set(fileName, path);
     return path;
   } catch (error) {
     console.error("Failed to get media file path:", error);
@@ -189,14 +197,12 @@ export async function saveThumbnail(
   blob: Blob
 ): Promise<string> {
   try {
-    // Convert blob to array buffer then to Uint8Array
-    const arrayBuffer = await blob.arrayBuffer();
-    const thumbnailData = Array.from(new Uint8Array(arrayBuffer));
+    // Send the thumbnail as base64 (~1.33x) rather than a JSON number array (~3-4x bloat).
+    const base64 = await blobToBase64(blob);
 
-    // Invoke Rust command to save thumbnail
     const thumbnailFilename = await invoke<string>("save_video_thumbnail", {
       mediaId,
-      thumbnailData,
+      thumbnailBase64: base64,
     });
 
     return thumbnailFilename;
@@ -204,6 +210,21 @@ export async function saveThumbnail(
     console.error("Failed to save thumbnail:", error);
     throw new Error(`Failed to save thumbnail: ${error}`);
   }
+}
+
+/** Convert a Blob to a base64 string (without the data-URL prefix). */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // result is a data URL like "data:image/png;base64,XXXX"
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
 }
 
 /**

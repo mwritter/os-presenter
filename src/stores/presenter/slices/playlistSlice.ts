@@ -3,6 +3,7 @@ import { Playlist, SlideGroup } from "@/components/presenter/types";
 import { SlideData } from "@/components/feature/slide/types";
 import * as storage from "@/services/storage";
 import { createDefaultTextObject } from "@/stores/utils/createDefaultTextObject";
+import { debouncedSave } from "@/stores/utils/debouncedSave";
 import { LibrarySlice } from "./librarySlice";
 import { MediaItem } from "@/stores/presenter/mediaLibraryStore";
 import { mediaItemToSlideGroup } from "@/stores/utils/mediaItemToSlideGroup";
@@ -109,9 +110,12 @@ export const createPlaylistSlice: StateCreator<
       });
       return { playlists };
     });
-    // Persist to disk asynchronously
+    // Persist to disk (debounced to coalesce rapid edits into a single write).
     if (updatedPlaylist) {
-      get().savePlaylistToDisk(updatedPlaylist).catch(console.error);
+      const playlist = updatedPlaylist;
+      debouncedSave(`playlist:${playlist.id}`, () =>
+        get().savePlaylistToDisk(playlist)
+      );
     }
   },
 

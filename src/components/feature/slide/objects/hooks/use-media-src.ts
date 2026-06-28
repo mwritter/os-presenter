@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { getMediaFilePath } from "@/services/storage";
 
 /**
  * Hook to convert media filenames to full asset:// URLs
@@ -22,13 +23,10 @@ export const useMediaSrc = (src: string): string => {
         return;
       }
 
-      // Otherwise, assume it's a filename in the media directory
-      // Get the media files path and convert to asset:// URL
+      // Otherwise, assume it's a filename in the media directory.
+      // Resolve via the cached path helper (avoids an IPC call per render).
       try {
-        const { invoke } = await import("@tauri-apps/api/core");
-        const mediaPath = await invoke<string>("get_media_file_path", {
-          fileName: src,
-        });
+        const mediaPath = await getMediaFilePath(src);
         const assetUrl = convertFileSrc(mediaPath);
         setFullSrc(assetUrl);
       } catch (error) {

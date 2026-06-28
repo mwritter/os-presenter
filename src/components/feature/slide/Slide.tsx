@@ -34,7 +34,6 @@ export const Slide = ({
   const { scale, isReady } = useSlideScale({
     canvasSize,
     containerRef,
-    useCache: true,
   });
   const [isMoveableInteracting, setIsMoveableInteracting] = useState(false);
 
@@ -59,7 +58,8 @@ export const Slide = ({
     <div
       ref={containerRef}
       key={id}
-      className="flex flex-col gap-4 aspect-video w-full relative"
+      className="flex flex-col gap-4 w-full relative"
+      style={{ aspectRatio: `${canvasSize.width} / ${canvasSize.height}` }}
     >
       <div
         onClick={onClick}

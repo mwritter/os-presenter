@@ -1,4 +1,4 @@
-import { SearchIcon, XCircle, XCircleIcon, XIcon } from "lucide-react";
+import { SearchIcon, XIcon } from "lucide-react";
 import { useSettingsSidebar } from "./context";
 import { Button } from "@/components/ui/button";
 

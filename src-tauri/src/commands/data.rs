@@ -1,11 +1,27 @@
 //! Commands for data persistence: libraries, playlists, media, and tag groups.
+//!
+//! Read/write-heavy commands are `async` and run their filesystem work on the blocking thread
+//! pool via `spawn_blocking` so large `save_library`/`load_*` payloads don't stall the IPC thread
+//! (which would stutter the UI).
 
+use base64::{engine::general_purpose, Engine as _};
 use std::path::PathBuf;
 use tauri::AppHandle;
 use uuid::Uuid;
 
 use crate::models::{Library, MediaItem, MediaPlaylist, Playlist, SlideTagGroup};
 use crate::storage;
+
+/// Helper to await a blocking task and flatten the join error into a `String`.
+async fn run_blocking<T, F>(f: F) -> Result<T, String>
+where
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+    T: Send + 'static,
+{
+    tauri::async_runtime::spawn_blocking(f)
+        .await
+        .map_err(|e| format!("Background task failed: {}", e))?
+}
 
 // ===== Storage Initialization =====
 
@@ -17,16 +33,16 @@ pub fn initialize_storage(app: AppHandle) -> Result<(), String> {
 // ===== Library Commands =====
 
 #[tauri::command]
-pub fn load_libraries(app: AppHandle) -> Result<Vec<Library>, String> {
+pub async fn load_libraries(app: AppHandle) -> Result<Vec<Library>, String> {
     let libraries_dir = storage::get_libraries_dir(&app).map_err(|e| e.message)?;
-    storage::read_all_json_files(&libraries_dir).map_err(|e| e.message)
+    run_blocking(move || storage::read_all_json_files(&libraries_dir).map_err(|e| e.message)).await
 }
 
 #[tauri::command]
-pub fn save_library(app: AppHandle, library: Library) -> Result<(), String> {
+pub async fn save_library(app: AppHandle, library: Library) -> Result<(), String> {
     let libraries_dir = storage::get_libraries_dir(&app).map_err(|e| e.message)?;
     let file_path = libraries_dir.join(format!("{}.json", library.id));
-    storage::write_json_file(&file_path, &library).map_err(|e| e.message)
+    run_blocking(move || storage::write_json_file(&file_path, &library).map_err(|e| e.message)).await
 }
 
 #[tauri::command]
@@ -39,16 +55,16 @@ pub fn delete_library(app: AppHandle, id: String) -> Result<(), String> {
 // ===== Playlist Commands =====
 
 #[tauri::command]
-pub fn load_playlists(app: AppHandle) -> Result<Vec<Playlist>, String> {
+pub async fn load_playlists(app: AppHandle) -> Result<Vec<Playlist>, String> {
     let playlists_dir = storage::get_playlists_dir(&app).map_err(|e| e.message)?;
-    storage::read_all_json_files(&playlists_dir).map_err(|e| e.message)
+    run_blocking(move || storage::read_all_json_files(&playlists_dir).map_err(|e| e.message)).await
 }
 
 #[tauri::command]
-pub fn save_playlist(app: AppHandle, playlist: Playlist) -> Result<(), String> {
+pub async fn save_playlist(app: AppHandle, playlist: Playlist) -> Result<(), String> {
     let playlists_dir = storage::get_playlists_dir(&app).map_err(|e| e.message)?;
     let file_path = playlists_dir.join(format!("{}.json", playlist.id));
-    storage::write_json_file(&file_path, &playlist).map_err(|e| e.message)
+    run_blocking(move || storage::write_json_file(&file_path, &playlist).map_err(|e| e.message)).await
 }
 
 #[tauri::command]
@@ -61,82 +77,79 @@ pub fn delete_playlist(app: AppHandle, id: String) -> Result<(), String> {
 // ===== Media Commands =====
 
 #[tauri::command]
-pub fn load_media_items(app: AppHandle) -> Result<Vec<MediaItem>, String> {
+pub async fn load_media_items(app: AppHandle) -> Result<Vec<MediaItem>, String> {
     let metadata_dir = storage::get_media_metadata_dir(&app).map_err(|e| e.message)?;
-    storage::read_all_json_files(&metadata_dir).map_err(|e| e.message)
+    run_blocking(move || storage::read_all_json_files(&metadata_dir).map_err(|e| e.message)).await
 }
 
 #[tauri::command]
-pub fn import_media_file(app: AppHandle, source_path: String) -> Result<MediaItem, String> {
-    let source = PathBuf::from(&source_path);
-
-    if !source.exists() {
-        return Err("Source file does not exist".to_string());
-    }
-
-    // Compute hash of source file for deduplication
-    let file_hash = storage::compute_file_hash(&source).map_err(|e| e.message)?;
-
-    // Check if we already have this file in the media library
+pub async fn import_media_file(app: AppHandle, source_path: String) -> Result<MediaItem, String> {
     let metadata_dir = storage::get_media_metadata_dir(&app).map_err(|e| e.message)?;
-    let existing_items: Vec<MediaItem> =
-        storage::read_all_json_files(&metadata_dir).map_err(|e| e.message)?;
-
-    // Look for existing media item with same hash
-    if let Some(existing_item) = existing_items
-        .iter()
-        .find(|item| item.hash.as_ref().map(|h| h == &file_hash).unwrap_or(false))
-    {
-        // File already exists, return the existing item
-        println!("Media file already exists with hash: {}", file_hash);
-        return Ok(existing_item.clone());
-    }
-
-    // Generate unique ID for the media
-    let media_id = Uuid::new_v4().to_string();
-
-    // Get file extension
-    let extension = storage::get_file_extension(&source)
-        .ok_or_else(|| "Could not determine file extension".to_string())?;
-
-    // Get original file name
-    let file_name = storage::get_file_stem(&source)
-        .ok_or_else(|| "Could not determine file name".to_string())?;
-
-    // Determine media type based on extension
-    let media_type = match extension.to_lowercase().as_str() {
-        "jpg" | "jpeg" | "png" | "gif" | "webp" | "bmp" => "image",
-        "mp4" | "webm" | "mov" | "avi" | "mkv" => "video",
-        _ => return Err("Unsupported file format".to_string()),
-    };
-
-    // Copy file to media directory
     let media_files_dir = storage::get_media_files_dir(&app).map_err(|e| e.message)?;
-    let dest_file_name = format!("{}.{}", media_id, extension);
-    let dest_path = media_files_dir.join(&dest_file_name);
 
-    storage::copy_file(&source, &dest_path).map_err(|e| e.message)?;
+    run_blocking(move || {
+        let source = PathBuf::from(&source_path);
 
-    // Create media item
-    let now = chrono::Utc::now().to_rfc3339();
-    let media_item = MediaItem {
-        id: media_id.clone(),
-        name: file_name,
-        media_type: media_type.to_string(),
-        source: dest_file_name, // Store relative path
-        thumbnail: None,
-        duration: None,
-        created_at: now.clone(),
-        updated_at: now,
-        metadata: None,
-        hash: Some(file_hash),
-    };
+        if !source.exists() {
+            return Err("Source file does not exist".to_string());
+        }
 
-    // Save metadata
-    let metadata_path = metadata_dir.join(format!("{}.json", media_id));
-    storage::write_json_file(&metadata_path, &media_item).map_err(|e| e.message)?;
+        // Compute hash of source file for deduplication
+        let file_hash = storage::compute_file_hash(&source).map_err(|e| e.message)?;
 
-    Ok(media_item)
+        // Check if we already have this file in the media library
+        let existing_items: Vec<MediaItem> =
+            storage::read_all_json_files(&metadata_dir).map_err(|e| e.message)?;
+
+        // Look for existing media item with same hash
+        if let Some(existing_item) = existing_items
+            .iter()
+            .find(|item| item.hash.as_ref().map(|h| h == &file_hash).unwrap_or(false))
+        {
+            println!("Media file already exists with hash: {}", file_hash);
+            return Ok(existing_item.clone());
+        }
+
+        // Generate unique ID for the media
+        let media_id = Uuid::new_v4().to_string();
+
+        let extension = storage::get_file_extension(&source)
+            .ok_or_else(|| "Could not determine file extension".to_string())?;
+
+        let file_name = storage::get_file_stem(&source)
+            .ok_or_else(|| "Could not determine file name".to_string())?;
+
+        let media_type = match extension.to_lowercase().as_str() {
+            "jpg" | "jpeg" | "png" | "gif" | "webp" | "bmp" => "image",
+            "mp4" | "webm" | "mov" | "avi" | "mkv" => "video",
+            _ => return Err("Unsupported file format".to_string()),
+        };
+
+        // Copy file to media directory
+        let dest_file_name = format!("{}.{}", media_id, extension);
+        let dest_path = media_files_dir.join(&dest_file_name);
+        storage::copy_file(&source, &dest_path).map_err(|e| e.message)?;
+
+        let now = chrono::Utc::now().to_rfc3339();
+        let media_item = MediaItem {
+            id: media_id.clone(),
+            name: file_name,
+            media_type: media_type.to_string(),
+            source: dest_file_name, // Store relative path
+            thumbnail: None,
+            duration: None,
+            created_at: now.clone(),
+            updated_at: now,
+            metadata: None,
+            hash: Some(file_hash),
+        };
+
+        let metadata_path = metadata_dir.join(format!("{}.json", media_id));
+        storage::write_json_file(&metadata_path, &media_item).map_err(|e| e.message)?;
+
+        Ok(media_item)
+    })
+    .await
 }
 
 #[tauri::command]
@@ -174,22 +187,24 @@ pub fn get_media_file_path(app: AppHandle, file_name: String) -> Result<String, 
 }
 
 #[tauri::command]
-pub fn save_video_thumbnail(
+pub async fn save_video_thumbnail(
     app: AppHandle,
     media_id: String,
-    thumbnail_data: Vec<u8>,
+    thumbnail_base64: String,
 ) -> Result<String, String> {
-    // Generate thumbnail filename
     let thumbnail_filename = format!("{}_thumb.png", media_id);
-
-    // Get media files directory
     let media_files_dir = storage::get_media_files_dir(&app).map_err(|e| e.message)?;
     let thumbnail_path = media_files_dir.join(&thumbnail_filename);
 
-    // Write thumbnail data to file
-    storage::write_file(&thumbnail_path, &thumbnail_data).map_err(|e| e.message)?;
-
-    Ok(thumbnail_filename)
+    run_blocking(move || {
+        // Decode base64 (far smaller over IPC than a JSON number array of raw bytes).
+        let bytes = general_purpose::STANDARD
+            .decode(thumbnail_base64.as_bytes())
+            .map_err(|e| format!("Failed to decode thumbnail data: {}", e))?;
+        storage::write_file(&thumbnail_path, &bytes).map_err(|e| e.message)?;
+        Ok(thumbnail_filename)
+    })
+    .await
 }
 
 #[tauri::command]
@@ -205,13 +220,9 @@ pub fn update_media_thumbnail(
     let mut media_item =
         storage::read_json_file::<MediaItem>(&metadata_path).map_err(|e| e.message)?;
 
-    // Update thumbnail field
     media_item.thumbnail = Some(thumbnail_filename);
-
-    // Update timestamp
     media_item.updated_at = chrono::Utc::now().to_rfc3339();
 
-    // Save updated metadata
     storage::write_json_file(&metadata_path, &media_item).map_err(|e| e.message)?;
 
     Ok(media_item)
@@ -220,16 +231,16 @@ pub fn update_media_thumbnail(
 // ===== Media Playlist Commands =====
 
 #[tauri::command]
-pub fn load_media_playlists(app: AppHandle) -> Result<Vec<MediaPlaylist>, String> {
+pub async fn load_media_playlists(app: AppHandle) -> Result<Vec<MediaPlaylist>, String> {
     let playlists_dir = storage::get_media_playlists_dir(&app).map_err(|e| e.message)?;
-    storage::read_all_json_files(&playlists_dir).map_err(|e| e.message)
+    run_blocking(move || storage::read_all_json_files(&playlists_dir).map_err(|e| e.message)).await
 }
 
 #[tauri::command]
-pub fn save_media_playlist(app: AppHandle, playlist: MediaPlaylist) -> Result<(), String> {
+pub async fn save_media_playlist(app: AppHandle, playlist: MediaPlaylist) -> Result<(), String> {
     let playlists_dir = storage::get_media_playlists_dir(&app).map_err(|e| e.message)?;
     let file_path = playlists_dir.join(format!("{}.json", playlist.id));
-    storage::write_json_file(&file_path, &playlist).map_err(|e| e.message)
+    run_blocking(move || storage::write_json_file(&file_path, &playlist).map_err(|e| e.message)).await
 }
 
 #[tauri::command]
@@ -258,4 +269,3 @@ pub fn save_tag_groups(app: AppHandle, tag_groups: Vec<SlideTagGroup>) -> Result
     let file_path = storage::get_tag_groups_file(&app).map_err(|e| e.message)?;
     storage::write_json_file(&file_path, &tag_groups).map_err(|e| e.message)
 }
-

@@ -1,27 +1,30 @@
+import { useRef } from "react";
 import { VideoObject as VideoObjectType, SlideObject } from "../../types";
 import { cn } from "@/lib/utils";
 import { useTextEditing } from "../hooks/use-text-editing";
 import { getContainerStyles } from "./utils/getContainerStyles";
 import { getVideoStyles } from "./utils/getVideoStyles";
 import { useMediaSrc } from "../hooks/use-media-src";
-import { RefObject } from "react";
 import { useIsAudienceRoute } from "@/hooks/use-is-audience-route";
 import { useVideoThumbnail } from "@/hooks/use-video-thumbnail";
+import { useAudienceVideoSync } from "@/hooks/use-video-control";
 
 export type VideoObjectProps = {
   object: SlideObject;
   isEditable?: boolean;
   isSelected?: boolean;
-  videoRef?: RefObject<HTMLVideoElement>; // For synced control in audience view
   forceShowVideo?: boolean; // Force showing actual video element (for AudienceSlide)
+  slideId?: string; // When set, listen for video:control (play/pause) from backend
 };
 
 export const VideoObject = ({
   object,
   isEditable = false,
-  videoRef,
   forceShowVideo = false,
+  slideId,
 }: VideoObjectProps) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   // Type narrowing - this component should only receive video objects
   if (object.type !== "video") return null;
 
@@ -64,8 +67,20 @@ export const VideoObject = ({
   });
 
   const videoStyle = getVideoStyles({ object: videoObject, isEditable });
-  const autoPlay =
-    (isAudienceRoute || forceShowVideo) && videoType === "object";
+  const autoPlay = false;
+
+  // Both the audience window and the preview panel render a real <video> for a background video
+  // and mirror control commands. The preview panel (main window, next to the controls) is the
+  // authoritative clock: it broadcasts playback state so the seek bar works even when the
+  // audience window is closed (single-monitor case).
+  const syncEnabled = Boolean(slideId) && isBackgroundVideo && shouldShowVideo;
+  const isPreviewStateSource = forceShowVideo && !isAudienceRoute;
+  useAudienceVideoSync({
+    videoRef,
+    slideId: slideId ?? "",
+    enabled: syncEnabled,
+    broadcastState: syncEnabled && isPreviewStateSource,
+  });
 
   return (
     <div
@@ -78,11 +93,18 @@ export const VideoObject = ({
     >
       {shouldShowVideo ? (
         <video
-          ref={videoRef}
+          ref={slideId && isBackgroundVideo ? videoRef : undefined}
           src={videoSrc}
           autoPlay={autoPlay}
           loop={videoObject.loop ?? true}
-          muted={isBackgroundVideo ? false : (videoObject.muted ?? true)}
+          // Background video plays audio only on the real audience output. The in-window preview
+          // mirror is muted to avoid doubled audio. NOTE: an unmuted audience video may be blocked
+          // by autoplay policy until first playback; play() is retried on the operator's command.
+          muted={
+            isBackgroundVideo
+              ? !isAudienceRoute
+              : (videoObject.muted ?? true)
+          }
           style={videoStyle}
         />
       ) : thumbnailSrc ? (

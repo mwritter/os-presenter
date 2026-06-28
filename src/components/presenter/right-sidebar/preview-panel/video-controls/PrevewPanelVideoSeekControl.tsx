@@ -9,6 +9,7 @@ interface PreviewPanelVideoSeekControlProps {
   onPause: () => void;
   onSeek: (time: number) => void;
   onPlay: () => void;
+  onDraggingChange?: (isDragging: boolean) => void;
   currentTime: number;
   duration: number;
   playbackRate: number;
@@ -19,6 +20,7 @@ export const PreviewPanelVideoSeekControl = ({
   onPause,
   onSeek,
   onPlay,
+  onDraggingChange,
   currentTime,
   duration,
 }: PreviewPanelVideoSeekControlProps) => {
@@ -28,6 +30,7 @@ export const PreviewPanelVideoSeekControl = ({
     onPause,
     onSeek,
     onPlay,
+    onDraggingChange,
   });
 
   return (

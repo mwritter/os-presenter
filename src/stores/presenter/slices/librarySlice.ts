@@ -3,6 +3,7 @@ import { Library, SlideGroup } from "@/components/presenter/types";
 import { SlideData } from "@/components/feature/slide/types";
 import * as storage from "@/services/storage";
 import { createDefaultTextObject } from "../../utils/createDefaultTextObject";
+import { debouncedSave } from "../../utils/debouncedSave";
 
 export interface LibrarySlice {
   libraries: Library[];
@@ -79,9 +80,12 @@ export const createLibrarySlice: StateCreator<
       });
       return { libraries };
     });
-    // Persist to disk asynchronously
+    // Persist to disk (debounced to coalesce rapid edits into a single write).
     if (updatedLibrary) {
-      get().saveLibraryToDisk(updatedLibrary).catch(console.error);
+      const library = updatedLibrary;
+      debouncedSave(`library:${library.id}`, () =>
+        get().saveLibraryToDisk(library)
+      );
     }
   },
 

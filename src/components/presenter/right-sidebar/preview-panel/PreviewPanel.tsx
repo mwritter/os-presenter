@@ -1,13 +1,13 @@
 "use client";
-import { AudienceSlide } from "@/components/audiance/slide/AudienceSlide";
 import { Button } from "@/components/ui/button";
 import { useSelectionStore } from "@/stores/presenter/presenterStore";
-import {} from "lucide-react";
+import { } from "lucide-react";
 import { DEFAULT_CANVAS_PRESET } from "@/consts/canvas";
 import { CanvasSize } from "@/components/presenter/types";
 import { SlideData } from "@/components/feature/slide/types";
 import { PreviewPanelClearItemActions } from "./PreviewPanelClearItemActions";
 import { PreviewPanelVideoControls } from "./video-controls/PrevewPanelVideoControls";
+import { AudienceSlide } from "@/components/audiance/slide/AudienceSlide";
 
 export const PreviewPanel = () => {
   const activeSlide = useSelectionStore((s) => s.activeSlide);

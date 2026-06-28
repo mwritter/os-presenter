@@ -6,6 +6,8 @@ interface UseVideoSeekProps {
   onPause: () => void;
   onSeek: (time: number) => void;
   onPlay: () => void;
+  /** Reports drag start/end so the parent can pause time interpolation while scrubbing. */
+  onDraggingChange?: (isDragging: boolean) => void;
 }
 
 export const useVideoSeek = ({
@@ -14,6 +16,7 @@ export const useVideoSeek = ({
   onPause,
   onSeek,
   onPlay,
+  onDraggingChange,
 }: UseVideoSeekProps) => {
   // Track whether video was playing when dragging started
   const [wasPlayingBeforeDrag, setWasPlayingBeforeDrag] = useState(false);
@@ -30,6 +33,7 @@ export const useVideoSeek = ({
           onPause();
         }
         setIsDragging(true);
+        onDraggingChange?.(true);
       }
 
       onSeek(value);
@@ -39,6 +43,7 @@ export const useVideoSeek = ({
   const handleSliderCommit = (values: number[]) => {
     if (values[0] !== undefined && isEnabled) {
       setIsDragging(false);
+      onDraggingChange?.(false);
 
       // If video was playing before drag, resume playback
       if (wasPlayingBeforeDrag) {

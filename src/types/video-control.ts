@@ -1,13 +1,21 @@
 // Video control event types for syncing between presenter and audience views
 
-export type VideoControlAction = "play" | "pause" | "seek" | "volume" | "rate";
+export type VideoControlAction =
+  | "play"
+  | "pause"
+  | "seek"
+  | "volume"
+  | "rate"
+  | "skip_forward"
+  | "skip_backward";
 
 export interface VideoControlCommand {
   slideId: string;
   action: VideoControlAction;
-  value?: number; // for seek (seconds), volume (0-1), rate (0.5-2)
+  value?: number; // for seek (seconds), volume (0-1), rate (0.5-2), skip seconds (default 10)
 }
 
+/** Playback state reported by the authoritative (audience) video element. */
 export interface VideoStateUpdate {
   slideId: string;
   currentTime: number;
@@ -23,18 +31,12 @@ export interface VideoStateUpdate {
   updatedAt: number; // Unix timestamp in milliseconds
 }
 
-// Handshake event payloads
-export interface VideoReadyPayload {
-  slideId: string;
-  videoType: "background" | "object";
-}
-
-export interface VideoAckPayload {
-  slideId: string;
-}
-
 // Event names
 export const VIDEO_CONTROL_EVENT = "video:control";
 export const VIDEO_STATE_UPDATE_EVENT = "video:state-update";
-export const VIDEO_READY_EVENT = "video:ready";
-export const VIDEO_ACK_EVENT = "video:ack";
+/** DOM custom event for synchronous delivery in same window (keeps user gesture for video.play()) */
+export const PRESENTER_VIDEO_CONTROL_EVENT = "presenter-video-control";
+/** BroadcastChannel name for direct cross-window video control (bypasses Tauri IPC) */
+export const VIDEO_BROADCAST_CHANNEL = "video-control";
+/** BroadcastChannel name for audience -> presenter playback state updates. */
+export const VIDEO_STATE_BROADCAST_CHANNEL = "video-state";

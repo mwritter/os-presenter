@@ -21,7 +21,6 @@ const AudienceView = () => {
         <AudienceSlide
           data={activeSlide.data}
           canvasSize={activeSlide.canvasSize}
-          useCache
         />
       )}
       <div className="absolute bottom-10 left-10 h-[10%] aspect-square">

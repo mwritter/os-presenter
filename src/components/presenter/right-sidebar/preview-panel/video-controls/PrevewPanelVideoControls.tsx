@@ -1,9 +1,10 @@
-import { useVideoState } from "@/hooks/use-video-state";
-import { PreviewPanelVideoSeekControl } from "./PrevewPanelVideoSeekControl";
-import { PreviewPanelVideoSync } from "./PreviewPanelVideoSync";
+import { useState } from "react";
+import { useVideoController } from "@/hooks/use-video-control";
 import { PreviewPanelVideoMediaControls } from "./PreviewPanelVideoMediaControls";
+import { PreviewPanelVideoSeekControl } from "./PrevewPanelVideoSeekControl";
+import { useSmoothVideoTime } from "./hooks/use-smooth-video-time";
 
-export interface PreviewPanelVideoControlsProps {
+interface PreviewPanelVideoControlsProps {
   slideId: string | null;
 }
 
@@ -12,52 +13,51 @@ export const PreviewPanelVideoControls = ({
 }: PreviewPanelVideoControlsProps) => {
   const {
     videoState,
-    handshakeState,
+    isPaused,
+    controlsAllowed,
     play,
     pause,
     togglePlayPause,
     seek,
     skipForward,
     skipBackward,
-    retryHandshake,
-  } = useVideoState({ slideId });
+  } = useVideoController({ slideId });
 
-  const isEnabled = Boolean(slideId);
-  const isPaused = videoState?.paused ?? true;
-  const currentTime = videoState?.currentTime || 0;
-  const duration = videoState?.duration || 0;
-  const playbackRate = videoState?.playbackRate || 1;
+  const [isDragging, setIsDragging] = useState(false);
+  const isEnabled = Boolean(slideId) && controlsAllowed;
 
-  const onSeek = (time: number) => seek(time);
-  const onSkipForward = () => skipForward(10);
-  const onSkipBackward = () => skipBackward(10);
+  const duration = videoState?.duration ?? 0;
+  const playbackRate = videoState?.playbackRate ?? 1;
+
+  // Interpolate time between the audience's ~4Hz updates for a smooth slider.
+  const { displayTime } = useSmoothVideoTime({
+    currentTime: videoState?.currentTime ?? 0,
+    isPaused,
+    playbackRate,
+    isDragging,
+    isEnabled,
+    duration,
+  });
 
   return (
-    <div className="flex flex-col pb-5 bg-shade-2">
-      <PreviewPanelVideoSync
-        key={slideId}
-        isEnabled={isEnabled}
-        handshakeState={handshakeState}
-        onRetryHandshake={retryHandshake}
-      />
-
+    <div className="flex flex-col items-center justify-center gap-2 mt-5">
       <PreviewPanelVideoSeekControl
         isEnabled={isEnabled}
         isPaused={isPaused}
         onPause={pause}
-        onSeek={onSeek}
         onPlay={play}
-        currentTime={currentTime}
+        onSeek={seek}
+        onDraggingChange={setIsDragging}
+        currentTime={displayTime}
         duration={duration}
         playbackRate={playbackRate}
       />
-
       <PreviewPanelVideoMediaControls
         isEnabled={isEnabled}
-        onSkipBackward={onSkipBackward}
-        onPlayPause={togglePlayPause}
-        onSkipForward={onSkipForward}
         isPaused={isPaused}
+        onTogglePlayPause={togglePlayPause}
+        onSkipBackward={() => skipBackward(10)}
+        onSkipForward={() => skipForward(10)}
       />
     </div>
   );

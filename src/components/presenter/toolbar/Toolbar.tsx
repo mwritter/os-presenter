@@ -8,8 +8,12 @@ import { Search } from "./search/Search";
 
 export const Toolbar = () => {
   const { toggle: toggleMediaLibrary } = useMediaLibraryContext();
-  const { audienceWindowVisible, handleToggleAudienceWindow } =
-    useAudienceWindowState();
+  const {
+    audienceWindowVisible,
+    handleToggleAudienceWindow,
+    canToggleAudience,
+    disabledReason,
+  } = useAudienceWindowState();
 
   const handleDrag = async (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -35,6 +39,8 @@ export const Toolbar = () => {
           Icon={Monitor}
           label={"Audience"}
           onClick={handleToggleAudienceWindow}
+          disabled={!canToggleAudience}
+          title={disabledReason}
           className={audienceWindowVisible ? "ring-2 ring-amber-400" : ""}
         />
       </div>

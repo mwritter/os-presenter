@@ -160,6 +160,14 @@
     field-sizing: content;
   }
 
+  /* Resize handle cursor – ensure it wins over library/other styles */
+  [data-resize-handle][data-panel-group-direction="horizontal"] {
+    cursor: col-resize !important;
+  }
+  [data-resize-handle][data-panel-group-direction="vertical"] {
+    cursor: row-resize !important;
+  }
+
   .w-color-swatch {
     display: grid !important;
     grid-template-columns: repeat(6, 1fr) !important;

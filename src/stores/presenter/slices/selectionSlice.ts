@@ -2,6 +2,7 @@ import { StateCreator } from "zustand";
 import { SlideData } from "@/components/feature/slide/types";
 import { CanvasSize } from "@/components/presenter/types";
 import { emit } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 
 export interface SelectionSlice {
   selectedLibraryId: string | null;
@@ -109,6 +110,10 @@ export const createSelectionSlice: StateCreator<
     emit("active-slide-changed", activeSlide).catch((error) => {
       console.error("Failed to emit active-slide-changed event:", error);
     });
+
+    // Reset the video recovery state so a newly activated slide's video starts fresh (paused)
+    // rather than inheriting a stale play/pause command from a previous slide.
+    invoke("clear_video_session").catch(() => {});
   },
 
   clearActiveSlide: () => {
@@ -118,5 +123,7 @@ export const createSelectionSlice: StateCreator<
     emit("active-slide-changed", null).catch((error) => {
       console.error("Failed to emit active-slide-changed event:", error);
     });
+
+    invoke("clear_video_session").catch(() => {});
   },
 });
